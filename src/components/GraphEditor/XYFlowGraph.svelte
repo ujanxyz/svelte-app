@@ -16,7 +16,7 @@
     table: TableNode,
   };
 
-  const {onpanecontextmenu, onnodecontextmenu, openGallery} = useXYMenus();
+  const {onpanecontextmenu, onnodecontextmenu, onedgecontextmenu, openGallery } = useXYMenus();
 
   let nodes = $state.raw<Node[]>(initialNodes);
   let edges = $state.raw<Edge[]>(initialEdges);
@@ -26,6 +26,7 @@
   <SvelteFlow bind:nodes bind:edges {nodeTypes}
         {onpanecontextmenu}
         {onnodecontextmenu}
+        {onedgecontextmenu}
         fitView colorMode={"dark"}>
       <Background variant={BackgroundVariant.Dots}
           gap={5} patternClass={"dots"} size={0.6} />

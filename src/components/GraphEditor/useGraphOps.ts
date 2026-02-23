@@ -1,26 +1,34 @@
-import { useNodes, type Edge, type Node } from "@xyflow/svelte";
+import { useEdges, useNodes, type Edge, type Node } from "@xyflow/svelte";
 
 interface GraphOps {
     addNode(node: Node): void;
-    rmNode(nodeId: string): void
+    rmNode(nodeId: string): void;
+    rmEdge(egeId: string): void;
 }
 
 function _makeGraphOps(): GraphOps {
-    const {current, update, set} = useNodes();
+    const {current: currentNodes, update: updateNodes, set: setNodes} = useNodes();
+    const {update: updateEdges} = useEdges();
 
-    function addNode(node: Node): void {
-        update((_nodes: Node[]) => {
-            return [..._nodes, node];
+    function addNode(newNode: Node): void {
+        updateNodes((nodes: Node[]) => {
+            return [...nodes, newNode];
         });
     }
 
     function rmNode(nodeId: string): void {
-        update((_nodes: Node[]) => {
-            return _nodes.filter((n: Node) => n.id !== nodeId);
+        updateNodes((nodes: Node[]) => {
+            return nodes.filter((n: Node) => n.id !== nodeId);
         });
     }
 
-    return {addNode, rmNode};
+    function rmEdge(egeId: string): void {
+        updateEdges((edges: Edge[]): Edge[] => {
+            return edges.filter((e: Edge) => e.id !== egeId);
+        });
+    }
+
+    return {addNode, rmNode, rmEdge};
 }
 
 function useGraphOps(): GraphOps {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Node } from '@xyflow/svelte';
+  import type { Edge, Node } from '@xyflow/svelte';
   import { EventKinds } from '../../utils/constants';
   import useEventDispatch from '../../utils/useEventDispatch';
   import { ContextMenu } from '../overlay';
@@ -24,17 +24,24 @@
     { code: MenuCodes.NODE_INFO, label: "Node Info"},
 	];
 
-  const dispatchRmNode = useEventDispatch(EventKinds.XY_NODE_RM);
+  const edgeCtx: MenuItem[] = [
+    { code: MenuCodes.RM_EDGE, label: "Delete Edge"},
+	];
+
+  const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
+  const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
 
   const menuActions: Record<string, MenuActionHandler> = {
     [MenuCodes.NEW_NODE]: _newNode,
     [MenuCodes.NEW_INPUT]: _newInput,
     [MenuCodes.RM_NODE]: _rmNode,
+    [MenuCodes.RM_EDGE]: _rmEdge,
   };
 
   const { registerUI } = useUiRegistry();
   registerUI(OverlayTriggers.PANE_CTX_MENU, paneCtxMenu);
   registerUI(OverlayTriggers.NODE_CTX_MENU, nodeCtxMenu);
+  registerUI(OverlayTriggers.EDGE_CTX_MENU, edgeCtxMenu);
 
   function _newNode(payload: any) {
     console.log("New node .. ", payload);
@@ -49,6 +56,11 @@
     dispatchRmNode({nodeId});
   }
 
+  function _rmEdge(payload: any) {
+    const edgeId = (payload.edge as Edge).id as string;
+    dispatchRmEdge({edgeId});
+  }
+
 </script>
 
 {#snippet paneCtxMenu(overlayUse: OverlayChildUse)}
@@ -57,6 +69,10 @@
 
 {#snippet nodeCtxMenu(overlayUse: OverlayChildUse)}
   <ContextMenu {overlayUse} menuItems={nodeCtx} {menuActions}/>
+{/snippet}
+
+{#snippet edgeCtxMenu(overlayUse: OverlayChildUse)}
+  <ContextMenu {overlayUse} menuItems={edgeCtx} {menuActions}/>
 {/snippet}
 
 <!-- No HTML template, everything via UI registration above -->

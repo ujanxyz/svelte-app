@@ -1,6 +1,7 @@
 const OverlayTriggers = {
     PANE_CTX_MENU: "p",
     NODE_CTX_MENU: "n",
+    EDGE_CTX_MENU: "e",
     GALLERY_POPUP: "g",
 };
 
@@ -15,6 +16,7 @@ const MenuCodes = {
 
     // Node context menu.
     RM_NODE: "n-",
+    RM_EDGE: "e-",
     NODE_INFO: "n?",
 };
 

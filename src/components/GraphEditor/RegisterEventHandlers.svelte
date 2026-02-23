@@ -11,7 +11,8 @@
 
   onMount(() => {
     handleEvent(EventKinds.FN_GALLERY_SELECT, _xyAddNode);
-    handleEvent(EventKinds.XY_NODE_RM, _xyRmNode);
+    handleEvent(EventKinds.XY_RM_NODE, _xyRmNode);
+    handleEvent(EventKinds.XY_RM_EDGE, _xyRmEdge);    
     return () => clearHandlers();
   });
 
@@ -28,6 +29,11 @@
   function _xyRmNode (payload: {nodeId: string}) {
     ops.rmNode(payload.nodeId);
   }
+
+  function _xyRmEdge (payload: {edgeId: string}) {
+    ops.rmEdge(payload.edgeId);
+  }
+
 </script>
 
 <!-- No HTML template, everything via UI registration above -->
