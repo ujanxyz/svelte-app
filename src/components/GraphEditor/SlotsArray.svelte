@@ -30,16 +30,16 @@
 
 <div class="container">
   <div class="row" bind:this={containerDiv}>
-    <Handle type="target" position={Position.Left} />
-    <Handle type="source" position={Position.Right} />
+    <Handle type="target" id="m1" position={Position.Left} />
+    <Handle type="source" id="m2" position={Position.Right} />
   </div>
 
   <div class="row" bind:this={containerDiv}>
-    <Handle type="source" position={Position.Right} />
+    <Handle type="source" id="o1" position={Position.Right} />
   </div>
 
   <div class="row" bind:this={containerDiv}>
-    <Handle type="target" position={Position.Left} />
+    <Handle type="target" id="i1" position={Position.Left} />
   </div>
 </div>
 

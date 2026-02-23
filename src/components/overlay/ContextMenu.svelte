@@ -1,12 +1,23 @@
 <script lang="ts">
-  import type { MenuItem, OverlayChildUse } from "./types";
+  import type { MenuActionHandler, MenuButton, MenuItem, OverlayChildUse } from "./types";
 
   interface Props {
     overlayUse: OverlayChildUse;
     menuItems: MenuItem[];
+    menuActions: Record<string, MenuActionHandler>;
   }
 
-  const { menuItems, overlayUse } : Props = $props();
+const { menuItems, overlayUse, menuActions } : Props = $props();
+
+function onClickMenuItem(ev: MouseEvent): void {
+  const menuCode = (ev.target as HTMLButtonElement).dataset.menuCode as string;
+  overlayUse.close();
+  const handlerFn = menuActions[menuCode] as MenuActionHandler;
+  if (!handlerFn) {
+    throw new Error("menu action not set:" + menuCode);
+  }
+  handlerFn();
+}
 </script>
 
 <div class="contextmenu txt-md-strong" aria-label="Main Menu">
@@ -14,10 +25,11 @@
     {#if item === "-"}
       <hr class="sep"/>
     {:else}
-      <button onclick={item.handler} class="item">
-        {item.label}
-        {#if item.shortcut}
-          <span class="shortcut">{item.shortcut}</span>
+      {@const {code, label, shortcut} = item as MenuButton }
+      <button onclick={onClickMenuItem} class="item" data-menu-code={code}>
+        {label}
+        {#if shortcut}
+          <span class="shortcut">{shortcut}</span>
         {/if}
       </button>
     {/if}
