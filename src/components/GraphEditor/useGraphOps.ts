@@ -1,20 +1,16 @@
 import { useNodes, type Edge, type Node } from "@xyflow/svelte";
-import { getContext, setContext } from "svelte";
-
 
 interface GraphOps {
-    addNodes(nodes: Node[]): void;
+    addNode(node: Node): void;
     rmNode(nodeId: string): void
 }
-
-const CONTEXT_KEY: Symbol = Symbol("grphops");
 
 function _makeGraphOps(): GraphOps {
     const {current, update, set} = useNodes();
 
-    function addNodes(nodes: Node[]): void {
+    function addNode(node: Node): void {
         update((_nodes: Node[]) => {
-            return [..._nodes, ...nodes];
+            return [..._nodes, node];
         });
     }
 
@@ -24,7 +20,7 @@ function _makeGraphOps(): GraphOps {
         });
     }
 
-    return {addNodes, rmNode};
+    return {addNode, rmNode};
 }
 
 function useGraphOps(): GraphOps {

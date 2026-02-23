@@ -19,7 +19,7 @@ export const initialNodes: Node[] = [
   },
 
   {
-    id: '10',
+    id: '5',
     data: { label: 'Node 3' },
     type: 'table',
     position: { x: 200, y: -200 },

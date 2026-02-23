@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { EventKinds } from "../../utils/constants";
+  import useEventDispatch from "../../utils/useEventDispatch";
   import type { OverlayChildUse } from "../overlay/types";
-
 
   interface Props {
     overlayUse: OverlayChildUse;
@@ -12,18 +13,19 @@
   };
 
   const { overlayUse } : Props = $props();
+  const dispatchSelect = useEventDispatch(EventKinds.FN_GALLERY_SELECT);
 
   const galleryItems: GalleryItem[] = [
-    { func: "math-1ary", label: "New Node ..."},
-    { func: "math-2ary", label: "New Cluster ..."},
-    { func: "random", label: "Center viewport"},
-    { func: "noise-1d", label: "Fit to view"},
+    { func: "math-1ary", label: "label here"},
+    { func: "math-2ary", label: "label here"},
+    { func: "random", label: "label here"},
+    { func: "noise-1d", label: "label here"},
 	];
 
   function onClickItem(ev: PointerEvent | MouseEvent) {
     const code = (ev.target as HTMLButtonElement).dataset.code as string;
     overlayUse.close();
-    console.log("Insert function: " + code);
+    dispatchSelect({code});
   }
 
 </script>
@@ -40,7 +42,7 @@
 .gallery {
   min-height: 60px;
   min-width: 5rem;
-  max-width: 25rem;
+  max-width: 80rem;
 
   padding-top: calc(2.2rem + 1px);
   padding-bottom: calc(2.2rem + 1px);

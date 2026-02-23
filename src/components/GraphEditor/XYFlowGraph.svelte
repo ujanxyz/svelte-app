@@ -9,6 +9,7 @@
   import RegisterXYMenus from './RegisterXYMenus.svelte';
   import useXYMenus from './useXYMenus';
   import RegisterXYGalleries from './RegisterXYGalleries.svelte';
+  import RegisterEventHandlers from './RegisterEventHandlers.svelte';
 
   const nodeTypes = {
     default: DefaultNode,
@@ -34,6 +35,7 @@
   </SvelteFlow>
   <RegisterXYMenus />
   <RegisterXYGalleries />
+  <RegisterEventHandlers />
 </SvelteFlowProvider>
 
 <style>
