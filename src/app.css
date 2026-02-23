@@ -1,0 +1,361 @@
+/*-------------------------------------------------------*/
+/* Font Families                                         */
+/*-------------------------------------------------------*/
+
+@font-face {
+  font-family: 'MyFont';
+  src: url('/fonts/MyFont-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+
+:root {
+  /* Text Bodies */
+  --txt-body-sm-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
+  --txt-body-sm-strong-font-size: 0.56rem;
+  --txt-body-sm-strong-font-weight: 500;
+  --txt-body-sm-strong-letter-spacing: .0168rem;
+  --txt-body-sm-strong-line-height: 0.875rem;
+
+  --txt-body-md-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
+  --txt-body-md-strong-font-size: 0.75rem;
+  --txt-body-md-strong-font-weight: 500;
+  --txt-body-md-strong-letter-spacing: .0168rem;
+  --txt-body-md-strong-line-height: 0.875rem;
+
+
+  /* =========================
+     COLOR SYSTEM
+     ========================= */
+
+  /* Base backgrounds */
+  --color-bg-canvas: #0f1115;
+  --color-bg-app: #15181e;
+  --color-bg-panel: #1b1f27;
+  --color-bg-panel-hover: #222733;
+  --color-bg-panel-active: #2a3140;
+
+  /* Borders */
+  --color-border-subtle: #232834;
+  --color-border-default: #2e3442;
+  --color-border-strong: #3a4154;
+
+  /* Text */
+  --color-text-primary: #e6e9ef;
+  --color-text-secondary: #a9b1c6;
+  --color-text-tertiary: #6b7385;
+  --color-text-disabled: #4a5162;
+
+  /* Accent */
+  --color-accent: #4c8dff;
+  --color-accent-hover: #6ea3ff;
+  --color-accent-active: #3c7be0;
+
+  /* Semantic */
+  --color-success: #3fb950;
+  --color-warning: #d29922;
+  --color-danger: #f85149;
+
+  /* Selection */
+  --color-selection-bg: rgba(76, 141, 255, 0.18);
+  --color-selection-border: #4c8dff;
+
+  /* Focus */
+  --color-focus-ring: rgba(76, 141, 255, 0.45);
+
+  /* Text */
+
+
+
+  /* =========================
+     TYPOGRAPHY
+     ========================= */
+
+  --font-family-base:
+    Inter,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-family-mono:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  /* Font sizes */
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 15px;
+  --font-size-xl: 18px;
+
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.4;
+  --line-height-loose: 1.6;
+
+
+  /* =========================
+     SPACING
+     ========================= */
+
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 20px;
+
+
+  /* =========================
+     RADIUS
+     ========================= */
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+
+  /* =========================
+     SHADOW
+     ========================= */
+
+  --shadow-panel:
+    0px 1px 2px rgba(0,0,0,0.25),
+    0px 4px 12px rgba(0,0,0,0.35);
+
+  --shadow-popup:
+    0px 6px 20px rgba(0,0,0,0.45);
+
+  /* =========================
+     COMMON
+    ========================= */
+
+}
+
+.txt-sm-strong {
+  font-family: var(--txt-body-sm-strong-font-family);
+  font-size: var(--txt-body-sm-strong-font-size);
+  font-weight: var(--txt-body-sm-strong-font-weight);
+  letter-spacing: var(--txt-body-sm-strong-letter-spacing);
+  line-height: var(--txt-body-sm-strong-line-height);
+}
+
+.txt-md-strong {
+  font-family: var(--txt-body-md-strong-font-family);
+  font-size: var(--txt-body-md-strong-font-size);
+  font-weight: var(--txt-body-md-strong-font-weight);
+  letter-spacing: var(--txt-body-md-strong-letter-spacing);
+  line-height: var(--txt-body-md-strong-line-height);
+}
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a,
+abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small,
+strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form,
+label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas,
+details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section,
+summary, time, mark, audio, video, input, select, button, textarea {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  outline: none;
+  vertical-align: inherit;
+  cursor: inherit;
+  text-decoration: none;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html, body {
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+/**************************************************************/
+/*                     TEXT LEVELS                            */
+/**************************************************************/
+
+/* App title */
+.text-xl {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+/* Panel title */
+.text-lg {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Default UI text */
+.text-md {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Labels, controls */
+.text-sm {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+/* Hints, secondary info */
+.text-xs {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/**************************************************************/
+/*                     PANEL STYLES                           */
+/**************************************************************/
+
+.panel {
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+
+.panel-header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.panel-body {
+  padding: var(--space-4);
+}
+
+/**************************************************************/
+/*                     BUTTON STYLES                          */
+/**************************************************************/
+
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  padding: 4px 8px;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+
+  color: var(--color-text-primary);
+
+  font-weight: var(--font-weight-medium);
+
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--color-bg-panel-hover);
+}
+
+button:active {
+  background: var(--color-bg-panel-active);
+}
+
+/* Primary button */
+.button-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.button-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+/**************************************************************/
+/*                     INPUT STYLES                           */
+/**************************************************************/
+
+input {
+  background: var(--color-bg-panel);
+  border: 0.5px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+
+  padding: 2px 4px;
+
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--color-accent);
+}
+
+/**************************************************************/
+/*                     MISC STYLES                           */
+/**************************************************************/
+
+.canvas {
+  background: var(--color-bg-canvas);
+}
+
+.canvas-grid {
+  background-image:
+    linear-gradient(#1d2230 1px, transparent 1px),
+    linear-gradient(90deg, #1d2230 1px, transparent 1px);
+
+  background-size: 20px 20px;
+}
+
+.selection {
+  background: var(--color-selection-bg);
+  border: 1px solid var(--color-selection-border);
+}
+
+hr {
+  border-top: 1px solid var(--color-border-subtle);
+  border-bottom: none;
+  width: 100%;
+  border-left: 0px;
+  border-right: 0px;
+  box-sizing: border-box;
+}
+
+#app {
+  margin: 0;
+  padding: 0;
+}
+
+/**************************************************************/
+/*                     OLD STYLES                             */
+/**************************************************************/
+
+a {
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+
+@media (prefers-color-scheme: light) {
+}
