@@ -7,16 +7,18 @@
     menuActions: Record<string, MenuActionHandler>;
   }
 
-const { menuItems, overlayUse, menuActions } : Props = $props();
+const { overlayUse, menuItems, menuActions } : Props = $props();
 
 function onClickMenuItem(ev: MouseEvent): void {
   const menuCode = (ev.target as HTMLButtonElement).dataset.menuCode as string;
-  overlayUse.close();
+  // Save the payload before closing the menu.
+  const payload = overlayUse.getState().payload as any;
   const handlerFn = menuActions[menuCode] as MenuActionHandler;
   if (!handlerFn) {
     throw new Error("menu action not set:" + menuCode);
   }
-  handlerFn();
+  handlerFn(payload);
+  overlayUse.close();
 }
 </script>
 

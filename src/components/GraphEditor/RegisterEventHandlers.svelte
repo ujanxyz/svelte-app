@@ -10,11 +10,12 @@
   let nextNodeId = 10;
 
   onMount(() => {
-    handleEvent(EventKinds.FN_GALLERY_SELECT, _addNode);
+    handleEvent(EventKinds.FN_GALLERY_SELECT, _xyAddNode);
+    handleEvent(EventKinds.XY_NODE_RM, _xyRmNode);
     return () => clearHandlers();
   });
 
-  function _addNode (payload: {code: string}) {
+  function _xyAddNode (payload: {code: string}) {
     const node: Node = {
       id: ("n-" + nextNodeId),
       data: { label: payload.code },
@@ -24,6 +25,9 @@
     ops.addNode(node);
   }
 
+  function _xyRmNode (payload: {nodeId: string}) {
+    ops.rmNode(payload.nodeId);
+  }
 </script>
 
 <!-- No HTML template, everything via UI registration above -->

@@ -1,3 +1,9 @@
+const OverlayTriggers = {
+    PANE_CTX_MENU: "p",
+    NODE_CTX_MENU: "n",
+    GALLERY_POPUP: "g",
+};
+
 const MenuCodes = {
     // Pane context menu.
     NEW_NODE: "n+",
@@ -12,4 +18,4 @@ const MenuCodes = {
     NODE_INFO: "n?",
 };
 
-export {MenuCodes};
+export {OverlayTriggers, MenuCodes};

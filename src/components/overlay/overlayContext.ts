@@ -6,8 +6,8 @@ interface OverlayProviderUse {
 };
 
 interface OverlayConsumerUse {
-    showAtTarget(uiName: string, clientXY: [number, number]): void;
-    showAtTop(uiName: string): void;
+    showAsCtxMenu(trigger: string, event: MouseEvent, payload: any): void;
+    showAtTop(trigger: string, payload: any): void;
 };
 
 const CONTEXT_KEY = Symbol("overlay");
@@ -19,23 +19,23 @@ function _makeContext(stateSetter: DisplayStateSetter): OverlayProviderUse & Ove
         container = view;
     }
 
-    function showAtTarget(uiName: string, clientXY: [number, number]): void {
+    function showAsCtxMenu(trigger: string, event: MouseEvent, payload: any): void {
+        event.preventDefault();
         if (!container) return;
+        const {clientX, clientY} = event;
         const rect = container.getBoundingClientRect();
-        const left = clientXY[0] - rect.left;
-        const top = clientXY[1] - rect.top;
-        const state: OverlayDisplayState = {uiName, mode: "ctx", left, top};
+        const topLeft: [number, number] = [clientY - rect.top, clientX - rect.left];
+        const state: OverlayDisplayState = {trigger, topLeft, payload};
         stateSetter(state);
     }
 
-    function showAtTop(uiName: string): void {
-        if (!container) return;
-        console.log("Gallery ... from top ⚡️ = " + uiName);
-        const state: OverlayDisplayState = {uiName, mode: "top"};
+    function showAtTop(trigger: string, payload: any): void {
+        console.log("Gallery ... from top ⚡️ = " + trigger);
+        const state: OverlayDisplayState = {trigger, payload};
         stateSetter(state);
     }
 
-    return {setContainer, showAtTarget, showAtTop};
+    return {setContainer, showAsCtxMenu, showAtTop};
 }
 
 function useOverlayProvider(stateSetter: DisplayStateSetter): OverlayProviderUse {

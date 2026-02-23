@@ -1,7 +1,6 @@
 <script lang="ts">
   import SlotsArray from "./SlotsArray.svelte";
-  import { onDestroy, onMount, setContext } from "svelte";
-  import type { NodeContext, TopLeftPosition } from "./types";
+  import { onDestroy, onMount } from "svelte";
   import { NodeToolbar, type NodeProps } from "@xyflow/svelte";
 
   const { data: nodeData }: NodeProps = $props();
@@ -14,16 +13,10 @@
     ios: ["m1"],
   };
 
-  setContext<NodeContext>("node", {addSlot});
-
-  function addSlot(slotDiv: HTMLDivElement, topLeft: TopLeftPosition) {
-  }
-
   onMount(() => {
   });
 
   onDestroy(() => {
-    console.log("Called onDetroy !!!.... ");
     containerDiv = undefined;
   });
 

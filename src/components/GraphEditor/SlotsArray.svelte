@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { getContext, onMount } from "svelte";
-  import NodeContext from "./DefaultNode.svelte";
+  import { onMount } from "svelte";
   import { Handle, Position } from "@xyflow/svelte";
-  import type { TopLeftPosition } from "./types";
 
   interface Slots {
     ins: string[];
@@ -17,15 +15,10 @@
   const { slots }: Props = $props();
   let containerDiv: HTMLDivElement;
 
-  const { addSlot } = getContext("node") as NodeContext;
   onMount(() => {
-    // addSlot(containerDiv, position);
     console.log(containerDiv);
   });
 
-  export function foobar() {
-
-  }
 </script>
 
 <div class="container">

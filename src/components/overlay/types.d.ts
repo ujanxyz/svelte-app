@@ -1,17 +1,16 @@
 import type { Snippet } from "svelte";
 
 export interface OverlayDisplayState {
-  uiName: string;
-  mode: "ctx" | "top";
-  left?: number;
-  top?: number;
+  trigger: string;
+  topLeft?: [top: number, left: number];
+  payload: any;
 };
 
 export type DisplayStateSetter = (state: OverlayDisplayState | null) => void;
 
 export interface OverlayChildUse {
+  getState(): OverlayDisplayState;
   close(): void;
-  select(payload: any): void;
 }
 
 /**
@@ -29,4 +28,4 @@ export interface MenuButton {
     shortcut?: string; 
 }
 export type MenuItem = (MenuButton | "-");
-export type MenuActionHandler = () => void;
+export type MenuActionHandler = (payload: any) => void;

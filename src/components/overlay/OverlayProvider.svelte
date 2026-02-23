@@ -5,6 +5,7 @@
   import clickOutside from './clickOutside';
   import useUiRegistry from './useUiRegistry';
   import type { ClassValue } from 'svelte/elements';
+  import { OverlayTriggers } from '../GraphEditor/constants';
 
   const { children }: { children: Snippet } = $props();
   let overlayContainer = $state<HTMLDivElement | undefined>(undefined);
@@ -45,15 +46,20 @@
     displayState = state;
   }
 
+  // Returns a non-reactive snapshot of the state.
+  function _getDisplayState(): OverlayDisplayState {
+    return $state.snapshot(displayState) as OverlayDisplayState;
+  }
+
   function _hideOverlay() {
 		displayState = null;
 	}
 
   function _toStyle(state: OverlayDisplayState | null): string {
     if (state !== null) {
-      if (state.mode === "ctx") {
-        const leftS = (state.left as number).toFixed(1);
-        const topS = (state.top as number).toFixed(1);
+      if (state.topLeft) {
+        const topS = state.topLeft[0].toFixed(1);
+        const leftS = state.topLeft[1].toFixed(1);
         return [`left:${leftS}px;`, `top:${topS}px;`].join(" ");
       }
     }
@@ -62,7 +68,7 @@
 
   function _toCssClass(state: OverlayDisplayState | null): ClassValue[] {
     if (state !== null) {
-      if (state.mode === "top") {
+      if (state.trigger === OverlayTriggers.GALLERY_POPUP) {
         return ["overlay-top"];
       }
     }
@@ -71,7 +77,7 @@
 
   function _toSnippet(state: OverlayDisplayState | null): OverlaySnippet {
     if (!state) return fallbackContent;
-    return getOverlayUI(state.uiName) ?? fallbackContent;
+    return getOverlayUI(state.trigger) ?? fallbackContent;
   }
 </script>
 
@@ -82,7 +88,7 @@
 <div bind:this={overlayContainer} class="container" data-debug-name="xyflow">
     {@render children()}
     {#if displayState !== null}
-      {@const childUse: OverlayChildUse = {close:_hideOverlay}}
+      {@const childUse: OverlayChildUse = {close:_hideOverlay, getState:_getDisplayState}}
       <nav class={["overlay", ...overlayClazzs]} style={overlayStyle}
   	      use:clickOutside on:clickOutside={_hideOverlay}>
         {@render overlayContent(childUse)}

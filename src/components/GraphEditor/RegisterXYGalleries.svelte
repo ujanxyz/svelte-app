@@ -2,10 +2,11 @@
   import PopupGallery from '../overlay/PopupGallery.svelte';
   import { type OverlayChildUse } from '../overlay/types';
   import useUiRegistry from '../overlay/useUiRegistry';
+  import { OverlayTriggers } from './constants';
   import FunctionGallery from './FunctionGallery.svelte';
 
   const { registerUI } = useUiRegistry();
-  registerUI("func", funcGallery);
+  registerUI(OverlayTriggers.GALLERY_POPUP, funcGallery);
 
 </script>
 

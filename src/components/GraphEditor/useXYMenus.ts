@@ -1,24 +1,20 @@
-import type { Node, NodeEventWithPointer } from "@xyflow/svelte";
+import type { Node } from "@xyflow/svelte";
 import { useOverlayConsumer } from "../overlay";
+import { OverlayTriggers } from "./constants";
 
 function useXYMenus() {
-    const {showAtTarget, showAtTop} = useOverlayConsumer();
+    const {showAsCtxMenu, showAtTop} = useOverlayConsumer();
 
     function onpanecontextmenu({event}: {event: MouseEvent}) {
-      event.preventDefault();
-      const {clientX, clientY} = event;
-      showAtTarget("pane", [clientX, clientY]);
+      showAsCtxMenu(OverlayTriggers.PANE_CTX_MENU, event, {ppp: 123, nest: {a: 12, b:34}, KK: 2222});
     }
 
     function onnodecontextmenu({ event, node }: {event: MouseEvent, node: Node}) {
-      event.preventDefault();
-      const {clientX, clientY} = event;
-      console.log("Node menu ....");
-      showAtTarget("node", [clientX, clientY]);
+      showAsCtxMenu(OverlayTriggers.NODE_CTX_MENU, event, {node});
     }
 
     function openGallery() {
-      showAtTop("func");
+      showAtTop(OverlayTriggers.GALLERY_POPUP, {});
     }
 
   return {onpanecontextmenu, onnodecontextmenu, openGallery};
