@@ -16,7 +16,7 @@
     table: TableNode,
   };
 
-  const {onpanecontextmenu, onnodecontextmenu, onedgecontextmenu, openGallery } = useXYMenus();
+  const {onpanecontextmenu, onnodecontextmenu, onedgecontextmenu, onselectioncontextmenu, openGallery } = useXYMenus();
 
   let nodes = $state.raw<Node[]>(initialNodes);
   let edges = $state.raw<Edge[]>(initialEdges);
@@ -27,6 +27,7 @@
         {onpanecontextmenu}
         {onnodecontextmenu}
         {onedgecontextmenu}
+        {onselectioncontextmenu}
         fitView colorMode={"dark"}>
       <Background variant={BackgroundVariant.Dots}
           gap={5} patternClass={"dots"} size={0.6} />

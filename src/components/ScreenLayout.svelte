@@ -7,14 +7,13 @@
 
 </script>
 
+<OverlayProvider>
 <div class="screen">
   <header id="pageHeader">
     <img src={logo} class="logo" alt="Vite Logo" />
   </header>
   <article id="mainArticle">
-    <OverlayProvider>
       <XYFlowGraph />
-    </OverlayProvider>
   </article>
   <nav id="mainNav">
     <WasmTester />
@@ -22,6 +21,7 @@
   <div id="siteAds">Ads</div>
   <footer id="pageFooter">Footer</footer>
 </div>
+</OverlayProvider>
 
 <style>
 img {

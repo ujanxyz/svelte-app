@@ -10,16 +10,15 @@
   const { overlayUse, children } : Props = $props();
 </script>
 
-<div class="container" aria-label="TODO: (Gallery Title Here)">
-  <button onclick={(eve) => {overlayUse.close()}}>Close overlay</button>
-  <hr/>
+<div class="container" data-debug-name="overlay-gallery" aria-label="TODO: (Gallery Title Here)">
+  <!-- <button onclick={(eve) => {overlayUse.close()}}>Close overlay</button>
+  <hr/> -->
   {@render children()}
 </div>
 
 <style>
 .container {
   animation: dropdown-in 200ms ease;
-  background-color: #888888;
 }
 
 @keyframes dropdown-in {

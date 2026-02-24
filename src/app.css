@@ -12,6 +12,8 @@
 
 
 :root {
+  --box-shadow-rgb: 0, 0, 0;
+
   /* Text Bodies */
   --txt-body-sm-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
   --txt-body-sm-strong-font-size: 0.56rem;
@@ -183,13 +185,18 @@ summary, time, mark, audio, video, input, select, button, textarea {
   text-rendering: optimizeLegibility;
 }
 
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
 html, body {
   background: var(--color-bg-app);
   color: var(--color-text-primary);
 
   font-family: var(--font-family-base);
-  font-size: var(--font-size-xs);
   line-height: var(--line-height-normal);
+
+  box-sizing: border-box;
 }
 
 /**************************************************************/

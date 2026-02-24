@@ -17,11 +17,15 @@ function useXYMenus() {
       showAsCtxMenu(OverlayTriggers.EDGE_CTX_MENU, event, {edge});
     }
 
+    function onselectioncontextmenu({ nodes, event }: {nodes: Node[], event: MouseEvent}): void {
+      showAsCtxMenu(OverlayTriggers.SELECTION_CTX_MENU, event, {nodes});
+    }
+
     function openGallery() {
       showAtTop(OverlayTriggers.GALLERY_POPUP, {});
     }
 
-  return {onpanecontextmenu, onnodecontextmenu, onedgecontextmenu, openGallery};
+  return {onpanecontextmenu, onnodecontextmenu, onedgecontextmenu, onselectioncontextmenu, openGallery};
 }
 
 export default useXYMenus;

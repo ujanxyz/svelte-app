@@ -3,6 +3,7 @@ import { useEdges, useNodes, type Edge, type Node } from "@xyflow/svelte";
 interface GraphOps {
     addNode(node: Node): void;
     rmNode(nodeId: string): void;
+    rmNodes(nodeIds: string[]): void;
     rmEdge(egeId: string): void;
 }
 
@@ -22,13 +23,20 @@ function _makeGraphOps(): GraphOps {
         });
     }
 
+    function rmNodes(nodeIds: string[]): void {
+        const lookup = new Set<string>(nodeIds);
+        updateNodes((nodes: Node[]) => {
+            return nodes.filter((n: Node) => !lookup.has(n.id));
+        });
+    }
+
     function rmEdge(egeId: string): void {
         updateEdges((edges: Edge[]): Edge[] => {
             return edges.filter((e: Edge) => e.id !== egeId);
         });
     }
 
-    return {addNode, rmNode, rmEdge};
+    return {addNode, rmNode, rmNodes, rmEdge};
 }
 
 function useGraphOps(): GraphOps {

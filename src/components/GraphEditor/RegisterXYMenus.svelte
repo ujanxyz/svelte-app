@@ -28,20 +28,28 @@
     { code: MenuCodes.RM_EDGE, label: "Delete Edge"},
 	];
 
+  const selectionCtx: MenuItem[] = [
+    { code: MenuCodes.RM_SELECTION, label: "Delete Selected"},
+	];
+
   const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
   const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
+  const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
+  
 
   const menuActions: Record<string, MenuActionHandler> = {
     [MenuCodes.NEW_NODE]: _newNode,
     [MenuCodes.NEW_INPUT]: _newInput,
     [MenuCodes.RM_NODE]: _rmNode,
     [MenuCodes.RM_EDGE]: _rmEdge,
+    [MenuCodes.RM_SELECTION]: _rmSelection,
   };
 
   const { registerUI } = useUiRegistry();
   registerUI(OverlayTriggers.PANE_CTX_MENU, paneCtxMenu);
   registerUI(OverlayTriggers.NODE_CTX_MENU, nodeCtxMenu);
   registerUI(OverlayTriggers.EDGE_CTX_MENU, edgeCtxMenu);
+  registerUI(OverlayTriggers.SELECTION_CTX_MENU, selCtxMenu);
 
   function _newNode(payload: any) {
     console.log("New node .. ", payload);
@@ -61,6 +69,11 @@
     dispatchRmEdge({edgeId});
   }
 
+  function _rmSelection(payload: any) {
+    const nodeIds: string[] = (payload.nodes as Node[]).map((n: Node) => n.id);
+    dispatchRmSelection({nodeIds});
+  }
+
 </script>
 
 {#snippet paneCtxMenu(overlayUse: OverlayChildUse)}
@@ -73,6 +86,10 @@
 
 {#snippet edgeCtxMenu(overlayUse: OverlayChildUse)}
   <ContextMenu {overlayUse} menuItems={edgeCtx} {menuActions}/>
+{/snippet}
+
+{#snippet selCtxMenu(overlayUse: OverlayChildUse)}
+  <ContextMenu {overlayUse} menuItems={selectionCtx} {menuActions}/>
 {/snippet}
 
 <!-- No HTML template, everything via UI registration above -->

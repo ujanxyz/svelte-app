@@ -2,6 +2,7 @@ const OverlayTriggers = {
     PANE_CTX_MENU: "p",
     NODE_CTX_MENU: "n",
     EDGE_CTX_MENU: "e",
+    SELECTION_CTX_MENU: "s",
     GALLERY_POPUP: "g",
 };
 
@@ -16,8 +17,13 @@ const MenuCodes = {
 
     // Node context menu.
     RM_NODE: "n-",
-    RM_EDGE: "e-",
     NODE_INFO: "n?",
+
+    // Edge context menu.
+    RM_EDGE: "e-",
+
+    // Selection context menu.
+    RM_SELECTION: "s-",
 };
 
 export {OverlayTriggers, MenuCodes};
