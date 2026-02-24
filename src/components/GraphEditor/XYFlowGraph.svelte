@@ -10,8 +10,10 @@
   import useXYMenus from './useXYMenus';
   import RegisterXYGalleries from './RegisterXYGalleries.svelte';
   import RegisterEventHandlers from './RegisterEventHandlers.svelte';
+  import InputNode from './InputNode.svelte';
 
   const nodeTypes = {
+    in: InputNode,
     default: DefaultNode,
     table: TableNode,
   };

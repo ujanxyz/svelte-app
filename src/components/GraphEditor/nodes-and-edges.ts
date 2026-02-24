@@ -24,6 +24,11 @@ export const initialNodes: Node[] = [
     type: 'table',
     position: { x: 200, y: -200 },
   },
+
+  {
+    id: 'in1',  data: { label: 'Input 1' },
+    type: 'in', position: { x: 150, y: 0 },
+  },
 //   { id: '4', data: { label: 'Node 4' }, position: { x: 200, y: 200 } },
 ];
  
