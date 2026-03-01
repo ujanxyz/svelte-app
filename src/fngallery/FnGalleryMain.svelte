@@ -3,7 +3,8 @@
   import { EventKinds } from "../utils/constants";
   import useEventDispatch from "../utils/useEventDispatch";
   import useFetchFnInfos from "./useFetchFnInfos";
-  import type { FuncParam, FuncSpec } from "./types";
+  import type { FuncSpec } from "./types";
+  import FunctionCard from "./FunctionCard.svelte";
 
   interface Props {
     onClose: () => void;
@@ -19,28 +20,20 @@
     return () => abortFetch();
   });
 
-  function onClickItem(ev: PointerEvent | MouseEvent) {
-    const code = (ev.target as HTMLButtonElement).dataset.code as string;
+  function onSelect(spec: FuncSpec) {
     onClose();
-    dispatchSelect({code});
+    console.log(spec);
+    dispatchSelect({code: spec.id});
   }
 
 </script>
-
-<!-- <div class="gallery txt-md-strong" data-debug-name="gallery-shell">
-  {#each galleryItems as {func, label}}
-    <button class="item" onclick={onClickItem} data-code={func}>
-      {label} / {func}
-    </button>
-  {/each}
-</div> -->
 
 <div class={["gallery-main", "elevated-rounded-md"]}>
 <div class="topbar">
   <h2 class="header-l1">www.mockaroo.com</h2>
   <div class="flex-remaining">m</div>
   <input type="text" name="search" class="textfield" value="search"/>
-  <div class="iconbtn">X</div>
+  <button  aria-label="close" class="iconbtn" onclick={() => onClose()}>X</button>
 </div>
 {#await itemsPromise}
   <p>Loading...</p>
@@ -48,7 +41,7 @@
   <div class="contentroot">
     <div class="gridbox">
         {#each items as item}
-          {@render renderFnInfo(item)}
+          <FunctionCard spec={item} {onSelect} />
         {/each}
     </div>
     <div class="bottombox">
@@ -62,22 +55,7 @@
 {/await}
 </div>
 
-{#snippet renderFnInfo(fnInfo: FuncSpec)}
-    {@const {id, label, desc, params} = fnInfo}
-    <div class="gridcell" data-uj-fn-id={id}>
-        <p class="celltypo">{label}</p>
-        <p class="celldesc">{desc}</p>
-        <p>
-            {#each params as {name, access} : FuncParam}
-              {@const accessStyle = `param-${access}` }
-              <span class={["cellparam", accessStyle]} data-param-role={access}>{name}</span>
-            {/each}
-        </p>
-    </div>
-{/snippet}
-
 <style>
-
 .gallery-main {
     width: calc(100vw - 48px);
     height: calc(100vh - 48px);
@@ -186,106 +164,4 @@
     padding: 12px;
 }
 
-.gridcell {
-    width: 240px;
-    cursor: pointer;
-    height: 110px;
-    display: block;
-    padding: 12px;
-    overflow-x: hidden;
-    overflow-y: hidden;
-    box-sizing: border-box;
-    transition: 100ms linear;
-    border-radius: 7px;
-
-    background-color: #30303044;
-}
-
-.gridcell:hover {
-    background-color: #303030;
-}
-
-.celltypo {
-    font-weight: 700;
-    line-height: 1.5;
-}
-
-.celldesc {
-    font-size: 0.7rem;
-    font-style: italic;
-    font-weight: 400;
-    line-height: 1.66;
-}
-
-.cellparam {
-    display: inline-flex;
-    align-items: center;
-
-    margin-left: 0.15rem;
-    padding: 0.1rem 0.125rem;
-    font-size: 0.7rem;
-
-    color: #e0e0e0;
-    background-color: #606060; /* #404040; */
-    border-radius: 2px;
-    cursor: default; /* Default cursor for static chips */
-    white-space: nowrap; /* Prevents text from wrapping */
-}
-.param-i {
-    background-color: #3047a5;
-}
-.param-o {
-    background-color: #217446;
-}
-.param-m {
-    background-color: #736c21;
-}
-
-
-
-.cellparam:first-child {
-    margin-left: 0px;
-}
-
-.gallery {
-  min-height: 60px;
-  min-width: 5rem;
-  max-width: 80rem;
-
-  padding-top: calc(2.2rem + 1px);
-  padding-bottom: calc(2.2rem + 1px);
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-
-  margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center safe;
-
-  align-items: flex-start;
-  align-content: flex-start;
-
-  font-size: 0.8rem;
-  color: #DDDDFF;
-  background-color: #264359;
-  border: 1px solid #dddddd44;
-  border-radius: 4px;
-}
-.item {
-  width: 6rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px;
-
-  background-color: #3c3c3c;
-  border: 1px solid #dddddd44;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.item:hover {
-    background-color: #1c1c1c;
-}
 </style>

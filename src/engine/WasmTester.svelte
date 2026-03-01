@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import wasmService from "../services/wasmService";
+  import wasmService from "./wasmService";
   import type { HelloClassInstance } from "../types/WasmModule";
-  import { graphStore } from "../stores/graphStore";
+  import { graphStore } from "./graphStore";
   import OutlinedSvgIcon from "../libs/OutlinedSvgIcon.svelte";
   import MultiWordsInput from "../libs/MultiWordsInput.svelte";
   import TextButton from "../libs/TextButton.svelte";

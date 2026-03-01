@@ -1,16 +1,17 @@
 <script lang="ts">
   import logo from '../assets/svelte.svg';
-  import XYFlowGraph from './GraphEditor/XYFlowGraph.svelte';
-  import { OverlayProvider } from './overlay';
-  import WasmTester from "./WasmTester.svelte";
-
-
+  import XYFlowGraph from '../components/GraphEditor/XYFlowGraph.svelte';
+  import { OverlayProvider } from '../components/overlay';
+  import WasmTester from "../engine/WasmTester.svelte";
+  import StyleGalleryMain from '../stylegallery/StyleGalleryMain.svelte';
+  import ContentSelector from './ContentSelector.svelte';
 </script>
 
 <OverlayProvider>
 <div class="screen">
   <header id="pageHeader">
     <img src={logo} class="logo" alt="Vite Logo" />
+    <ContentSelector />
   </header>
   <article id="mainArticle">
       <XYFlowGraph />
@@ -18,7 +19,9 @@
   <nav id="mainNav">
     <WasmTester />
   </nav>
-  <div id="siteAds">Ads</div>
+  <div id="siteAds">
+    <StyleGalleryMain />
+  </div>
   <footer id="pageFooter">Footer</footer>
 </div>
 </OverlayProvider>
@@ -55,6 +58,8 @@ header, footer, article, nav, div {
 }
 #pageHeader {
   grid-area: header;
+
+  display: flex;
   }
 #pageFooter {
   grid-area: footer;
