@@ -1,7 +1,6 @@
 import { mount } from 'svelte';
-import './app.css';
-import App from './App.svelte';
-import wasmService from './services/wasmService';
+import App from './app/App.svelte';
+import wasmService from './modules/engine/wasmService';
 
 let start = Date.now();
 wasmService.initialize().then(() => {

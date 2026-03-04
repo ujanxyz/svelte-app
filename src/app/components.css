@@ -1,0 +1,73 @@
+/**************************************************************/
+/*  Elevated UIs                                              */
+/**************************************************************/
+
+.elevation-0 {
+  background-color: var(--color-bg-0);
+}
+.elevation-1 {
+  background-color: var(--color-bg-1);
+}
+.elevation-2 {
+  background-color: var(--color-bg-2);
+}
+.elevation-3 {
+  background-color: var(--color-bg-3);
+}
+.elevation-4 {
+  background-color: var(--color-bg-4);
+}
+
+
+
+.text-hi-con {
+  color: var(--color-text-hi-con);
+}
+.text-md-con {
+  color: var(--color-text-md-con);
+}
+.text-lo-con {
+  color: var(--color-text-lo-con);
+}
+.text-error {
+  color: var(--color-text-error);
+}
+
+
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+
+/**************************************************************/
+/*                     PANEL STYLES                           */
+/**************************************************************/
+
+.panel {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+
+.panel-header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.panel-body {
+  padding: var(--space-4);
+}
+
+/**************************************************************/
+/*  Content Div                                               */
+/**************************************************************/
+
+div.contents {
+  display: contents;
+}

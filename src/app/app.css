@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./reset.css";
+@import "./metrics.css";
+@import "./theme.css";
+@import "./components.css";
+
+@theme {
+  --color-*: initial;
+  --color-white: #fff;
+  --color-purple: #3f3cbb;
+  --color-midnight: #121063;
+  --color-tahiti: #3ab7bf;
+  --color-bermuda: #78dcca;
+}
+
+
+/*-------------------------------------------------------*/
+/* Font Families                                         */
+/*-------------------------------------------------------*/
+
+@font-face {
+  font-family: 'MyFont';
+  src: url('/fonts/MyFont-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+
+:root {
+  --box-shadow-rgb: 0, 0, 0;
+
+  /* Text Bodies */
+  --txt-body-sm-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
+  --txt-body-sm-strong-font-size: 0.56rem;
+  --txt-body-sm-strong-font-weight: 500;
+  --txt-body-sm-strong-letter-spacing: .0168rem;
+  --txt-body-sm-strong-line-height: 0.875rem;
+
+  --txt-body-md-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
+  --txt-body-md-strong-font-size: 0.75rem;
+  --txt-body-md-strong-font-weight: 500;
+  --txt-body-md-strong-letter-spacing: .0168rem;
+  --txt-body-md-strong-line-height: 0.875rem;
+
+
+  /* =========================
+     COLOR SYSTEM
+     ========================= */
+
+  /* Base backgrounds */
+  --color-bg-canvas: #0f1115;
+  --color-bg-app: #15181e;
+
+
+  /* Text */
+  --color-text-primary: #e6e9ef;
+  --color-text-secondary: #a9b1c6;
+  --color-text-tertiary: #6b7385;
+  --color-text-disabled: #4a5162;
+
+
+  /* Semantic */
+  --color-success: #3fb950;
+  --color-warning: #d29922;
+  --color-danger: #f85149;
+
+  /* Selection */
+  --color-selection-bg: rgba(76, 141, 255, 0.18);
+  --color-selection-border: #4c8dff;
+
+  /* Focus */
+  --color-focus-ring: rgba(76, 141, 255, 0.45);
+
+  /* Text */
+
+
+
+  /* =========================
+     TYPOGRAPHY
+     ========================= */
+
+  --font-family-base:
+    Inter,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-family-mono:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  /* Font sizes */
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 15px;
+  --font-size-xl: 18px;
+
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.4;
+  --line-height-loose: 1.6;
+}
+
+.txt-sm-strong {
+  font-family: var(--txt-body-sm-strong-font-family);
+  font-size: var(--txt-body-sm-strong-font-size);
+  font-weight: var(--txt-body-sm-strong-font-weight);
+  letter-spacing: var(--txt-body-sm-strong-letter-spacing);
+  line-height: var(--txt-body-sm-strong-line-height);
+}
+
+.txt-md-strong {
+  font-family: var(--txt-body-md-strong-font-family);
+  font-size: var(--txt-body-md-strong-font-size);
+  font-weight: var(--txt-body-md-strong-font-weight);
+  letter-spacing: var(--txt-body-md-strong-letter-spacing);
+  line-height: var(--txt-body-md-strong-line-height);
+}
+
+/**************************************************************/
+/*                     TEXT LEVELS                            */
+/**************************************************************/
+
+/* App title */
+.text-xl {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+/* Panel title */
+.text-lg {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Default UI text */
+.text-md {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Labels, controls */
+.text-sm {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+/* Hints, secondary info */
+.text-xs {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+
+/**************************************************************/
+/*                     INPUT STYLES                           */
+/**************************************************************/
+
+input {
+  background: var(--color-bg-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-primary);
+  outline: none;
+  box-sizing: border-box;
+}
+
+input:hover {
+  background-color: var(--color-bg-4);
+}
+
+input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/**************************************************************/
+/*                     MISC STYLES                           */
+/**************************************************************/
+
+.canvas {
+  background: var(--color-bg-canvas);
+}
+
+.canvas-grid {
+  background-image:
+    linear-gradient(#1d2230 1px, transparent 1px),
+    linear-gradient(90deg, #1d2230 1px, transparent 1px);
+
+  background-size: 20px 20px;
+}
+
+.selection {
+  background: var(--color-selection-bg);
+  border: 1px solid var(--color-selection-border);
+}
+
+hr {
+  border-top: 1px solid var(--color-border-subtle);
+  border-bottom: none;
+  width: 100%;
+  border-left: 0px;
+  border-right: 0px;
+  box-sizing: border-box;
+}
+
+/**************************************************************/
+/*                     OLD STYLES                             */
+/**************************************************************/
+
+a {
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}

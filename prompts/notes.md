@@ -1,0 +1,5 @@
+Create id:
+
+```
+crypto.randomUUID(),
+```
