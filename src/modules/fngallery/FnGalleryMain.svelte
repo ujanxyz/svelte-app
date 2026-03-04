@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { EventKinds } from "../utils/constants";
-  import useEventDispatch from "../utils/useEventDispatch";
+  import { EventKinds } from "../../utils/constants";
+  import useEventDispatch from "../../utils/useEventDispatch";
   import useFetchFnInfos from "./useFetchFnInfos";
   import type { FuncSpec } from "./types";
   import FunctionCard from "./FunctionCard.svelte";

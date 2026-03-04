@@ -1,6 +1,6 @@
 <script lang="ts">
-  import FnGalleryMain from "../../fngallery/FnGalleryMain.svelte";
-  import type { OverlayChildUse } from "../overlay/types";
+  import FnGalleryMain from "../../modules/fngallery/FnGalleryMain.svelte";
+  import type { OverlayChildUse } from "../../overlay/types";
 
   interface Props {
     overlayUse: OverlayChildUse;

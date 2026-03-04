@@ -1,4 +1,4 @@
-import type { HelloClassInstance, WasmModuleType } from "../types/WasmModule";
+import type { HelloClassInstance, WasmModuleType } from "../../types/WasmModule";
 
 const GLUEJS_PATH = '/webassembly/entrypoint.js';
 

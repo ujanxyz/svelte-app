@@ -5,7 +5,7 @@
   import clickOutside from './clickOutside';
   import useUiRegistry from './useUiRegistry';
   import type { ClassValue } from 'svelte/elements';
-  import { OverlayTriggers } from '../GraphEditor/constants';
+  import { OverlayTriggers } from '../graph/xyflow/constants';
 
   const { children }: { children: Snippet } = $props();
   let overlayContainer = $state<HTMLDivElement | undefined>(undefined);

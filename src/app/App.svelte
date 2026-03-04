@@ -1,6 +1,7 @@
 <script lang="ts">
-  import useNewEventTarget from './app/useNewEventTarget';
-  import ScreenLayout from './app/ScreenLayout.svelte';
+  import useNewEventTarget from './useNewEventTarget';
+  import ScreenLayout from './ScreenLayout.svelte';
+  import './app.css';
 
   useNewEventTarget();
 </script>

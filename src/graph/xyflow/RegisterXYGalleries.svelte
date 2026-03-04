@@ -1,7 +1,7 @@
 <script lang="ts">
-  import PopupGallery from '../overlay/PopupGallery.svelte';
-  import { type OverlayChildUse } from '../overlay/types';
-  import useUiRegistry from '../overlay/useUiRegistry';
+  import PopupGallery from '../../overlay/PopupGallery.svelte';
+  import { type OverlayChildUse } from '../../overlay/types';
+  import useUiRegistry from '../../overlay/useUiRegistry';
   import { OverlayTriggers } from './constants';
   import FunctionGallery from './FunctionGallery.svelte';
 

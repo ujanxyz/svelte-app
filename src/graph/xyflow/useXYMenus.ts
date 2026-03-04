@@ -1,5 +1,5 @@
 import type { Edge, Node } from "@xyflow/svelte";
-import { useOverlayConsumer } from "../overlay";
+import { useOverlayConsumer } from "../../overlay";
 import { OverlayTriggers } from "./constants";
 
 function useXYMenus() {

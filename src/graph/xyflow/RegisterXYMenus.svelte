@@ -2,10 +2,10 @@
   import type { Edge, Node } from '@xyflow/svelte';
   import { EventKinds } from '../../utils/constants';
   import useEventDispatch from '../../utils/useEventDispatch';
-  import { ContextMenu } from '../overlay';
-  import type { MenuActionHandler, MenuItem, OverlayChildUse } from '../overlay/types';
-  import useUiRegistry from '../overlay/useUiRegistry';
+  import type { MenuActionHandler, MenuItem, OverlayChildUse } from '../../overlay/types';
   import { MenuCodes, OverlayTriggers } from './constants';
+    import useUiRegistry from '../../overlay/useUiRegistry';
+    import ContextMenu from '../../overlay/ContextMenu.svelte';
 
   const paneCtx: MenuItem[] = [
     { code: MenuCodes.NEW_NODE, label: "New Node ..."},  // handler: () => console.log("New node")

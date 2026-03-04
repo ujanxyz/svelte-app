@@ -1,10 +1,10 @@
 <script lang="ts">
   import logo from '../assets/svelte.svg';
-  import XYFlowGraph from '../components/GraphEditor/XYFlowGraph.svelte';
-  import { OverlayProvider } from '../components/overlay';
-  import WasmTester from "../engine/WasmTester.svelte";
-  import StyleGalleryMain from '../stylegallery/StyleGalleryMain.svelte';
+  import { OverlayProvider } from '../overlay';
+  import WasmTester from '../modules/engine/WasmTester.svelte';
+  import PropsPanelMain from '../graph/propspanel/PropsPanelMain.svelte';
   import ContentSelector from './ContentSelector.svelte';
+    import XYFlowGraph from '../graph/xyflow/XYFlowGraph.svelte';
 </script>
 
 <OverlayProvider>
@@ -16,11 +16,11 @@
   <article id="mainArticle">
       <XYFlowGraph />
   </article>
-  <nav id="mainNav">
+  <nav id="mainNav" class="elevation-1">
     <WasmTester />
   </nav>
   <div id="siteAds">
-    <StyleGalleryMain />
+    <PropsPanelMain />
   </div>
   <footer id="pageFooter">Footer</footer>
 </div>
@@ -44,7 +44,7 @@ img {
     "nav article ads"
     "nav footer footer";
   grid-template-rows: 30px 1fr 50px;
-  grid-template-columns: 15% 1fr 15%;
+  grid-template-columns: 35% 1fr 35%; /* 15% */
   grid-row-gap: 1px;
   grid-column-gap: 1px;
   background-color: #444;
@@ -73,7 +73,7 @@ header, footer, article, nav, div {
   }
 #siteAds { 
   grid-area: ads; 
-  } 
+} 
 /* Stack the layout on small devices/viewports. */
 @media all and (max-width: 575px) {
   .screen { 
@@ -83,7 +83,7 @@ header, footer, article, nav, div {
       "ads"
       "nav"
       "footer";
-    grid-template-rows: 80px 1fr 70px 1fr 70px;  
+    grid-template-rows: 80px 1fr 250px 1fr 70px;  
     grid-template-columns: 1fr;
  }
 }

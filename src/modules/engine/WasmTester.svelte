@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import wasmService from "./wasmService";
-  import type { HelloClassInstance } from "../types/WasmModule";
+  import type { HelloClassInstance } from "../../types/WasmModule";
   import { graphStore } from "./graphStore";
-  import OutlinedSvgIcon from "../libs/OutlinedSvgIcon.svelte";
-  import MultiWordsInput from "../libs/MultiWordsInput.svelte";
-  import TextButton from "../libs/TextButton.svelte";
+  import OutlinedSvgIcon from "../../icons/OutlinedSvgIcon.svelte";
+  import MultiWordsInput from "../../components/MultiWordsInput.svelte";
+  import TextButton from "../../components/TextButton.svelte";
 
   let graphApi: HelloClassInstance | null = null;
 
@@ -135,8 +135,8 @@
 
 </script>
 
-<div class="container">
-    <h2>Graph API Tester</h2>
+<div class="contents">
+<h2>Graph API Tester</h2>
 
 <hr/>
 
@@ -182,14 +182,9 @@
 <section>
   <TextButton text="Delete Graph" onclick={handleDeleteGraph}/>
 </section>
-
 </div>
 
 <style>
-.container {
-  margin: 0;
-  padding: 0;
-}
 section {
   margin: 0;
   padding: var(--space-1);

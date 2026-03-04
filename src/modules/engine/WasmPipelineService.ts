@@ -1,4 +1,4 @@
-import type { PipelineAPI } from "../types/PipelineAPI"
+import type { PipelineAPI } from "../../types/PipelineAPI"
 
 class WasmPipelineService implements PipelineAPI {
   private static instance: WasmPipelineService | null = null
