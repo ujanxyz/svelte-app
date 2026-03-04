@@ -1,21 +1,20 @@
 <script lang="ts">
-  type Props = {
-    text: string;
-    onclick: () => void;
-  };
-  const { text, onclick }: Props = $props();
+type Props = {
+  text: string;
+  onclick: () => void;
+};
+const { text, onclick }: Props = $props();
 </script>
 
 <div>
-    <button onclick={onclick} class="rounded-sm">
-        <span class="text-md-con txt-md-strong">{text}</span>
-    </button>
+  <button onclick={onclick} class="rounded-sm">
+    <span class="text-md-con txt-md-strong">{text}</span>
+  </button>
 </div>
-
 
 <style>
 div {
-    display: inline;
+  display: inline;
 }
 
 button {
@@ -39,8 +38,8 @@ button:active {
   color: var(--color-accent-text);
 }
 
-button:hover span, button:active span {
+button:hover span,
+button:active span {
   color: var(--color-text-hi-con);
 }
-
 </style>

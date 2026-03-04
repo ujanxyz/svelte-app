@@ -7,7 +7,6 @@ div.uj-panel {
   border-width: 1px;
   border-style: solid;
   border-color: transparent;
-
 }
 
 div.uj-panel:hover {
@@ -29,9 +28,3 @@ button.uj-button {
   font-weight: 600;
   border-width: 0px;
 }
-
-
-
-
-
-

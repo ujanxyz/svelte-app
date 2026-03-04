@@ -1,4 +1,3 @@
-
 /**
  * This attaches it to the global scope
  */
@@ -9,9 +8,9 @@ declare global {
 }
 
 interface WasmModuleType {
-    getBuildInfo: () => object;
-    HelloClass: HelloClassConstructor;
-};
+  getBuildInfo: () => object;
+  HelloClass: HelloClassConstructor;
+}
 
 interface HelloClassConstructor {
   new (name: string): HelloClassInstance;

@@ -1,13 +1,18 @@
 <script lang="ts">
-  import type { MenuActionHandler, MenuButton, MenuItem, OverlayChildUse } from "./types";
+import type {
+  MenuActionHandler,
+  MenuButton,
+  MenuItem,
+  OverlayChildUse,
+} from "./types";
 
-  interface Props {
-    overlayUse: OverlayChildUse;
-    menuItems: MenuItem[];
-    menuActions: Record<string, MenuActionHandler>;
-  }
+interface Props {
+  overlayUse: OverlayChildUse;
+  menuItems: MenuItem[];
+  menuActions: Record<string, MenuActionHandler>;
+}
 
-const { overlayUse, menuItems, menuActions } : Props = $props();
+const { overlayUse, menuItems, menuActions }: Props = $props();
 
 function onClickMenuItem(ev: MouseEvent): void {
   const menuCode = (ev.target as HTMLButtonElement).dataset.menuCode as string;
@@ -25,9 +30,9 @@ function onClickMenuItem(ev: MouseEvent): void {
 <div class="contextmenu txt-md-strong" aria-label="Main Menu">
   {#each menuItems as item}
     {#if item === "-"}
-      <hr class="sep"/>
+      <hr class="sep" />
     {:else}
-      {@const {code, label, shortcut} = item as MenuButton }
+      {@const { code, label, shortcut } = item as MenuButton}
       <button onclick={onClickMenuItem} class="item" data-menu-code={code}>
         {label}
         {#if shortcut}
@@ -48,7 +53,7 @@ function onClickMenuItem(ev: MouseEvent): void {
   padding-bottom: calc(0.2rem + 1px);
 
   font-size: 0.8rem;
-  color: #DDDDFF;
+  color: #ddddff;
 
   background-color: #222222;
   border: 1px solid #dddddd44;
@@ -67,34 +72,34 @@ hr.sep {
   box-sizing: border-box;
 }
 .item {
-    padding: 0.45rem 10px;
-    background: none;
-    border: none;
-    border-radius: 2px;
+  padding: 0.45rem 10px;
+  background: none;
+  border: none;
+  border-radius: 2px;
 
-    display: flex;
-    justify-content: space-between;
-    place-items: center;
-    text-align: left;
-    cursor: pointer;
-    gap: 5px;
+  display: flex;
+  justify-content: space-between;
+  place-items: center;
+  text-align: left;
+  cursor: pointer;
+  gap: 5px;
 }
 button:hover {
-    background: #88888844;
+  background: #88888844;
 }
 .shortcut {
-    color: #666;
-    font-size: 0.8em;
+  color: #666;
+  font-size: 0.8em;
 }
 
 @keyframes dropdown-in {
-from {
+  from {
     opacity: 0;
     transform: translateY(-8px);
-}
-to {
+  }
+  to {
     opacity: 1;
     transform: translateY(0);
-}
+  }
 }
 </style>

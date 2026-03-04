@@ -11,9 +11,9 @@ function createGraphStore() {
       id: newNodeId,
       label: funcName,
       ins: inSlots,
-      outs: outSlots
+      outs: outSlots,
     };
-    update(graph => {
+    update((graph) => {
       return {
         ...graph,
         nodes: [...graph.nodes, newNode],
@@ -21,16 +21,21 @@ function createGraphStore() {
     });
   }
 
-  function addEdge(srcNode: string, srcSlot: string, dstNode: string, dstSlot: string) {
+  function addEdge(
+    srcNode: string,
+    srcSlot: string,
+    dstNode: string,
+    dstSlot: string,
+  ) {
     const newEdgeId = `edge-${Date.now()}`;
     const newEdge = {
       id: newEdgeId,
       src: srcNode,
       srcSlot,
       dst: dstNode,
-      dstSlot
+      dstSlot,
     };
-    update(graph => {
+    update((graph) => {
       return {
         ...graph,
         edges: [...graph.edges, newEdge],
@@ -47,7 +52,7 @@ function createGraphStore() {
     addNode,
     addEdge,
     clearGraph,
-  }
+  };
 }
 
 function _makeDefaultGraph(): IGraph {
@@ -55,7 +60,7 @@ function _makeDefaultGraph(): IGraph {
     id: "default",
     label: "Default Graph",
     nodes: [],
-    edges: []
+    edges: [],
   };
 }
 

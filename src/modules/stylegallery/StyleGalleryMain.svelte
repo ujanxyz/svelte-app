@@ -1,10 +1,10 @@
 <script lang="ts">
-import './components.css';
+import "./components.css";
 </script>
 
 <div class="contents">
   <h2>Style gallery.</h2>
-  <br/>
+  <br />
 
   <div class="elevation-0 panel">
     <span class="text-lo-con">Lo</span>
@@ -44,14 +44,11 @@ import './components.css';
         Footer elev 2
       </div>
 
-    Footer elev 1
-  </div>
-  
+      Footer elev 1
+    </div>
+
     Footer elev 0
   </div>
-
-
-  
 </div>
 
 <style>

@@ -1,34 +1,27 @@
-import { onMount, onDestroy } from "svelte"
-import WasmPipelineService from "./WasmPipelineService"
+import { onMount, onDestroy } from "svelte";
+import WasmPipelineService from "./WasmPipelineService";
 
 export function usePipeline() {
-
-  let pipelineId: number
-
+  let pipelineId: number;
 
   onMount(async () => {
+    await WasmPipelineService.initialize();
 
-    await WasmPipelineService.initialize()
+    pipelineId = WasmPipelineService.createPipeline();
 
-    pipelineId = WasmPipelineService.createPipeline()
-
-    console.log("Pipeline created:", pipelineId)
+    console.log("Pipeline created:", pipelineId);
 
     // example test call
-    WasmPipelineService.evaluate(pipelineId)
-  })
-
+    WasmPipelineService.evaluate(pipelineId);
+  });
 
   onDestroy(() => {
+    WasmPipelineService.destroyPipeline(pipelineId);
 
-    WasmPipelineService.destroyPipeline(pipelineId)
-
-    console.log("Pipeline destroyed:", pipelineId)
-  })
-
+    console.log("Pipeline destroyed:", pipelineId);
+  });
 
   return {
-
-    getPipelineId: () => pipelineId
-  }
+    getPipelineId: () => pipelineId,
+  };
 }

@@ -16,19 +16,16 @@
   --color-bermuda: #78dcca;
 }
 
-
 /*-------------------------------------------------------*/
 /* Font Families                                         */
 /*-------------------------------------------------------*/
 
 @font-face {
-  font-family: 'MyFont';
-  src: url('/fonts/MyFont-Regular.woff2') format('woff2');
+  font-family: "MyFont";
+  src: url("/fonts/MyFont-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
 }
-
-
 
 :root {
   --box-shadow-rgb: 0, 0, 0;
@@ -37,15 +34,14 @@
   --txt-body-sm-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
   --txt-body-sm-strong-font-size: 0.56rem;
   --txt-body-sm-strong-font-weight: 500;
-  --txt-body-sm-strong-letter-spacing: .0168rem;
+  --txt-body-sm-strong-letter-spacing: 0.0168rem;
   --txt-body-sm-strong-line-height: 0.875rem;
 
   --txt-body-md-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
   --txt-body-md-strong-font-size: 0.75rem;
   --txt-body-md-strong-font-weight: 500;
-  --txt-body-md-strong-letter-spacing: .0168rem;
+  --txt-body-md-strong-letter-spacing: 0.0168rem;
   --txt-body-md-strong-line-height: 0.875rem;
-
 
   /* =========================
      COLOR SYSTEM
@@ -55,13 +51,11 @@
   --color-bg-canvas: #0f1115;
   --color-bg-app: #15181e;
 
-
   /* Text */
   --color-text-primary: #e6e9ef;
   --color-text-secondary: #a9b1c6;
   --color-text-tertiary: #6b7385;
   --color-text-disabled: #4a5162;
-
 
   /* Semantic */
   --color-success: #3fb950;
@@ -77,29 +71,16 @@
 
   /* Text */
 
-
-
   /* =========================
      TYPOGRAPHY
      ========================= */
 
   --font-family-base:
-    Inter,
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Helvetica,
-    Arial,
+    Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
     sans-serif;
 
   --font-family-mono:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    monospace;
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Font sizes */
   --font-size-xs: 11px;
@@ -170,7 +151,6 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
 }
-
 
 /**************************************************************/
 /*                     INPUT STYLES                           */

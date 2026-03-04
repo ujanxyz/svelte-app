@@ -1,19 +1,21 @@
 <script lang="ts">
-  import { Handle, Position, type NodeProps } from "@xyflow/svelte";
+import { Handle, Position, type NodeProps } from "@xyflow/svelte";
 
-  // Optional props
+const { data: nodeData }: NodeProps = $props();
 
-  const { data: nodeData }: NodeProps = $props();
+const width: number = 200;
+const height: number = 100;
 
-  const width: number = 200;
-  const height: number = 100;
-
-  const path = "M 150,5 5,5 5,95 150,95 195,50 Z";
-
+const path = "M 150,5 5,5 5,95 150,95 195,50 Z";
 </script>
 
 <div class="container">
-  <svg class="nodebg" {width} {height} viewBox="0 0 {width} {height}">
+  <svg
+    class="nodebg"
+    width={width}
+    height={height}
+    viewBox="0 0 {width} {height}"
+  >
     <path class="bg" d={path} />
     <path class="fg" d={path} />
   </svg>
@@ -21,7 +23,7 @@
     <span>{nodeData.label}</span>
   </div>
 </div>
-<Handle type="source" position={Position.Right} id="o1" title="slot: IN"/>
+<Handle type="source" position={Position.Right} id="o1" title="slot: IN" />
 
 <style>
 .container {
@@ -85,7 +87,7 @@ path.fg {
 }
 
 svg.nodebg:hover path.bg {
-  stroke: #D8D8D8;
+  stroke: #d8d8d8;
 }
 
 /* Ensure only filled region receives pointer events */

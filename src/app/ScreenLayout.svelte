@@ -1,29 +1,29 @@
 <script lang="ts">
-  import logo from '../assets/svelte.svg';
-  import { OverlayProvider } from '../overlay';
-  import WasmTester from '../modules/engine/WasmTester.svelte';
-  import PropsPanelMain from '../graph/propspanel/PropsPanelMain.svelte';
-  import ContentSelector from './ContentSelector.svelte';
-    import XYFlowGraph from '../graph/xyflow/XYFlowGraph.svelte';
+import logo from "../assets/svelte.svg";
+import { OverlayProvider } from "../overlay";
+import WasmTester from "../modules/engine/WasmTester.svelte";
+import PropsPanelMain from "../graph/propspanel/PropsPanelMain.svelte";
+import ContentSelector from "./ContentSelector.svelte";
+import XYFlowGraph from "../graph/xyflow/XYFlowGraph.svelte";
 </script>
 
 <OverlayProvider>
-<div class="screen">
-  <header id="pageHeader">
-    <img src={logo} class="logo" alt="Vite Logo" />
-    <ContentSelector />
-  </header>
-  <article id="mainArticle">
+  <div class="screen">
+    <header id="pageHeader">
+      <img src={logo} class="logo" alt="Vite Logo" />
+      <ContentSelector />
+    </header>
+    <article id="mainArticle">
       <XYFlowGraph />
-  </article>
-  <nav id="mainNav" class="elevation-1">
-    <WasmTester />
-  </nav>
-  <div id="siteAds">
-    <PropsPanelMain />
+    </article>
+    <nav id="mainNav" class="elevation-1">
+      <WasmTester />
+    </nav>
+    <div id="siteAds">
+      <PropsPanelMain />
+    </div>
+    <footer id="pageFooter">Footer</footer>
   </div>
-  <footer id="pageFooter">Footer</footer>
-</div>
 </OverlayProvider>
 
 <style>
@@ -39,7 +39,7 @@ img {
   border: 1px solid #444;
 
   display: grid;
-  grid-template-areas: 
+  grid-template-areas:
     "header header header"
     "nav article ads"
     "nav footer footer";
@@ -50,7 +50,11 @@ img {
   background-color: #444;
 }
 
-header, footer, article, nav, div {
+header,
+footer,
+article,
+nav,
+div {
   margin: 0;
   padding: 0;
   background: var(--color-bg-app);
@@ -60,31 +64,31 @@ header, footer, article, nav, div {
   grid-area: header;
 
   display: flex;
-  }
+}
 #pageFooter {
   grid-area: footer;
-  }
-#mainArticle { 
+}
+#mainArticle {
   grid-area: article;
   overflow-y: scroll;
 }
-#mainNav { 
-  grid-area: nav; 
-  }
-#siteAds { 
-  grid-area: ads; 
-} 
+#mainNav {
+  grid-area: nav;
+}
+#siteAds {
+  grid-area: ads;
+}
 /* Stack the layout on small devices/viewports. */
 @media all and (max-width: 575px) {
-  .screen { 
-    grid-template-areas: 
+  .screen {
+    grid-template-areas:
       "header"
       "article"
       "ads"
       "nav"
       "footer";
-    grid-template-rows: 80px 1fr 250px 1fr 70px;  
+    grid-template-rows: 80px 1fr 250px 1fr 70px;
     grid-template-columns: 1fr;
- }
+  }
 }
 </style>

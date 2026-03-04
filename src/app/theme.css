@@ -11,17 +11,16 @@
   --color-grey-8: #E5E5E5;
   --color-grey-9: #FAFAFA; */
 
-
-  --color-bg-0: #FAFAFA;
+  --color-bg-0: #fafafa;
   --color-bg-1: #e2e4e8;
   --color-bg-2: #d5d9df;
   --color-bg-3: #c2c6cf;
   --color-bg-4: #aeb5c2;
 
   --color-text-hi-con: rgb(0 0 0 / 0.87);
-  --color-text-md-con: rgb(0 0 0 / 0.60);
+  --color-text-md-con: rgb(0 0 0 / 0.6);
   --color-text-lo-con: rgb(0 0 0 / 0.38);
-  --color-text-error: #B00020;
+  --color-text-error: #b00020;
 
   /* --color-border-subtle: #232834;
   --color-border-default: #2e3442;
@@ -29,12 +28,10 @@
 
   --color-border-subtle: rgb(0 0 0 / 0.15);
   --color-border-default: rgb(0 0 0 / 0.38);
-  --color-border-strong: rgb(0 0 0 / 0.60);
+  --color-border-strong: rgb(0 0 0 / 0.6);
 
-  --shadow-panel:
-    1px 1px 1px rgba(0,0,0,0.20);
-  --shadow-popup:
-    0px 6px 10px rgba(0,0,0,0.45);
+  --shadow-panel: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  --shadow-popup: 0px 6px 10px rgba(0, 0, 0, 0.45);
 
   --color-accent: #001aff;
   --color-accent-fill: #2140a5;
@@ -43,19 +40,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg-0: #0A0E15;
+    --color-bg-0: #0a0e15;
     --color-bg-1: #171b23;
     --color-bg-2: #1f252d;
     --color-bg-3: #313643;
     --color-bg-4: #424957;
 
     --color-text-hi-con: rgb(255 255 255 / 0.87);
-    --color-text-md-con: rgb(255 255 255 / 0.60);
+    --color-text-md-con: rgb(255 255 255 / 0.6);
     --color-text-lo-con: rgb(255 255 255 / 0.38);
-    --color-text-error: #ff486C;
+    --color-text-error: #ff486c;
 
     --color-border-subtle: rgb(255 255 255 / 0.15);
     --color-border-default: rgb(255 255 255 / 0.38);
-    --color-border-strong: rgb(255 255 255 / 0.60);
+    --color-border-strong: rgb(255 255 255 / 0.6);
   }
 }

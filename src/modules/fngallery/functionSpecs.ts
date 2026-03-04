@@ -209,9 +209,7 @@ const vecFns: FuncSpec[] = [
     id: "/vec2/normalize",
     label: "Normalize Vectors",
     desc: "Sets vector length to 1.0",
-    params: [
-      { name: "vecs", access: "m", type: "[]float2" },
-    ],
+    params: [{ name: "vecs", access: "m", type: "[]float2" }],
   },
 ];
 
@@ -308,58 +306,58 @@ const colorFns: FuncSpec[] = [
 //------------------------------------------------------------------------------
 
 const artFns: FuncSpec[] = [
-    {
-        id: "/art/stipple-fill",
-        label: "Stipple Points",
-        desc: "Generate points within a mask based on a density map",
-        params: [
-            { name: "mask", access: "i", type: "[]float" },
-            { name: "bounds", access: "i", type: "float4" },
-            { name: "count", access: "i", type: "int" },
-            { name: "points", access: "o", type: "[]float2" },
-        ],
-    },
-    {
-        id: "/art/voronoi-mesh",
-        label: "Voronoi Diagram",
-        desc: "Generates cell polygons from seed points",
-        params: [
-        { name: "seeds", access: "i", type: "[]float2" },
-        { name: "bounds", access: "i", type: "float4" },
-        { name: "cells", access: "o", type: "[][]float2" }, // Array of polygons
-        ],
-    },
-    {
-        id: "/art/recursive-subdiv",
-        label: "Rect Subdivide",
-        desc: "Splits a rectangle into smaller ones (Mondrian style)",
-        params: [
-        { name: "rect", access: "i", type: "float4" },
-        { name: "iterations", access: "i", type: "int" },
-        { name: "minSize", access: "i", type: "float" },
-        { name: "rects", access: "o", type: "[]float4" },
-        ],
-    },
-    {
-        id: "/art/chaikin-smooth",
-        label: "Chaikin Smoothing",
-        desc: "Smoothes a rough polyline by corner cutting",
-        params: [
-        { name: "polyline", access: "m", type: "[]float2" },
-        { name: "iterations", access: "i", type: "int" },
-        ],
-    },
-    {
-        id: "/art/l-system",
-        label: "L-System Generator",
-        desc: "Generates a string-based fractal path",
-        params: [
-        { name: "axiom", access: "i", type: "string" },
-        { name: "rules", access: "i", type: "string" },
-        { name: "depth", access: "i", type: "int" },
-        { name: "path", access: "o", type: "[]float2" },
-        ],
-    },
+  {
+    id: "/art/stipple-fill",
+    label: "Stipple Points",
+    desc: "Generate points within a mask based on a density map",
+    params: [
+      { name: "mask", access: "i", type: "[]float" },
+      { name: "bounds", access: "i", type: "float4" },
+      { name: "count", access: "i", type: "int" },
+      { name: "points", access: "o", type: "[]float2" },
+    ],
+  },
+  {
+    id: "/art/voronoi-mesh",
+    label: "Voronoi Diagram",
+    desc: "Generates cell polygons from seed points",
+    params: [
+      { name: "seeds", access: "i", type: "[]float2" },
+      { name: "bounds", access: "i", type: "float4" },
+      { name: "cells", access: "o", type: "[][]float2" }, // Array of polygons
+    ],
+  },
+  {
+    id: "/art/recursive-subdiv",
+    label: "Rect Subdivide",
+    desc: "Splits a rectangle into smaller ones (Mondrian style)",
+    params: [
+      { name: "rect", access: "i", type: "float4" },
+      { name: "iterations", access: "i", type: "int" },
+      { name: "minSize", access: "i", type: "float" },
+      { name: "rects", access: "o", type: "[]float4" },
+    ],
+  },
+  {
+    id: "/art/chaikin-smooth",
+    label: "Chaikin Smoothing",
+    desc: "Smoothes a rough polyline by corner cutting",
+    params: [
+      { name: "polyline", access: "m", type: "[]float2" },
+      { name: "iterations", access: "i", type: "int" },
+    ],
+  },
+  {
+    id: "/art/l-system",
+    label: "L-System Generator",
+    desc: "Generates a string-based fractal path",
+    params: [
+      { name: "axiom", access: "i", type: "string" },
+      { name: "rules", access: "i", type: "string" },
+      { name: "depth", access: "i", type: "int" },
+      { name: "path", access: "o", type: "[]float2" },
+    ],
+  },
 ];
 
 //------------------------------------------------------------------------------
@@ -367,26 +365,26 @@ const artFns: FuncSpec[] = [
 //------------------------------------------------------------------------------
 
 const arrayFns: FuncSpec[] = [
-    {
-        id: "/array/shuffle",
-        label: "Shuffle List",
-        desc: "Randomly reorder a list of elements using a seed",
-        params: [
-        { name: "data", access: "m", type: "[]any" },
-        { name: "seed", access: "i", type: "int" },
-        ],
-    },
-    {
-        id: "/array/slice",
-        label: "Slice List",
-        desc: "Extract a subset of a list",
-        params: [
-        { name: "data", access: "i", type: "[]any" },
-        { name: "start", access: "i", type: "int" },
-        { name: "end", access: "i", type: "int" },
-        { name: "out", access: "o", type: "[]any" },
-        ],
-    },
+  {
+    id: "/array/shuffle",
+    label: "Shuffle List",
+    desc: "Randomly reorder a list of elements using a seed",
+    params: [
+      { name: "data", access: "m", type: "[]any" },
+      { name: "seed", access: "i", type: "int" },
+    ],
+  },
+  {
+    id: "/array/slice",
+    label: "Slice List",
+    desc: "Extract a subset of a list",
+    params: [
+      { name: "data", access: "i", type: "[]any" },
+      { name: "start", access: "i", type: "int" },
+      { name: "end", access: "i", type: "int" },
+      { name: "out", access: "o", type: "[]any" },
+    ],
+  },
 ];
 
 //------------------------------------------------------------------------------
@@ -428,7 +426,7 @@ const exportFns: FuncSpec[] = [
 ];
 
 function getFunctionSpecs(): FuncSpec[] {
-    return [
+  return [
     ...genFns,
     ...noiseFns,
     ...samplingFns,

@@ -1,45 +1,55 @@
-import type { Node, Edge } from '@xyflow/svelte';
+import type { Node, Edge } from "@xyflow/svelte";
 
 export const initialNodes: Node[] = [
   {
-    id: '1',  data: { label: 'Node 1' },
-    type: 'default', position: { x: 0, y: 0 },
+    id: "1",
+    data: { label: "Node 1" },
+    type: "default",
+    position: { x: 0, y: 0 },
   },
   {
-    id: '2',  data: { label: 'Func B' },
-    type: 'default', position: { x: 0, y: 200 },
+    id: "2",
+    data: { label: "Func B" },
+    type: "default",
+    position: { x: 0, y: 200 },
   },
   {
-    id: '3',  data: { label: 'Func C' },
-    type: 'default', position: { x: 200, y: 0 },
+    id: "3",
+    data: { label: "Func C" },
+    type: "default",
+    position: { x: 200, y: 0 },
   },
   {
-    id: '4',  data: { label: 'Func C' },
-    type: 'default', position: { x: 200, y: 200 },
+    id: "4",
+    data: { label: "Func C" },
+    type: "default",
+    position: { x: 200, y: 200 },
   },
 
   {
-    id: '5',
-    data: { label: 'Node 3' },
-    type: 'table',
+    id: "5",
+    data: { label: "Node 3" },
+    type: "table",
     position: { x: 200, y: -200 },
   },
 
   {
-    id: 'in1',  data: { label: 'Input 1' },
-    type: 'in', position: { x: 150, y: 0 },
+    id: "in1",
+    data: { label: "Input 1" },
+    type: "in",
+    position: { x: 150, y: 0 },
   },
-//   { id: '4', data: { label: 'Node 4' }, position: { x: 200, y: 200 } },
+  //   { id: '4', data: { label: 'Node 4' }, position: { x: 200, y: 200 } },
 ];
- 
+
 export const initialEdges: Edge[] = [
   {
-    id: 'e1-4',
-    source: '1',
-    target: '4',
-    type: 'custom',
+    id: "e1-4",
+    source: "1",
+    target: "4",
+    type: "custom",
     data: {
-      label: 'reconnectable edge',
+      label: "reconnectable edge",
     },
   },
 ];

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import useNewEventTarget from './useNewEventTarget';
-  import ScreenLayout from './ScreenLayout.svelte';
-  import './app.css';
+import useNewEventTarget from "./useNewEventTarget";
+import ScreenLayout from "./ScreenLayout.svelte";
+import "./app.css";
 
-  useNewEventTarget();
+useNewEventTarget();
 </script>
 
 <main>
-    <ScreenLayout />
+  <ScreenLayout />
 </main>
 
 <style>

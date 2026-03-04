@@ -1,95 +1,111 @@
 <script lang="ts">
-  import type { Edge, Node } from '@xyflow/svelte';
-  import { EventKinds } from '../../utils/constants';
-  import useEventDispatch from '../../utils/useEventDispatch';
-  import type { MenuActionHandler, MenuItem, OverlayChildUse } from '../../overlay/types';
-  import { MenuCodes, OverlayTriggers } from './constants';
-    import useUiRegistry from '../../overlay/useUiRegistry';
-    import ContextMenu from '../../overlay/ContextMenu.svelte';
+import type { Edge, Node } from "@xyflow/svelte";
+import { EventKinds } from "../../utils/constants";
+import useEventDispatch from "../../utils/useEventDispatch";
+import type {
+  MenuActionHandler,
+  MenuItem,
+  OverlayChildUse,
+} from "../../overlay/types";
+import { MenuCodes, OverlayTriggers } from "./constants";
+import useUiRegistry from "../../overlay/useUiRegistry";
+import ContextMenu from "../../overlay/ContextMenu.svelte";
 
-  const paneCtx: MenuItem[] = [
-    { code: MenuCodes.NEW_NODE, label: "New Node ..."},  // handler: () => console.log("New node")
-    { code: MenuCodes.NEW_INPUT, label: "New Input ..."},
-    { code: MenuCodes.NEW_OUTPUT, label: "New Output ..."},
-		"-",
-    { code: MenuCodes.RM_NODES, label: "Clear Graph", shortcut: "Ctrl+G"},
-    { code: MenuCodes.RM_EDGES, label: "Clear Edges", shortcut: "Ctrl+E"},
-		"-",
-    { code: MenuCodes.PIPELINE_INFO, label: "Pipeline Info"},
-	];
- 
-  const nodeCtx: MenuItem[] = [
-    { code: MenuCodes.RM_NODE, label: "Delete Node"},
-		"-",
-    { code: MenuCodes.NODE_INFO, label: "Node Info"},
-	];
+const paneCtx: MenuItem[] = [
+  { code: MenuCodes.NEW_NODE, label: "New Node ..." }, // handler: () => console.log("New node")
+  { code: MenuCodes.NEW_INPUT, label: "New Input ..." },
+  { code: MenuCodes.NEW_OUTPUT, label: "New Output ..." },
+  "-",
+  { code: MenuCodes.RM_NODES, label: "Clear Graph", shortcut: "Ctrl+G" },
+  { code: MenuCodes.RM_EDGES, label: "Clear Edges", shortcut: "Ctrl+E" },
+  "-",
+  { code: MenuCodes.PIPELINE_INFO, label: "Pipeline Info" },
+];
 
-  const edgeCtx: MenuItem[] = [
-    { code: MenuCodes.RM_EDGE, label: "Delete Edge"},
-	];
+const nodeCtx: MenuItem[] = [
+  { code: MenuCodes.RM_NODE, label: "Delete Node" },
+  "-",
+  { code: MenuCodes.NODE_INFO, label: "Node Info" },
+];
 
-  const selectionCtx: MenuItem[] = [
-    { code: MenuCodes.RM_SELECTION, label: "Delete Selected"},
-	];
+const edgeCtx: MenuItem[] = [{ code: MenuCodes.RM_EDGE, label: "Delete Edge" }];
 
-  const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
-  const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
-  const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
-  
+const selectionCtx: MenuItem[] = [
+  { code: MenuCodes.RM_SELECTION, label: "Delete Selected" },
+];
 
-  const menuActions: Record<string, MenuActionHandler> = {
-    [MenuCodes.NEW_NODE]: _newNode,
-    [MenuCodes.NEW_INPUT]: _newInput,
-    [MenuCodes.RM_NODE]: _rmNode,
-    [MenuCodes.RM_EDGE]: _rmEdge,
-    [MenuCodes.RM_SELECTION]: _rmSelection,
-  };
+const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
+const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
+const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
 
-  const { registerUI } = useUiRegistry();
-  registerUI(OverlayTriggers.PANE_CTX_MENU, paneCtxMenu);
-  registerUI(OverlayTriggers.NODE_CTX_MENU, nodeCtxMenu);
-  registerUI(OverlayTriggers.EDGE_CTX_MENU, edgeCtxMenu);
-  registerUI(OverlayTriggers.SELECTION_CTX_MENU, selCtxMenu);
+const menuActions: Record<string, MenuActionHandler> = {
+  [MenuCodes.NEW_NODE]: _newNode,
+  [MenuCodes.NEW_INPUT]: _newInput,
+  [MenuCodes.RM_NODE]: _rmNode,
+  [MenuCodes.RM_EDGE]: _rmEdge,
+  [MenuCodes.RM_SELECTION]: _rmSelection,
+};
 
-  function _newNode(payload: any) {
-    console.log("New node .. ", payload);
-  }
+const { registerUI } = useUiRegistry();
+registerUI(OverlayTriggers.PANE_CTX_MENU, paneCtxMenu);
+registerUI(OverlayTriggers.NODE_CTX_MENU, nodeCtxMenu);
+registerUI(OverlayTriggers.EDGE_CTX_MENU, edgeCtxMenu);
+registerUI(OverlayTriggers.SELECTION_CTX_MENU, selCtxMenu);
 
-  function _newInput(payload: any) {
-    console.log("New input ..", payload);
-  }
+function _newNode(payload: any) {
+  console.log("New node .. ", payload);
+}
 
-  function _rmNode(payload: any) {
-    const nodeId = (payload.node as Node).id as string;
-    dispatchRmNode({nodeId});
-  }
+function _newInput(payload: any) {
+  console.log("New input ..", payload);
+}
 
-  function _rmEdge(payload: any) {
-    const edgeId = (payload.edge as Edge).id as string;
-    dispatchRmEdge({edgeId});
-  }
+function _rmNode(payload: any) {
+  const nodeId = (payload.node as Node).id as string;
+  dispatchRmNode({ nodeId });
+}
 
-  function _rmSelection(payload: any) {
-    const nodeIds: string[] = (payload.nodes as Node[]).map((n: Node) => n.id);
-    dispatchRmSelection({nodeIds});
-  }
+function _rmEdge(payload: any) {
+  const edgeId = (payload.edge as Edge).id as string;
+  dispatchRmEdge({ edgeId });
+}
 
+function _rmSelection(payload: any) {
+  const nodeIds: string[] = (payload.nodes as Node[]).map((n: Node) => n.id);
+  dispatchRmSelection({ nodeIds });
+}
 </script>
 
 {#snippet paneCtxMenu(overlayUse: OverlayChildUse)}
-  <ContextMenu {overlayUse} menuItems={paneCtx} {menuActions}/>
+  <ContextMenu
+    overlayUse={overlayUse}
+    menuItems={paneCtx}
+    menuActions={menuActions}
+  />
 {/snippet}
 
 {#snippet nodeCtxMenu(overlayUse: OverlayChildUse)}
-  <ContextMenu {overlayUse} menuItems={nodeCtx} {menuActions}/>
+  <ContextMenu
+    overlayUse={overlayUse}
+    menuItems={nodeCtx}
+    menuActions={menuActions}
+  />
 {/snippet}
 
 {#snippet edgeCtxMenu(overlayUse: OverlayChildUse)}
-  <ContextMenu {overlayUse} menuItems={edgeCtx} {menuActions}/>
+  <ContextMenu
+    overlayUse={overlayUse}
+    menuItems={edgeCtx}
+    menuActions={menuActions}
+  />
 {/snippet}
 
 {#snippet selCtxMenu(overlayUse: OverlayChildUse)}
-  <ContextMenu {overlayUse} menuItems={selectionCtx} {menuActions}/>
+  <ContextMenu
+    overlayUse={overlayUse}
+    menuItems={selectionCtx}
+    menuActions={menuActions}
+  />
 {/snippet}
 
 <!-- No HTML template, everything via UI registration above -->

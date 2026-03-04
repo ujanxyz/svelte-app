@@ -1,13 +1,12 @@
 <script lang="ts">
-  import FnGalleryMain from "../../modules/fngallery/FnGalleryMain.svelte";
-  import type { OverlayChildUse } from "../../overlay/types";
+import FnGalleryMain from "../../modules/fngallery/FnGalleryMain.svelte";
+import type { OverlayChildUse } from "../../overlay/types";
 
-  interface Props {
-    overlayUse: OverlayChildUse;
-  }
+interface Props {
+  overlayUse: OverlayChildUse;
+}
 
-  const { overlayUse } : Props = $props();
-
+const { overlayUse }: Props = $props();
 </script>
 
 <div class="container" data-debug-name="gallery-popup">

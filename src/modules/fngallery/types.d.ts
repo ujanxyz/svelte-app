@@ -12,13 +12,13 @@ interface FuncParam {
   // Rectangles are represented as "float4".
   // Colors are represented as "float3" (for RGB).
   type: string;
-};
+}
 
 interface FuncSpec {
   id: string;
   label: string;
   desc: string;
   params: FuncParam[];
-};
+}
 
-export {FuncParam, FuncSpec};
+export { FuncParam, FuncSpec };

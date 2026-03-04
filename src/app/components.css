@@ -18,8 +18,6 @@
   background-color: var(--color-bg-4);
 }
 
-
-
 .text-hi-con {
   color: var(--color-text-hi-con);
 }
@@ -33,7 +31,6 @@
   color: var(--color-text-error);
 }
 
-
 .rounded-sm {
   border-radius: var(--radius-sm);
 }
@@ -43,7 +40,6 @@
 .rounded-lg {
   border-radius: var(--radius-lg);
 }
-
 
 /**************************************************************/
 /*                     PANEL STYLES                           */

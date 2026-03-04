@@ -1,7 +1,7 @@
 <script>
-    import RadioBtnGroup from "../components/RadioBtnGroup.svelte";
-
+import RadioBtnGroup from "../components/RadioBtnGroup.svelte";
 </script>
+
 <div class="comproot">
   Select content 1:
   <RadioBtnGroup />

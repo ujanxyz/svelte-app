@@ -1,6 +1,3 @@
 {
-  "recommendations": [
-    "svelte.svelte-vscode",
-    "vscode-icons-team.vscode-icons",
-  ],
+  "recommendations": ["svelte.svelte-vscode", "vscode-icons-team.vscode-icons"]
 }

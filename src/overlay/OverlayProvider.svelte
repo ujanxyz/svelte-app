@@ -1,84 +1,87 @@
 <script lang="ts">
-  import { onMount, type Snippet } from 'svelte';
-  import { useOverlayProvider } from './overlayContext';
-  import type { OverlayChildUse, OverlayDisplayState, OverlaySnippet } from './types';
-  import clickOutside from './clickOutside';
-  import useUiRegistry from './useUiRegistry';
-  import type { ClassValue } from 'svelte/elements';
-  import { OverlayTriggers } from '../graph/xyflow/constants';
+import { onMount, type Snippet } from "svelte";
+import { useOverlayProvider } from "./overlayContext";
+import type {
+  OverlayChildUse,
+  OverlayDisplayState,
+  OverlaySnippet,
+} from "./types";
+import clickOutside from "./clickOutside";
+import useUiRegistry from "./useUiRegistry";
+import type { ClassValue } from "svelte/elements";
+import { OverlayTriggers } from "../graph/xyflow/constants";
 
-  const { children }: { children: Snippet } = $props();
-  let overlayContainer = $state<HTMLDivElement | undefined>(undefined);
+const { children }: { children: Snippet } = $props();
+let overlayContainer = $state<HTMLDivElement | undefined>(undefined);
 
-  /**
-   * This controls the displayed state of overlay, as well as config data.
-   */
-  let displayState = $state<OverlayDisplayState | null>(null);
+/**
+ * This controls the displayed state of overlay, as well as config data.
+ */
+let displayState = $state<OverlayDisplayState | null>(null);
 
-  /**
-   * Inline style of the container nav element.
-   */
-  const overlayStyle: string = $derived(_toStyle(displayState));
+/**
+ * Inline style of the container nav element.
+ */
+const overlayStyle: string = $derived(_toStyle(displayState));
 
-  /**
-   * The snippet which is rendered.
-   */
-  const overlayClazzs: ClassValue[] = $derived(_toCssClass(displayState));
+/**
+ * The snippet which is rendered.
+ */
+const overlayClazzs: ClassValue[] = $derived(_toCssClass(displayState));
 
-  /**
-   * The snippet which is rendered as overlay. The snippet render function should
-   * have a prototype that accepts an instance of type `OverlayChildUse`, which
-   * can be passed in child props, and later used in overlay components to close
-   * the overlay.
-   */
-  const overlayContent: OverlaySnippet = $derived(_toSnippet(displayState));
+/**
+ * The snippet which is rendered as overlay. The snippet render function should
+ * have a prototype that accepts an instance of type `OverlayChildUse`, which
+ * can be passed in child props, and later used in overlay components to close
+ * the overlay.
+ */
+const overlayContent: OverlaySnippet = $derived(_toSnippet(displayState));
 
+const { getUI: getOverlayUI } = useUiRegistry();
+const overlay = useOverlayProvider(_setDisplayState);
 
-  const {getUI: getOverlayUI} = useUiRegistry();
-  const overlay = useOverlayProvider(_setDisplayState);
+onMount(() => {
+  overlay.setContainer(overlayContainer as HTMLDivElement);
+  return () => _hideOverlay;
+});
 
-  onMount(() => {
-    overlay.setContainer(overlayContainer as HTMLDivElement);
-    return () => _hideOverlay;
-  });
+function _setDisplayState(state: OverlayDisplayState | null): void {
+  displayState = state;
+}
 
-  function _setDisplayState(state: OverlayDisplayState | null): void {
-    displayState = state;
-  }
+// Returns a non-reactive snapshot of the state.
+function _getDisplayState(): OverlayDisplayState {
+  return $state.snapshot(displayState) as OverlayDisplayState;
+}
 
-  // Returns a non-reactive snapshot of the state.
-  function _getDisplayState(): OverlayDisplayState {
-    return $state.snapshot(displayState) as OverlayDisplayState;
-  }
+function _hideOverlay() {
+  displayState = null;
+}
 
-  function _hideOverlay() {
-		displayState = null;
-	}
-
-  function _toStyle(state: OverlayDisplayState | null): string {
-    if (state !== null) {
-      if (state.topLeft) {
-        const topS = state.topLeft[0].toFixed(1);
-        const leftS = state.topLeft[1].toFixed(1);
-        return [`left:${leftS}px;`, `top:${topS}px;`].join(" ");
-      }
+function _toStyle(state: OverlayDisplayState | null): string {
+  if (state !== null) {
+    if (state.topLeft) {
+      const topS = state.topLeft[0].toFixed(1);
+      const leftS = state.topLeft[1].toFixed(1);
+      return [`left:${leftS}px;`, `top:${topS}px;`].join(" ");
     }
-    return "";
   }
+  return "";
+}
 
-  function _toCssClass(state: OverlayDisplayState | null): ClassValue[] {
-    if (state !== null) {
-      if (state.trigger === OverlayTriggers.GALLERY_POPUP) {
-        return ["overlay-top"];
-      }
+function _toCssClass(state: OverlayDisplayState | null): ClassValue[] {
+  if (state !== null) {
+    if (state.trigger === OverlayTriggers.GALLERY_POPUP) {
+      return ["overlay-top"];
     }
-    return [];
   }
+  return [];
+}
 
-  function _toSnippet(state: OverlayDisplayState | null): OverlaySnippet {
-    if (!state) return fallbackContent;
-    return getOverlayUI(state.trigger) ?? fallbackContent;
-  }
+function _toSnippet(state: OverlayDisplayState | null): OverlaySnippet {
+  if (!state) return fallbackContent;
+  return getOverlayUI(state.trigger) ?? fallbackContent;
+}
 </script>
 
 {#snippet fallbackContent(overlay: OverlayChildUse)}
@@ -86,14 +89,18 @@
 {/snippet}
 
 <div bind:this={overlayContainer} class="container" data-debug-name="xyflow">
-    {@render children()}
-    {#if displayState !== null}
-      {@const childUse: OverlayChildUse = {close:_hideOverlay, getState:_getDisplayState}}
-      <nav class={["overlay", ...overlayClazzs]} style={overlayStyle}
-  	      use:clickOutside on:clickOutside={_hideOverlay}>
-        {@render overlayContent(childUse)}
-      </nav>
-    {/if}
+  {@render children()}
+  {#if displayState !== null}
+    {@const childUse: OverlayChildUse = {close:_hideOverlay, getState:_getDisplayState}}
+    <nav
+      class={["overlay", ...overlayClazzs]}
+      style={overlayStyle}
+      use:clickOutside
+      on:clickOutside={_hideOverlay}
+    >
+      {@render overlayContent(childUse)}
+    </nav>
+  {/if}
 </div>
 
 <style>
@@ -106,7 +113,7 @@
   right: 0px;
   top: 0px;
   bottom: 0px;
-  margin: auto; 
+  margin: auto;
   width: fit-content;
   height: fit-content;
 }

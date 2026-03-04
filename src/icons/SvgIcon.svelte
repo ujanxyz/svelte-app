@@ -1,20 +1,27 @@
 <script lang="ts">
-    import { getIconPath } from "./getIconPath";
+import { getIconPath } from "./getIconPath";
 
-  const size = 256;
+const size = 256;
 
-  interface Props {
-    icon: string;  
-  }
+interface Props {
+  icon: string;
+}
 
-  const { icon }: Props = $props();
-  const path: string = getIconPath(icon);
+const { icon }: Props = $props();
+const path: string = getIconPath(icon);
 </script>
 
-
-<svg xmlns="http://www.w3.org/2000/svg" role="img" class="ico" viewBox="0 0 {`${size}`} {`${size}`}"
-    fill="none" stroke-linecap="round" stroke-linejoin="round" clip-rule="evenodd" >
-    <path d={path}/>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  class="ico"
+  viewBox="0 0 {`${size}`} {`${size}`}"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  clip-rule="evenodd"
+>
+  <path d={path} />
 </svg>
 
 <style>

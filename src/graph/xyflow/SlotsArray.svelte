@@ -1,24 +1,23 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { Handle, Position } from "@xyflow/svelte";
+import { onMount } from "svelte";
+import { Handle, Position } from "@xyflow/svelte";
 
-  interface Slots {
-    ins: string[];
-    outs: string[];
-    ios: string[];
-  };
+interface Slots {
+  ins: string[];
+  outs: string[];
+  ios: string[];
+}
 
-  interface Props {
-    slots: Slots;
-  };
+interface Props {
+  slots: Slots;
+}
 
-  const { slots }: Props = $props();
-  let containerDiv: HTMLDivElement;
+const { slots }: Props = $props();
+let containerDiv: HTMLDivElement;
 
-  onMount(() => {
-    console.log(containerDiv);
-  });
-
+onMount(() => {
+  console.log(containerDiv);
+});
 </script>
 
 <div class="container">
