@@ -1,27 +1,21 @@
 <script lang="ts">
-import OutlinedSvgIcon from "../icons/OutlinedSvgIcon.svelte";
+import type { Snippet } from "svelte";
 
 type Props = {
-  tooltip: string;
+  children: Snippet;
   onclick: () => void;
+  tooltip: string;
 };
-const { tooltip, onclick }: Props = $props();
+const { children, onclick, tooltip }: Props = $props();
 </script>
 
 <button onclick={onclick} class="rounded-sm" title={tooltip}>
-  <OutlinedSvgIcon />
+  {@render children()}
 </button>
 
 <style>
 button {
-  /* --comp-icon-btn-border-col: ; */
-  /* --comp-icon-btn-border-col-hover: ; */
-  /* --comp-icon-btn-bg: ; */
-  /* --comp-icon-btn-bg-hover: ; */
-
-  --stroke-width: 1.5;
   padding: var(--space-1) var(--space-2);
-
   background-color: var(--color-bg-3);
   color: var(--color-text-md-con);
   border-width: 1px;
@@ -34,7 +28,6 @@ button {
 }
 
 button:hover {
-  --stroke-width: 1.8;
   background-color: var(--color-bg-4);
   color: var(--color-text-hi-con);
   border-color: var(

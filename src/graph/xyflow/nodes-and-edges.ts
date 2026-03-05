@@ -27,13 +27,6 @@ export const initialNodes: Node[] = [
   },
 
   {
-    id: "5",
-    data: { label: "Node 3" },
-    type: "table",
-    position: { x: 200, y: -200 },
-  },
-
-  {
     id: "in1",
     data: { label: "Input 1" },
     type: "in",

@@ -20,7 +20,7 @@ function useXYMenus() {
     node: Node;
     event: MouseEvent;
   }): void {
-    showAsCtxMenu(OverlayTriggers.NODE_CTX_MENU, event, { node });
+    //showAsCtxMenu(OverlayTriggers.NODE_CTX_MENU, event, { node });
   }
 
   function onedgecontextmenu({

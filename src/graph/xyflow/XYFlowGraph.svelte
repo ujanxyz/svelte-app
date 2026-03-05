@@ -11,18 +11,16 @@ import { initialNodes, initialEdges } from "./nodes-and-edges";
 import { type Edge, type Node } from "@xyflow/svelte";
 import "@xyflow/svelte/dist/style.css";
 import "./xyflow.css";
-import DefaultNode from "./DefaultNode.svelte";
-import TableNode from "./TableNode.svelte";
+import DefaultNode from "../nodes/DefaultNode.svelte";
 import RegisterXYMenus from "./RegisterXYMenus.svelte";
 import useXYMenus from "./useXYMenus";
 import RegisterXYGalleries from "./RegisterXYGalleries.svelte";
 import RegisterEventHandlers from "./RegisterEventHandlers.svelte";
-import InputNode from "./InputNode.svelte";
+import InputNode from "../nodes/InputNode.svelte";
 
 const nodeTypes = {
   in: InputNode,
   default: DefaultNode,
-  table: TableNode,
 };
 
 const {
