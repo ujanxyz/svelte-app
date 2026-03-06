@@ -10,6 +10,6 @@ interface Props {
 const { layers }: Props = $props();
 </script>
 
-{#each layers as { renderfn, descendantUse: clientuse }}
-  <Layer renderfn={renderfn} clientuse={clientuse} />
+{#each layers as { layerId, payload, renderfn, descendantUse: clientuse }}
+  <Layer {layerId} layerPayload={payload} renderfn={renderfn} clientuse={clientuse} />
 {/each}

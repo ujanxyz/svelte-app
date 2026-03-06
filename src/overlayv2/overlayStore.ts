@@ -6,6 +6,7 @@ import type {
   CreatorUse,
   ResolveFn,
   StatusOr,
+  LayerPayload,
 } from "./types";
 import { ReturnStatus } from "./constants";
 
@@ -52,15 +53,13 @@ function _makeOverlayOps(layers: Writable<OverlayEntry[]>) {
     return last;
   }
 
-  // Remove layer(s) from a matching one onwards till end, returns the removed ones.
-  // if not found, removes everything (safely remove all overlays in case of this
+  // Remove layer(s) from a given id onwards till end, and return the removed ones.
+  // If not found, removes everything (safely remove all layers in case of this
   // unexpected scenario).
-  function popFromMatching(
-    select: (elem: OverlayEntry) => boolean,
-  ): OverlayEntry[] {
+  function popFromLayerId(fromLayerId: string): OverlayEntry[] {
     const removed: OverlayEntry[] = [];
     layers.update((entries: OverlayEntry[]): OverlayEntry[] => {
-      const index = entries.findIndex(select);
+      const index = entries.findIndex((layer: OverlayEntry) => layer.layerId === fromLayerId);
       if (index < 0) {
         removed.push(...entries);
         return [];
@@ -74,7 +73,7 @@ function _makeOverlayOps(layers: Writable<OverlayEntry[]>) {
     return removed;
   }
 
-  function popAll(): OverlayEntry[] {
+  function popAllLayers(): OverlayEntry[] {
     const removed: OverlayEntry[] = [];
     layers.update((entries: OverlayEntry[]): OverlayEntry[] => {
       removed.push(...entries);
@@ -83,22 +82,20 @@ function _makeOverlayOps(layers: Writable<OverlayEntry[]>) {
     return removed;
   }
 
-  return { pushLayer, popLayer, popFromMatching, popAll };
+  return { pushLayer, popLayer, popFromLayerId, popAllLayers };
 }
 
 //--------------------------------------------------------------------------------------------------
 function _makeConsumerUse(
-  layerSymId: symbol,
+  currentLayerId: string,
   ops: ReturnType<typeof _makeOverlayOps>,
 ): DescendantUse {
-  const isCurrentLayer = (e: OverlayEntry): boolean => e.symId === layerSymId;
-
   // Separate the first (must also match the predicate) from the rest.
   function _seggregate(elems: OverlayEntry[]): {
     first: OverlayEntry | undefined;
     rest: OverlayEntry[];
   } {
-    if (elems.length === 0 || !isCurrentLayer(elems[0])) {
+    if (elems.length === 0 || elems[0].layerId !== currentLayerId) {
       return { first: undefined, rest: [...elems] };
     }
     const [first, ...rest] = elems;
@@ -115,7 +112,7 @@ function _makeConsumerUse(
   }
 
   function settleOverlay<T>(value: T) {
-    const { first, rest } = _seggregate(ops.popFromMatching(isCurrentLayer));
+    const { first, rest } = _seggregate(ops.popFromLayerId(currentLayerId));
     _abortLayers(rest);
     if (!!first) {
       first.resolve(value);
@@ -123,7 +120,7 @@ function _makeConsumerUse(
   }
 
   function abortOverlay(customStatus?: string) {
-    const { first, rest } = _seggregate(ops.popFromMatching(isCurrentLayer));
+    const { first, rest } = _seggregate(ops.popFromLayerId(currentLayerId));
     _abortLayers(rest);
     if (!!first) {
       const error = new SelfAbortedError("Aborted from overlay", customStatus);
@@ -151,7 +148,7 @@ const overlayStore = (function () {
   }
 
   function clearOverlays(): void {
-    const removed = overlayOps.popAll();
+    const removed = overlayOps.popAllLayers();
     if (removed.length === 0) return;
     const error = new BulkAbortedError("Overlays canceled");
     while (removed.length > 0) {
@@ -159,7 +156,17 @@ const overlayStore = (function () {
     }
   }
 
-  return { pushOverlay, subscribeStackChange, clearOverlays, overlayOps };
+  // Clear all layers from the given layer id (inclusive).
+  function clearLayersFrom(layerId: string): void {
+    const removed = overlayOps.popFromLayerId(layerId);
+    if (removed.length === 0) return;
+    const error = new BulkAbortedError("Overlays canceled");
+    while (removed.length > 0) {
+      (removed.pop() as OverlayEntry).reject(error);
+    }
+  }
+
+  return { pushOverlay, subscribeStackChange, clearOverlays, clearLayersFrom, overlayOps };
 })();
 
 //--------------------------------------------------------------------------------------------------
@@ -171,22 +178,26 @@ function useOverlayUi(renderfn: LayerSnippetFn): CreatorUse & DescendantUse {
     if (reason instanceof SelfAbortedError) {
       const customStatus = (reason as SelfAbortedError).customStatus;
       return { status: customStatus ?? ReturnStatus.SELF_ABORTED, reason };
+    } else if (reason instanceof BulkAbortedError) {
+      return { status: ReturnStatus.BULK_ABORTED, reason };
     } else if (reason instanceof ParentAbortedError) {
-      return { status: ReturnStatus.SELF_ABORTED, reason };
+      return { status: ReturnStatus.PARENT_ABORTED, reason };
     }
+
     throw reason;
   }
 
-  async function openOverlayAsync<T>(): Promise<StatusOr<T>> {
+  async function openOverlayAsync<T>(payload: LayerPayload): Promise<StatusOr<T>> {
     const promise = new Promise<T>((resolve: ResolveFn<T>, reject) => {
-      const symId = Symbol(); // A new unique symbol for this layer instance.
-      const descendantUse: DescendantUse = _makeConsumerUse(symId, overlayOps);
+      const layerId = crypto.randomUUID();
+      const descendantUse: DescendantUse = _makeConsumerUse(layerId, overlayOps);
 
       const entry: OverlayEntry = {
+        layerId,
+        payload,
+        renderfn,
         resolve: resolve as ResolveFn<unknown>,
         reject,
-        renderfn,
-        symId,
         descendantUse: descendantUse,
       };
       overlayStore.pushOverlay(entry);

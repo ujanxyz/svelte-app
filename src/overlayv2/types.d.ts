@@ -7,8 +7,15 @@ export interface StatusOr<T> {
   reason?: any;
 }
 
+export interface ClientXY {
+  x: number;
+  y: number;
+}
+
+export type LayerPayload = Record<string, any>;
+
 export interface CreatorUse {
-  openOverlayAsync<T>(): Promise<StatusOr<T>>;
+  openOverlayAsync<T>(payload: LayerPayload): Promise<StatusOr<T>>;
 }
 
 export interface DescendantUse {
@@ -17,12 +24,15 @@ export interface DescendantUse {
 }
 
 export interface LayerUse extends DescendantUse {
+  getLayerPayload(): LayerPayload;
   setDebugName(name: string): void;
 }
 
 export type LayerSnippetFn = Snippet<[]>;
 
 export interface LayerData {
+  layerId: string;
+  payload: LayerPayload;
   renderfn: LayerSnippetFn;
   descendantUse: DescendantUse;
 }
@@ -30,7 +40,8 @@ export interface LayerData {
 export type ResolveFn<T> = (value: T) => void;
 
 export interface OverlayEntry {
-  symId: symbol;
+  layerId: string;
+  payload: LayerPayload;
   renderfn: Snippet;
   resolve: ResolveFn<unknown>;
   reject: (reason: any) => void;

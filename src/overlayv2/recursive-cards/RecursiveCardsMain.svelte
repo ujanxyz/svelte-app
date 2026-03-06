@@ -18,15 +18,24 @@ const cardColors = [
 const overlayCards = useOverlayUi(renderRecursiveCards);
 
 async function openOverlayCards() {
-  const pr = await overlayCards.openOverlayAsync<number>();
-  console.log(pr);
+  const retValue = await overlayCards.openOverlayAsync<number>({});
+  console.log(retValue);
 }
 </script>
 
 {#snippet renderRecursiveCards()}
-  Rec cards !!
   <RecursiveCardWrapper cardColors={cardColors} />
-  <br />
 {/snippet}
 
-<button onclick={openOverlayCards}>Recursive Cards</button>
+<button class="trigger" onclick={openOverlayCards}>Recursive Cards</button>
+
+<style>
+.trigger {
+  background-color: #2656aa;
+  color: #F0F0F0;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-weight: 400;
+  cursor: pointer;
+}
+</style>
