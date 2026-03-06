@@ -4,7 +4,8 @@ import { OverlayProvider } from "../overlay";
 import WasmTester from "../modules/engine/WasmTester.svelte";
 import PropsPanelMain from "../graph/propspanel/PropsPanelMain.svelte";
 import ContentSelector from "./ContentSelector.svelte";
-import XYFlowGraph from "../graph/xyflow/XYFlowGraph.svelte";
+import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
+import OverlayTesterMain from "../overlayv2/OverlayTesterMain.svelte";
 </script>
 
 <OverlayProvider>
@@ -14,7 +15,8 @@ import XYFlowGraph from "../graph/xyflow/XYFlowGraph.svelte";
       <ContentSelector />
     </header>
     <article id="mainArticle">
-      <XYFlowGraph />
+      <!-- <XYFlowWrapper /> -->
+      <OverlayTesterMain />
     </article>
     <nav id="mainNav" class="elevation-1">
       <WasmTester />
@@ -44,7 +46,7 @@ img {
     "nav article ads"
     "nav footer footer";
   grid-template-rows: 30px 1fr 50px;
-  grid-template-columns: 35% 1fr 35%; /* 15% */
+  grid-template-columns: 15% 1fr 15%; /* 15% */
   grid-row-gap: 1px;
   grid-column-gap: 1px;
   background-color: #444;

@@ -1,15 +1,18 @@
-import type { Edge, Node } from "@xyflow/svelte";
+import { useSvelteFlow, type Edge, type Node } from "@xyflow/svelte";
 import { useOverlayConsumer } from "../../overlay";
 import { OverlayTriggers } from "./constants";
 
 function useXYMenus() {
   const { showAsCtxMenu, showAtTop } = useOverlayConsumer();
+  const { screenToFlowPosition } = useSvelteFlow();
 
   function onpanecontextmenu({ event }: { event: MouseEvent }): void {
+    const flowPosn = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
     showAsCtxMenu(OverlayTriggers.PANE_CTX_MENU, event, {
-      ppp: 123,
-      nest: { a: 12, b: 34 },
-      KK: 2222,
+      flowPosn,
     });
   }
 

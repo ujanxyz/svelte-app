@@ -45,7 +45,11 @@ onDestroy(() => {
 }
 
 :global(.svelte-flow .svelte-flow__node.selected) {
-  background: linear-gradient(to bottom, var(--color-accent), var(--color-bg-0));
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent),
+    var(--color-bg-0)
+  );
 }
 
 .noderoot {

@@ -13,9 +13,8 @@ interface Props {
 
 let nextId = 0;
 function getNodeId() {
-    return `n-${++nextId}`;
+  return `n-${++nextId}`;
 }
-
 </script>
 
 <div class="flex-fitted-rows">
@@ -31,8 +30,8 @@ function getNodeId() {
 {#snippet inSlot()}
   <div class="slot rounded-sm flex-fitted-cells">
     <span class="label rounded-sm">Slot 2</span>
-    <MyHandle kind="in" id={getNodeId()}/>
-    <MyHandle kind="out-x"/>
+    <MyHandle kind="in" id={getNodeId()} />
+    <MyHandle kind="out-x" />
   </div>
 {/snippet}
 
@@ -40,16 +39,16 @@ function getNodeId() {
   <div class="slot rounded-sm flex-fitted-cells">
     <span class="label rounded-sm">Slot 2</span>
 
-    <MyHandle kind="in-x"/>
-    <MyHandle kind="out" id={getNodeId()}/>
+    <MyHandle kind="in-x" />
+    <MyHandle kind="out" id={getNodeId()} />
   </div>
 {/snippet}
 
 {#snippet inoutSlot()}
   <div class="slot rounded-sm flex-fitted-cells">
     <span class="label rounded-sm">Slot 2</span>
-    <MyHandle kind="in" id={getNodeId()}/>
-    <MyHandle kind="out" id={getNodeId()}/>
+    <MyHandle kind="in" id={getNodeId()} />
+    <MyHandle kind="out" id={getNodeId()} />
   </div>
 {/snippet}
 
@@ -84,5 +83,4 @@ function getNodeId() {
   padding: var(--space-1) var(--space-2);
   text-align: start;
 }
-
 </style>
