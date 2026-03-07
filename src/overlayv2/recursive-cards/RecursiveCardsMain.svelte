@@ -32,7 +32,7 @@ async function openOverlayCards() {
 <style>
 .trigger {
   background-color: #2656aa;
-  color: #F0F0F0;
+  color: #f0f0f0;
   border-radius: 4px;
   padding: 4px 8px;
   font-weight: 400;

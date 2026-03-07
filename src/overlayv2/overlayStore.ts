@@ -59,7 +59,9 @@ function _makeOverlayOps(layers: Writable<OverlayEntry[]>) {
   function popFromLayerId(fromLayerId: string): OverlayEntry[] {
     const removed: OverlayEntry[] = [];
     layers.update((entries: OverlayEntry[]): OverlayEntry[] => {
-      const index = entries.findIndex((layer: OverlayEntry) => layer.layerId === fromLayerId);
+      const index = entries.findIndex(
+        (layer: OverlayEntry) => layer.layerId === fromLayerId,
+      );
       if (index < 0) {
         removed.push(...entries);
         return [];
@@ -166,7 +168,13 @@ const overlayStore = (function () {
     }
   }
 
-  return { pushOverlay, subscribeStackChange, clearOverlays, clearLayersFrom, overlayOps };
+  return {
+    pushOverlay,
+    subscribeStackChange,
+    clearOverlays,
+    clearLayersFrom,
+    overlayOps,
+  };
 })();
 
 //--------------------------------------------------------------------------------------------------
@@ -187,10 +195,15 @@ function useOverlayUi(renderfn: LayerSnippetFn): CreatorUse & DescendantUse {
     throw reason;
   }
 
-  async function openOverlayAsync<T>(payload: LayerPayload): Promise<StatusOr<T>> {
+  async function openOverlayAsync<T>(
+    payload: LayerPayload,
+  ): Promise<StatusOr<T>> {
     const promise = new Promise<T>((resolve: ResolveFn<T>, reject) => {
       const layerId = crypto.randomUUID();
-      const descendantUse: DescendantUse = _makeConsumerUse(layerId, overlayOps);
+      const descendantUse: DescendantUse = _makeConsumerUse(
+        layerId,
+        overlayOps,
+      );
 
       const entry: OverlayEntry = {
         layerId,

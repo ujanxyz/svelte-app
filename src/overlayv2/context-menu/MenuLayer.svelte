@@ -1,22 +1,25 @@
 <script lang="ts">
+import type { Snippet } from "svelte";
 import type { ClientXY } from "../types";
 import useCurrentOverlay from "../useCurrentOverlay";
 import type { MenuItem, MenuRow } from "./menu";
 
-import CheckIcon from "phosphor-svelte/lib/CheckIcon";
-
 interface Props {
   menuItems: MenuItem[];
+  icons: Record<string, Snippet>;
+  defaultIcon: Snippet;
 }
 
-const { menuItems }: Props = $props();
+const { menuItems, icons, defaultIcon }: Props = $props();
 
-let clientXY = $state<ClientXY>({x: 0, y: 0});
+let clientXY = $state<ClientXY>({ x: 0, y: 0 });
 
 /**
  * CSS vars controlling the menu position.
  */
-const styleString: string = $derived(`--left: ${clientXY.x}px; --top: ${clientXY.y}px;`);
+const styleString: string = $derived(
+  `--left: ${clientXY.x}px; --top: ${clientXY.y}px;`,
+);
 
 const current = useCurrentOverlay();
 
@@ -26,11 +29,10 @@ $effect.pre(() => {
 });
 
 function onClickMenuItem(ev: MouseEvent): void {
-  const menuCode = (ev.currentTarget as HTMLButtonElement).dataset.menuCode as string;
-  current.settleOverlay("MENU_SELECTED");
-  console.log("Handle code: ", menuCode);
+  const menuCode = (ev.currentTarget as HTMLButtonElement).dataset
+    .menuCode as string;
+  current.settleOverlay(menuCode);
 }
-
 </script>
 
 <div class="layer contextmenu" style={styleString}>
@@ -38,9 +40,10 @@ function onClickMenuItem(ev: MouseEvent): void {
     {#if item === "-"}
       <hr class="sep" />
     {:else}
-      {@const { code, icon, label, shortcut } = item as MenuRow}
+      {@const { code, label, shortcut } = item as MenuRow}
+      {@const icon = icons[code] ?? (defaultIcon as Snippet)}
       <button onclick={onClickMenuItem} class="row" data-menu-code={code}>
-        {#if !!icon }
+        {#if !!icon}
           {@render icon()}
         {/if}
         <span class="label">{label}</span>
@@ -129,5 +132,4 @@ button:hover {
     transform: translateY(0);
   }
 }
-
 </style>

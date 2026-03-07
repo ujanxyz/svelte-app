@@ -32,8 +32,8 @@ onMount(() => {
 
 function _clearOverlays(ev: CustomEvent) {
   const layerDivs = rootDiv.querySelectorAll<HTMLDivElement>("[data-layer-id]");
-  const {clientX, clientY} = ev.detail;
-  const point = {clientX, clientY};
+  const { clientX, clientY } = ev.detail;
+  const point = { clientX, clientY };
   let foundIndex = -1;
   for (let i = layerDivs.length - 1; i >= 0; --i) {
     if (pointInAnyChild(layerDivs[i], point)) {
@@ -41,7 +41,6 @@ function _clearOverlays(ev: CustomEvent) {
       break;
     }
   }
-  console.log("Found hit: ", foundIndex);
   if (foundIndex < 0) {
     // Clicked outside, remove all layers.
     overlayStore.clearOverlays();
@@ -57,7 +56,10 @@ function _clearOverlays(ev: CustomEvent) {
   }
 }
 
-function pointInAnyChild(parent: HTMLDivElement, point: {clientX: number, clientY: number}): boolean {
+function pointInAnyChild(
+  parent: HTMLDivElement,
+  point: { clientX: number; clientY: number },
+): boolean {
   const children = parent.children;
   const nchildren = children.length;
   if (nchildren === 0) return false;
@@ -73,11 +75,14 @@ function pointInAnyChild(parent: HTMLDivElement, point: {clientX: number, client
   }
   return false;
 }
-
 </script>
 
-<div data-name="OverlayProvider" class="provider" use:clickoutside
-  onclickoutside={_clearOverlays}>
+<div
+  data-name="OverlayProvider"
+  class="provider"
+  use:clickoutside
+  onclickoutside={_clearOverlays}
+>
   {@render children()}
   <div class="contents" bind:this={rootDiv}>
     <LayerList layers={layers} />

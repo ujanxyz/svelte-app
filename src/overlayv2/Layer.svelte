@@ -1,6 +1,11 @@
 <script lang="ts">
 import { setContext } from "svelte";
-import type { LayerSnippetFn, DescendantUse, LayerUse, LayerPayload } from "./types";
+import type {
+  LayerSnippetFn,
+  DescendantUse,
+  LayerUse,
+  LayerPayload,
+} from "./types";
 import { LAYER_CONTEXT_KEY } from "./constants";
 
 interface Props {
@@ -29,7 +34,6 @@ function getLayerPayload(): LayerPayload {
 function setDebugName(name: string): void {
   layerName = name;
 }
-
 </script>
 
 <div class="layer" data-layer-id={layerId}>

@@ -27,12 +27,15 @@ onMount(() => {
     }, 20);
     return () => {
       window.clearTimeout(timeoutId);
-    }
+    };
   }
 });
 </script>
 
-<div class="card flex-sections" style="--color-card: {selfColor}; --card-index: {cardIndex};">
+<div
+  class="card flex-sections"
+  style="--color-card: {selfColor}; --card-index: {cardIndex};"
+>
   <TopNavBar title={"Card# " + cardIndex} />
   <section class="content">
     Content {cardIndex}

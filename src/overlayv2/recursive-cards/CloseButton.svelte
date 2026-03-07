@@ -16,10 +16,10 @@ function closeErr() {
 </script>
 
 <button class="closebtn" onclick={closeOk} style="margin-right: 4px;">
-  <CheckIcon size={24}  style="display: block;"/>
+  <CheckIcon size={24} style="display: block;" />
 </button>
 <button class="closebtn" onclick={closeErr}>
-  <XIcon size={24}  style="display: block;"/>
+  <XIcon size={24} style="display: block;" />
 </button>
 
 <style>

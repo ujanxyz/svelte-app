@@ -1,11 +1,13 @@
 <script lang="ts">
 import ContextMenuMain from "./context-menu/ContextMenuMain.svelte";
+import LocalPopupsMain from "./local-popups/LocalPopupsMain.svelte";
 import RecursiveCardsMain from "./recursive-cards/RecursiveCardsMain.svelte";
 </script>
 
 <div class="content">
   <!-- <RecursiveCardsMain /> -->
-  <ContextMenuMain />
+  <!-- <ContextMenuMain /> -->
+  <LocalPopupsMain />
 </div>
 
 <style>

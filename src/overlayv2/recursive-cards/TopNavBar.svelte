@@ -18,7 +18,7 @@ const { title }: Props = $props();
   width: 100%;
   height: 3rem;
   background-color: rgb(0, 0, 0, 50%);
-  color: #FFFFFF;
+  color: #ffffff;
   padding: 2px 12px;
   display: flex;
   align-items: center;

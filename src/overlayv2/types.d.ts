@@ -12,6 +12,13 @@ export interface ClientXY {
   y: number;
 }
 
+export interface ClientRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export type LayerPayload = Record<string, any>;
 
 export interface CreatorUse {
