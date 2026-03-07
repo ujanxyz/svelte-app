@@ -16,15 +16,10 @@ interface Props {
 }
 const { gridData }: Props = $props();
 
-const iconPicker = makeSamplePicker([
-  cloudRainIcon,
-  codeIcon,
-  lightningIcon,
-  paletteIcon,
-  trainIcon,
-  treeIcon,
-], 0);
-
+const iconPicker = makeSamplePicker(
+  [cloudRainIcon, codeIcon, lightningIcon, paletteIcon, trainIcon, treeIcon],
+  0,
+);
 </script>
 
 <div class="container" style="styleString">
@@ -32,7 +27,7 @@ const iconPicker = makeSamplePicker([
     <div class="column">
       {#each column as cellData: CellData}
         {@const cellIcon = iconPicker.pick()}
-        <MiniCard {cellData} {cellIcon} />
+        <MiniCard cellData={cellData} cellIcon={cellIcon} />
       {/each}
     </div>
   {/each}
@@ -59,7 +54,7 @@ const iconPicker = makeSamplePicker([
 {/snippet}
 
 {#snippet treeIcon()}
-  <TreeIcon size={24}  class="phosphor-icon"/>
+  <TreeIcon size={24} class="phosphor-icon" />
 {/snippet}
 
 <style>

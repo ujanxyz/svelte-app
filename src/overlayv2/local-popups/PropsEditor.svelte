@@ -1,6 +1,6 @@
 <script lang="ts">
 import { fly } from "svelte/transition";
-import { quadOut } from 'svelte/easing';
+import { quadOut } from "svelte/easing";
 import CheckIcon from "phosphor-svelte/lib/CheckIcon";
 
 import type { ClientRect } from "../types";
@@ -32,15 +32,17 @@ function onClickApply() {
   const editedLorem = $state.snapshot(currentText);
   current.settleOverlay({ editedLorem });
 }
-
 </script>
 
 <div class="container" style={containerStyle}>
-  <div class="toastcard" transition:fly={{ y: clientRect.w, duration: 300, easing: quadOut }}>
+  <div
+    class="toastcard"
+    transition:fly={{ y: clientRect.w, duration: 300, easing: quadOut }}
+  >
     <div class="topbar">
       <span class="title">Edit</span>
       <button class="actionbtn" onclick={onClickApply}>
-        <CheckIcon size={24}/>
+        <CheckIcon size={24} />
       </button>
     </div>
     <div class="content">
@@ -77,10 +79,6 @@ function onClickApply() {
   align-items: center;
 }
 
-
-
-
-
 .content {
   flex-grow: 1;
   background-color: rgba(210, 210, 210, 0.7);
@@ -98,14 +96,13 @@ function onClickApply() {
 }
 .actionbtn {
   background-color: rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
+  color: #ffffff;
   border-radius: 50%;
   height: calc(24px + 8px);
   width: calc(24px + 8px);
   padding: 4px;
   cursor: pointer;
 }
-
 
 .editor {
   --spacing: 8px;
@@ -118,7 +115,7 @@ function onClickApply() {
   color: #202020;
   border: 1px solid #484848;
 
-  line-height: 1.0;
+  line-height: 1;
   font-size: 0.8rem;
   font-family: monospace;
 }

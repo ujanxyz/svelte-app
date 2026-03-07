@@ -19,7 +19,7 @@ export function createRNG(seed: number): () => number {
   let t = seed >>> 0;
 
   return function rng(): number {
-    t += 0x6D2B79F5;
+    t += 0x6d2b79f5;
     let x = t;
 
     x = Math.imul(x ^ (x >>> 15), x | 1);
@@ -60,58 +60,58 @@ export function genMasonryColumns(
   columns: number,
   total: number,
   allowed: number[],
-  rng: () => number
+  rng: () => number,
 ): number[][] {
-  const cols: number[][] = Array.from({ length: columns }, () => [])
-  const heights: number[] = new Array(columns).fill(0)
+  const cols: number[][] = Array.from({ length: columns }, () => []);
+  const heights: number[] = new Array(columns).fill(0);
 
-  const sorted = [...allowed].sort((a, b) => a - b)
+  const sorted = [...allowed].sort((a, b) => a - b);
 
-  const dp: boolean[] = new Array(total + 1).fill(false)
-  dp[0] = true
+  const dp: boolean[] = new Array(total + 1).fill(false);
+  dp[0] = true;
 
   for (let i = 1; i <= total; i++) {
     for (const a of sorted) {
       if (i - a >= 0 && dp[i - a]) {
-        dp[i] = true
-        break
+        dp[i] = true;
+        break;
       }
     }
   }
 
-  const canFill = (remaining: number) => dp[remaining]
+  const canFill = (remaining: number) => dp[remaining];
 
   while (true) {
     const unfinished = heights
       .map((h, i) => ({ h, i }))
-      .filter(x => x.h < total)
+      .filter((x) => x.h < total);
 
-    if (unfinished.length === 0) break
+    if (unfinished.length === 0) break;
 
-    const startIdx = unfinished[Math.floor(rng() * unfinished.length)].i
+    const startIdx = unfinished[Math.floor(rng() * unfinished.length)].i;
 
-    const span = 1 + Math.floor(rng() * Math.min(3, columns - startIdx))
+    const span = 1 + Math.floor(rng() * Math.min(3, columns - startIdx));
 
-    const candidates = sorted.filter(v =>
+    const candidates = sorted.filter((v) =>
       Array.from({ length: span }).every((_, j) => {
-        const col = startIdx + j
-        const remaining = total - (heights[col] + v)
-        return remaining >= 0 && canFill(remaining)
-      })
-    )
+        const col = startIdx + j;
+        const remaining = total - (heights[col] + v);
+        return remaining >= 0 && canFill(remaining);
+      }),
+    );
 
-    if (candidates.length === 0) continue
+    if (candidates.length === 0) continue;
 
-    const height = candidates[Math.floor(rng() * candidates.length)]
+    const height = candidates[Math.floor(rng() * candidates.length)];
 
     for (let j = 0; j < span; j++) {
-      const col = startIdx + j
-      cols[col].push(height)
-      heights[col] += height
+      const col = startIdx + j;
+      cols[col].push(height);
+      heights[col] += height;
     }
   }
 
-  return cols
+  return cols;
 }
 
 /**
@@ -149,10 +149,10 @@ export function genMasonryColumns(
 export function makeSamplePicker<T>(values: T[], seed: number) {
   const rng = createRNG(seed);
   function pick(): T {
-    const index = ((rng() * 100000)|0) % values.length;
+    const index = ((rng() * 100000) | 0) % values.length;
     return values[index];
   }
-  return {pick};
+  return { pick };
 }
 
 /**
@@ -162,7 +162,10 @@ export function makeSamplePicker<T>(values: T[], seed: number) {
  * @param grid 2D grid of cell heights.
  * @param seed Seeds the RNGs used for color, text etc.
  */
-export function gridToCellData(grid: number[][], seed: number): MasonryLayoutData {
+export function gridToCellData(
+  grid: number[][],
+  seed: number,
+): MasonryLayoutData {
   const colorPicker = makeSamplePicker(kCellColors, seed + 32);
   const titlePicker = makeSamplePicker(kCellTitles, seed + 37);
   const loremPicker = makeSamplePicker(kCellLorems, seed + 43);
@@ -174,7 +177,7 @@ export function gridToCellData(grid: number[][], seed: number): MasonryLayoutDat
       const bgcolor = colorPicker.pick();
       const title = titlePicker.pick();
       const lorem = loremPicker.pick();
-      return {weightY, bgcolor, title, lorem};
+      return { weightY, bgcolor, title, lorem };
     });
     result.push(resultRow);
   }
@@ -212,7 +215,7 @@ const kCellTitles = [
   "Frozen Northern Wind",
   "Blooming Spring Garden",
   "Shadows and Lanterns",
-  "Last Train Home"
+  "Last Train Home",
 ];
 
 const kCellLorems = [
@@ -235,5 +238,5 @@ const kCellLorems = [
   "Pellentesque in ipsum id orci porta dapibus. Cras ultricies ligula sed magna dictum porta.",
   "Praesent sapien massa, convallis a pellentesque nec, egestas non nisi.",
   "Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a. Curabitur aliquet quam id dui posuere blandit.",
-  "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec velit neque."
+  "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec velit neque.",
 ];

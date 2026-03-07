@@ -16,13 +16,21 @@ let currentLorem = $state<string>(lorem);
 
 let container: HTMLDivElement;
 
-type EditAsyncFn = (anchor: HTMLDivElement, initial: string) => Promise<string | null>;
-const propsEditor = getContext("propseditor") as { editPropsAsync: EditAsyncFn };
+type EditAsyncFn = (
+  anchor: HTMLDivElement,
+  initial: string,
+) => Promise<string | null>;
+const propsEditor = getContext("propseditor") as {
+  editPropsAsync: EditAsyncFn;
+};
 
 async function openLocalPopup(ev: MouseEvent) {
   ev.preventDefault();
   const snapshotLorem: string = $state.snapshot(currentLorem);
-  const editedStr = await propsEditor.editPropsAsync(container, snapshotLorem) as string | null;
+  const editedStr = (await propsEditor.editPropsAsync(
+    container,
+    snapshotLorem,
+  )) as string | null;
   if (!!editedStr) {
     currentLorem = editedStr;
   }
@@ -32,7 +40,7 @@ async function openLocalPopup(ev: MouseEvent) {
 <div style="--cell-height:{weightY}; --cell-color:{bgcolor}" class="cell">
   <div class="cardbody" bind:this={container}>
     <div class="topbar">
-      <span class="title" {title}>{title}</span>
+      <span class="title" title={title}>{title}</span>
       <button class="actionbtn" onclick={openLocalPopup}>
         {@render cellIcon()}
       </button>
@@ -90,7 +98,7 @@ async function openLocalPopup(ev: MouseEvent) {
 
 .actionbtn {
   background-color: rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
+  color: #ffffff;
   border-radius: 50%;
   height: calc(24px + 8px);
   width: calc(24px + 8px);

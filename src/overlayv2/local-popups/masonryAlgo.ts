@@ -20,56 +20,57 @@
 function splitIntoAllowedSegments(
   total: number,
   allowed: number[],
-  rng: () => number
+  rng: () => number,
 ): number[] {
-  const sorted = [...allowed].sort((a, b) => a - b)
+  const sorted = [...allowed].sort((a, b) => a - b);
 
-  const dp: boolean[] = new Array(total + 1).fill(false)
-  dp[0] = true
+  const dp: boolean[] = new Array(total + 1).fill(false);
+  dp[0] = true;
 
   for (let i = 1; i <= total; i++) {
     for (const a of sorted) {
       if (i - a >= 0 && dp[i - a]) {
-        dp[i] = true
-        break
+        dp[i] = true;
+        break;
       }
     }
   }
 
   if (!dp[total]) {
-    throw new Error("No valid segmentation exists")
+    throw new Error("No valid segmentation exists");
   }
 
-  const result: number[] = []
-  const usage = new Map<number, number>()
-  sorted.forEach(v => usage.set(v, 0))
+  const result: number[] = [];
+  const usage = new Map<number, number>();
+  sorted.forEach((v) => usage.set(v, 0));
 
-  let remaining = total
+  let remaining = total;
 
   while (remaining > 0) {
-    const choices = sorted.filter(v => remaining - v >= 0 && dp[remaining - v])
+    const choices = sorted.filter(
+      (v) => remaining - v >= 0 && dp[remaining - v],
+    );
 
-    const weights = choices.map(v => 1 / (1 + (usage.get(v) ?? 0)))
-    const weightSum = weights.reduce((a, b) => a + b, 0)
+    const weights = choices.map((v) => 1 / (1 + (usage.get(v) ?? 0)));
+    const weightSum = weights.reduce((a, b) => a + b, 0);
 
-    let r = rng() * weightSum
+    let r = rng() * weightSum;
 
-    let chosen = choices[0]
+    let chosen = choices[0];
 
     for (let i = 0; i < choices.length; i++) {
-      r -= weights[i]
+      r -= weights[i];
       if (r <= 0) {
-        chosen = choices[i]
-        break
+        chosen = choices[i];
+        break;
       }
     }
 
-    result.push(chosen)
-    usage.set(chosen, (usage.get(chosen) ?? 0) + 1)
+    result.push(chosen);
+    usage.set(chosen, (usage.get(chosen) ?? 0) + 1);
 
-    remaining -= chosen
+    remaining -= chosen;
   }
 
-  return result
+  return result;
 }
-
