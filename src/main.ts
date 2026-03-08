@@ -13,8 +13,13 @@ wasmService
     console.error("Failed to initialize WASM service:", error);
   });
 
-const app = mount(App, {
-  target: document.getElementById("app") as HTMLElement,
-});
+
+const context = (function() {
+  const ctx: Map<any, any> = new Map();
+  return ctx;
+})();
+
+const target = document.getElementById("app") as HTMLDivElement;
+const app = mount(App, { target, context });
 
 export default app;

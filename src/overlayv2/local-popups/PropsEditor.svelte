@@ -91,7 +91,6 @@ function onClickApply() {
   font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 10rem;
   padding-right: 8px;
 }
 .actionbtn {
@@ -105,12 +104,12 @@ function onClickApply() {
 }
 
 .editor {
-  --spacing: 8px;
+  --spacing: 12px;
   width: calc(100% - 2 * var(--spacing));
   height: calc(100% - 2 * var(--spacing));
   margin: var(--spacing);
   padding: 4px;
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: #eaeaea;
   color: #202020;
   border: 1px solid #484848;

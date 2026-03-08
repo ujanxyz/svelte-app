@@ -1,8 +1,9 @@
 <script lang="ts">
+import { createRNG } from "../../utils/random";
 import MasonryGrid from "./MasonryGrid.svelte";
 import PropsEditorProvider from "./PropsEditorProvider.svelte";
 import type { MasonryLayoutData } from "./types";
-import { createRNG, genMasonryColumns, gridToCellData } from "./utils";
+import { genMasonryColumns, gridToCellData } from "./utils";
 
 const gridData: MasonryLayoutData = (function () {
   const rng = createRNG(543210);

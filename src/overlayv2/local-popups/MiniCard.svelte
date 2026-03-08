@@ -1,7 +1,6 @@
 <script lang="ts">
 import { getContext, type Snippet } from "svelte";
 import type { CellData } from "./types";
-import type { StatusOr } from "../types";
 
 interface Props {
   cellData: CellData;
@@ -82,8 +81,7 @@ async function openLocalPopup(ev: MouseEvent) {
 .content {
   flex-grow: 1;
   padding: 4px 8px;
-  background-color: rgba(210, 210, 210, 0.7);
-  color: rgba(0, 0, 0, 0.8);
+  background-color: rgb(0, 0, 0, 30%);
 }
 .title {
   flex-grow: 1;
@@ -92,7 +90,6 @@ async function openLocalPopup(ev: MouseEvent) {
   font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 10rem;
   padding-right: 8px;
 }
 

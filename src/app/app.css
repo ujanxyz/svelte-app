@@ -1,20 +1,9 @@
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 @import "./reset.css";
 @import "./metrics.css";
 @import "./theme.css";
 @import "./components.css";
-
-@theme {
-  --color-*: initial;
-  --color-white: #fff;
-  --color-purple: #3f3cbb;
-  --color-midnight: #121063;
-  --color-tahiti: #3ab7bf;
-  --color-bermuda: #78dcca;
-}
 
 /*-------------------------------------------------------*/
 /* Font Families                                         */

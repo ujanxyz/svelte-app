@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [tailwindcss(), svelte()],
   // assetsInclude: ['**/*.wasm'],
+  base: './', // This ensures assets are linked relatively
   server: {
     port: 3000,
   },

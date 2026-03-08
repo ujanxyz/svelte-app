@@ -7,13 +7,16 @@
     "dev": "vite --open",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/vite": "^4.2.1",
     "@tsconfig/svelte": "^5.0.8",
     "autoprefixer": "^10.4.27",
+    "gh-pages": "^6.3.0",
     "phosphor-svelte": "^3.1.0",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",

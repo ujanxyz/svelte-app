@@ -1,33 +1,6 @@
+import { kDummyLorems, kDummyTitles } from "../../utils/dummyData";
+import { makeRandomPicker } from "../../utils/random";
 import type { CellData, ColumnLayoutData, MasonryLayoutData } from "./types";
-
-/**
- * Creates a fast deterministic pseudo-random number generator.
- *
- * Uses the Mulberry32 algorithm.
- * - Very fast
- * - Deterministic for the same seed
- * - Returns numbers in the range [0, 1)
- *
- * @param seed Any 32-bit integer seed
- * @returns Function that returns a pseudo-random number in [0, 1)
- *
- * @example
- * const rng = createRNG(12345);
- * console.log(rng()); // always same sequence for same seed
- */
-export function createRNG(seed: number): () => number {
-  let t = seed >>> 0;
-
-  return function rng(): number {
-    t += 0x6d2b79f5;
-    let x = t;
-
-    x = Math.imul(x ^ (x >>> 15), x | 1);
-    x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
-
-    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 /**
  * Generate a k-column masonry grid layout.
@@ -78,7 +51,6 @@ export function genMasonryColumns(
       }
     }
   }
-
   const canFill = (remaining: number) => dp[remaining];
 
   while (true) {
@@ -115,47 +87,6 @@ export function genMasonryColumns(
 }
 
 /**
- * Creates a deterministic random sampler for a given set of values.
- *
- * The returned picker selects a random element from the provided `values`
- * array each time `pick()` is called. The randomness is **seeded**, meaning
- * the same `seed` will always produce the same sequence of picks. This is
- * useful for reproducible UI testing, procedural generation, or simulations.
- *
- * Internally it uses a seeded RNG (`createRNG`) and converts the generated
- * float to an index within the `values` array.
- *
- * @template T Type of elements in the values array.
- *
- * @param values - Array of candidate values to randomly pick from.
- * @param seed - Seed used to initialize the deterministic random number generator.
- *
- * @returns An object containing a `pick()` method that returns a sampled value.
- *
- * @example
- * ```ts
- * const picker = makeSamplePicker(["a", "b", "c"], 42);
- *
- * picker.pick(); // "b"
- * picker.pick(); // "a"
- * picker.pick(); // "c"
- * ```
- *
- * @remarks
- * - The sequence of returned values is deterministic for a given seed.
- * - If `values.length === 0`, the behavior is undefined.
- * - Designed for lightweight sampling, not cryptographic randomness.
- */
-export function makeSamplePicker<T>(values: T[], seed: number) {
-  const rng = createRNG(seed);
-  function pick(): T {
-    const index = ((rng() * 100000) | 0) % values.length;
-    return values[index];
-  }
-  return { pick };
-}
-
-/**
  * Create a grid of cell info from the raw cell heights, by adding
  * cell-level attributes like color, text etc.
  *
@@ -166,9 +97,9 @@ export function gridToCellData(
   grid: number[][],
   seed: number,
 ): MasonryLayoutData {
-  const colorPicker = makeSamplePicker(kCellColors, seed + 32);
-  const titlePicker = makeSamplePicker(kCellTitles, seed + 37);
-  const loremPicker = makeSamplePicker(kCellLorems, seed + 43);
+  const colorPicker = makeRandomPicker(kCellColors, seed + 32);
+  const titlePicker = makeRandomPicker(kDummyTitles, seed + 37);
+  const loremPicker = makeRandomPicker(kDummyLorems, seed + 43);
 
   const result: MasonryLayoutData = [];
   for (const column of grid) {
@@ -193,50 +124,4 @@ const kCellColors = [
   "#2563EB", // blue
   "#16A34A", // green
   "#CA8A04", // mustard amber
-];
-
-const kCellTitles = [
-  "Quick Brown Fox",
-  "Silent Ocean Waves",
-  "Hidden Mountain Trail",
-  "Golden Evening Light",
-  "Lost City Ruins",
-  "Midnight Coding Session",
-  "Bright Summer Sky",
-  "Rustic Wooden Bridge",
-  "Neon City Nights",
-  "Ancient Desert Path",
-  "Whispering Pine Forest",
-  "Falling Autumn Leaves",
-  "Crystal Clear Lake",
-  "Storm Over Horizon",
-  "Quiet Village Morning",
-  "Endless Sand Dunes",
-  "Frozen Northern Wind",
-  "Blooming Spring Garden",
-  "Shadows and Lanterns",
-  "Last Train Home",
-];
-
-const kCellLorems = [
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vel ligula scelerisque.",
-  "Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Donec sollicitudin molestie malesuada.",
-  "Vivamus suscipit tortor eget felis porttitor volutpat. Nulla quis lorem ut libero malesuada feugiat.",
-  "Pellentesque in ipsum id orci porta dapibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices.",
-  "Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a. Nulla porttitor accumsan tincidunt.",
-  "Donec rutrum congue leo eget malesuada. Cras ultricies ligula sed magna dictum porta.",
-  "Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui. Proin eget tortor risus.",
-  "Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem.",
-  "Sed porttitor lectus nibh. Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui.",
-  "Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Curabitur aliquet quam id dui posuere.",
-  "Quisque velit nisi, pretium ut lacinia in, elementum id enim.",
-  "Nulla quis lorem ut libero malesuada feugiat. Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a.",
-  "Sed porttitor lectus nibh. Donec sollicitudin molestie malesuada. Cras ultricies ligula sed magna dictum porta.",
-  "Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Pellentesque in ipsum id orci porta dapibus.",
-  "Donec rutrum congue leo eget malesuada. Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui.",
-  "Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Donec sollicitudin molestie malesuada.",
-  "Pellentesque in ipsum id orci porta dapibus. Cras ultricies ligula sed magna dictum porta.",
-  "Praesent sapien massa, convallis a pellentesque nec, egestas non nisi.",
-  "Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a. Curabitur aliquet quam id dui posuere blandit.",
-  "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec velit neque.",
 ];

@@ -1,17 +1,20 @@
 <script lang="ts">
 import useNewEventTarget from "./useNewEventTarget";
-import ScreenLayout from "./ScreenLayout.svelte";
-import "./app.css";
 import OverlayProvider from "../overlayv2/OverlayProvider.svelte";
+import OverlayTesterMain from "../overlayv2/OverlayTesterMain.svelte";
+import Toaster from "../toast/Toaster.svelte";
+import "./app.css";
 
 useNewEventTarget();
+
 </script>
 
 <OverlayProvider>
   <main>
-    <ScreenLayout />
+    <OverlayTesterMain />
   </main>
 </OverlayProvider>
+<Toaster />
 
 <style>
 main {

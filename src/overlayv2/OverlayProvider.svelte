@@ -75,6 +75,10 @@ function pointInAnyChild(
   }
   return false;
 }
+
+function handleWinResize() {
+  overlayStore.clearOverlays();
+}
 </script>
 
 <div
@@ -88,6 +92,9 @@ function pointInAnyChild(
     <LayerList layers={layers} />
   </div>
 </div>
+
+<!-- Clear all popups on window resize, as they would look displaced -->
+<svelte:window on:resize={handleWinResize} />
 
 <style>
 .provider {

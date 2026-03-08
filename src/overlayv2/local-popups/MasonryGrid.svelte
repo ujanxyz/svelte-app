@@ -1,6 +1,5 @@
 <script lang="ts">
 import MiniCard from "./MiniCard.svelte";
-import { makeSamplePicker } from "./utils";
 import type { MasonryLayoutData } from "./types";
 
 // Icons.
@@ -10,13 +9,14 @@ import LightningIcon from "phosphor-svelte/lib/LightningIcon";
 import PaletteIcon from "phosphor-svelte/lib/PaletteIcon";
 import TrainIcon from "phosphor-svelte/lib/TrainIcon";
 import TreeIcon from "phosphor-svelte/lib/TreeIcon";
+import { makeRandomPicker } from "../../utils/random";
 
 interface Props {
   gridData: MasonryLayoutData;
 }
 const { gridData }: Props = $props();
 
-const iconPicker = makeSamplePicker(
+const iconPicker = makeRandomPicker(
   [cloudRainIcon, codeIcon, lightningIcon, paletteIcon, trainIcon, treeIcon],
   0,
 );
