@@ -1,5 +1,4 @@
 <script lang="ts">
-
 interface ButtonItem {
   label: string;
   code: string;
@@ -11,7 +10,11 @@ interface Props {
   onselect?: (code: string) => void;
 }
 
-let { buttons = [], value = $bindable<string | null>(), onselect}: Props = $props();
+let {
+  buttons = [],
+  value = $bindable<string | null>(),
+  onselect,
+}: Props = $props();
 
 // default selection
 $effect(() => {
@@ -25,24 +28,23 @@ function select(btn: ButtonItem) {
   value = btn.code;
   onselect?.(btn.code);
 }
-
 </script>
 
 <div class="btn-group">
   {#each buttons as btn}
     <button class:selected={btn.code === value} onclick={() => select(btn)}>
-        {btn.label}
+      {btn.label}
     </button>
   {/each}
 </div>
 
 <style>
 .btn-group {
-    box-sizing: border-box;
-    display: inline-flex;
-    border: 1px solid var(--color-border-default);
-    border-radius: 6px;
-    overflow: hidden;
+  box-sizing: border-box;
+  display: inline-flex;
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  overflow: hidden;
 }
 button {
   border: none;
@@ -57,7 +59,7 @@ button:not(:last-child) {
 }
 
 button.selected {
-    background: #2b7cff;
-    color: white;
+  background: #2b7cff;
+  color: white;
 }
 </style>

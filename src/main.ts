@@ -13,8 +13,7 @@ wasmService
     console.error("Failed to initialize WASM service:", error);
   });
 
-
-const context = (function() {
+const context = (function () {
   const ctx: Map<any, any> = new Map();
   return ctx;
 })();

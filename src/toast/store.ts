@@ -3,7 +3,7 @@ import type { ToastEntry } from "./types";
 
 const MAX_TOASTS_COUNT = 10;
 
-const store = (function() {
+const store = (function () {
   const toasts = writable<ToastEntry[]>([]);
   const timeNow = writable<number>(Date.now());
 

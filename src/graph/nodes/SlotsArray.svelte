@@ -19,36 +19,32 @@ function getNodeId() {
 
 <div class="flex-fitted-rows">
   {@render inSlot()}
-  {@render inSlot()}
-  {@render inSlot()}
   {@render outSlot()}
-  {@render outSlot()}
-  {@render inoutSlot()}
   {@render inoutSlot()}
 </div>
 
 {#snippet inSlot()}
   <div class="slot rounded-sm flex-fitted-cells">
-    <span class="label rounded-sm">Slot 2</span>
-    <MyHandle kind="in" id={getNodeId()} />
+    <span class="label rounded-sm">an in param</span>
+    <MyHandle kind="in" id={"in0"} />
     <MyHandle kind="out-x" />
   </div>
 {/snippet}
 
 {#snippet outSlot()}
   <div class="slot rounded-sm flex-fitted-cells">
-    <span class="label rounded-sm">Slot 2</span>
+    <span class="label rounded-sm">an out param</span>
 
     <MyHandle kind="in-x" />
-    <MyHandle kind="out" id={getNodeId()} />
+    <MyHandle kind="out" id={"out0"} />
   </div>
 {/snippet}
 
 {#snippet inoutSlot()}
   <div class="slot rounded-sm flex-fitted-cells">
-    <span class="label rounded-sm">Slot 2</span>
-    <MyHandle kind="in" id={getNodeId()} />
-    <MyHandle kind="out" id={getNodeId()} />
+    <span class="label rounded-sm">an in/out param</span>
+    <MyHandle kind="in" id={"mut0i"} />
+    <MyHandle kind="out" id={"mut0o"} />
   </div>
 {/snippet}
 
@@ -82,5 +78,6 @@ function getNodeId() {
   margin-right: calc(var(--space-4) + 4px);
   padding: var(--space-1) var(--space-2);
   text-align: start;
+  font-size: 0.5rem;
 }
 </style>

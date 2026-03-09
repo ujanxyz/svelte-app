@@ -11,7 +11,7 @@ function useToast() {
     store.pushToast(t);
   }
 
-  return {showToast};
+  return { showToast };
 }
 
 export default useToast;

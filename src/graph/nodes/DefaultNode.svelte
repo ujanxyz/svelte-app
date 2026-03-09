@@ -8,7 +8,6 @@ import { EventKinds } from "../../utils/constants";
 import XYNodeTopBar from "./XYNodeTopBar.svelte";
 
 const { data: nodeData, id: nodeId, ...restProps }: NodeProps = $props();
-//const { id: nodeId } = nodeData as { label: string };
 const { label } = nodeData as { label: string };
 
 let containerDiv: HTMLDivElement | undefined;
@@ -32,8 +31,8 @@ onDestroy(() => {
 </script>
 
 <div bind:this={containerDiv} class="noderoot">
-  <h3 class="card-title">Title: {label}</h3>
-  <a href="#" class="card-button">View</a>
+  <h3 class="card-title">{label}</h3>
+  <!-- <a href="#" class="card-button">View</a> -->
   <SlotsArray slots={slots} />
 </div>
 <XYNodeTopBar />
@@ -45,11 +44,12 @@ onDestroy(() => {
 }
 
 :global(.svelte-flow .svelte-flow__node.selected) {
-  background: linear-gradient(
+  background: rgb(115, 151, 36);
+  /* background: linear-gradient(
     to bottom,
     var(--color-accent),
     var(--color-bg-0)
-  );
+  ); */
 }
 
 .noderoot {

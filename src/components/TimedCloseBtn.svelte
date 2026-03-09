@@ -31,37 +31,48 @@ function toSvgPath(t: number): ComputedPaths | null {
   else if (fract >= 1) {
     const filledPath = `M ${cx} ${cy} m -${r},0  a ${r},${r} 0 1,0 ${r * 2},0 a ${r},${r} 0 1,0 -${r * 2},0`;
     const strokePath = filledPath;
-    return {filledPath, strokePath};
+    return { filledPath, strokePath };
   }
   const angle = fract * Math.PI * 2 - Math.PI / 2;
   const start = polarToCartesian(cx, cy, r, -Math.PI / 2);
   const end = polarToCartesian(cx, cy, r, angle);
   const largeArc = fract > 0.5 ? 1 : 0;
   const filledPath = `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
-  const strokePath = `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;;
-  return {filledPath, strokePath};
+  const strokePath = `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+  return { filledPath, strokePath };
 }
 
 function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
   return {
     x: cx + r * Math.cos(angle),
-    y: cy + r * Math.sin(angle)
+    y: cy + r * Math.sin(angle),
   };
 }
 </script>
 
-<button class="actionbtn" onclick={onClose} style="--icon-size: {iconSize}px; --icon-color: {color}">
+<button
+  class="actionbtn"
+  onclick={onClose}
+  style="--icon-size: {iconSize}px; --icon-color: {color}"
+>
   {@render animatedBgSvg()}
   <div class="icon">
-    <XIcon size={iconSize} {color} weight="bold" />
+    <XIcon size={iconSize} color={color} weight="bold" />
   </div>
 </button>
 
 {#snippet animatedBgSvg()}
-  <svg xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="true" fill="currentColor" viewBox="0 0 256 256" class="bgarc">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    preserveAspectRatio="true"
+    fill="currentColor"
+    viewBox="0 0 256 256"
+    class="bgarc"
+  >
     <circle cx="128" cy="128" r="120" fill="transparent" />
     {#if !!path}
-      {@const {filledPath, strokePath} = path}
+      {@const { filledPath, strokePath } = path}
       <path d={filledPath} class="fillarc" />
       <path d={strokePath} class="stroke" />
     {/if}
@@ -111,5 +122,4 @@ function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
   stroke-width: 16;
   fill: none;
 }
-
 </style>

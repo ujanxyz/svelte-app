@@ -4,7 +4,7 @@ import store from "./store";
 import { ToastType, type ToastEntry } from "./types";
 import ToastRenderable from "./ToastRenderable.svelte";
 
-const {subscribeNow} = store;
+const { subscribeNow } = store;
 let renderables = $state<ToastEntry[]>([]);
 let intervalId: number | undefined = undefined;
 
@@ -15,7 +15,7 @@ const themeColors = {
   [ToastType.ERROR]: "#AA4848",
 };
 
-onMount(()  => {
+onMount(() => {
   const unsubscribe = store.subscribeToasts(_onUpdateToasts);
   return () => {
     unsubscribe();
@@ -39,17 +39,23 @@ function _onTick() {
 function onExpireToast(id: string) {
   store.rmToast(id);
 }
-
 </script>
 
-{#if renderables.length > 0 }
-<div class="toaster">
-  {#each renderables as renderable}
-    {@const {id, type, message, startedAt} = renderable}
-    {@const themeColor = themeColors[type] }
-    <ToastRenderable {id} {startedAt} {message} {themeColor} {subscribeNow} onexpire={onExpireToast} />
-  {/each}
-</div>
+{#if renderables.length > 0}
+  <div class="toaster">
+    {#each renderables as renderable}
+      {@const { id, type, message, startedAt } = renderable}
+      {@const themeColor = themeColors[type]}
+      <ToastRenderable
+        id={id}
+        startedAt={startedAt}
+        message={message}
+        themeColor={themeColor}
+        subscribeNow={subscribeNow}
+        onexpire={onExpireToast}
+      />
+    {/each}
+  </div>
 {/if}
 
 <style>

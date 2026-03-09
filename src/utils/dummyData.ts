@@ -44,7 +44,10 @@ export const kDummyLorems = [
   "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec velit neque.",
 ];
 
-export const kDummyToasts: Record<"info" | "success" | "warning" | "error", string[]> = {
+export const kDummyToasts: Record<
+  "info" | "success" | "warning" | "error",
+  string[]
+> = {
   info: [
     "Loaded workspace",
     "Fetching latest updates",
@@ -55,7 +58,7 @@ export const kDummyToasts: Record<"info" | "success" | "warning" | "error", stri
     "Autosave scheduled",
     "Checking dependencies",
     "Opening recent project",
-    "Syncing settings"
+    "Syncing settings",
   ],
   success: [
     "Deleted node N01",
@@ -67,7 +70,7 @@ export const kDummyToasts: Record<"info" | "success" | "warning" | "error", stri
     "Node graph compiled",
     "Plugin installed successfully",
     "Backup created",
-    "Workspace restored"
+    "Workspace restored",
   ],
   warning: [
     "Config not loaded, using default",
@@ -79,7 +82,7 @@ export const kDummyToasts: Record<"info" | "success" | "warning" | "error", stri
     "Cache nearing limit",
     "API response slow",
     "Storage almost full",
-    "Node execution delayed"
+    "Node execution delayed",
   ],
   error: [
     "Failed to load config",
@@ -91,6 +94,6 @@ export const kDummyToasts: Record<"info" | "success" | "warning" | "error", stri
     "Dependency resolution failed",
     "Graph compile error",
     "File write permission denied",
-    "Unexpected runtime error"
-  ]
+    "Unexpected runtime error",
+  ],
 };

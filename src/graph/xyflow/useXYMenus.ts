@@ -1,53 +1,102 @@
 import { useSvelteFlow, type Edge, type Node } from "@xyflow/svelte";
-import { useOverlayConsumer } from "../../overlay";
-import { OverlayTriggers } from "./constants";
+import { CONTXT_KEY_XY_ACTIONS, MenuCodes } from "./constants";
+import type { ClientXY, StatusOr } from "../../overlayv2/types";
+import { getContext } from "svelte";
+import type { XYActions } from "./types";
+import { ReturnStatus } from "../../overlayv2/constants";
+import useEventDispatch from "../../utils/useEventDispatch";
+import { EventKinds } from "../../utils/constants";
 
 function useXYMenus() {
-  const { showAsCtxMenu, showAtTop } = useOverlayConsumer();
+  const xyActions = getContext(CONTXT_KEY_XY_ACTIONS) as XYActions;
   const { screenToFlowPosition } = useSvelteFlow();
 
-  function onpanecontextmenu({ event }: { event: MouseEvent }): void {
-    const flowPosn = screenToFlowPosition({
+  const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
+  const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
+  const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
+
+  async function onpanecontextmenu({ event }: { event: MouseEvent }): Promise<void> {
+    const clientXY: ClientXY = {
       x: event.clientX,
       y: event.clientY,
-    });
-    showAsCtxMenu(OverlayTriggers.PANE_CTX_MENU, event, {
-      flowPosn,
-    });
+    };
+    event.preventDefault();
+    const flowPosn = screenToFlowPosition(clientXY);
+    const retval = await xyActions.menuInPane?.(clientXY) as StatusOr<string>;
+    if (retval.status !== ReturnStatus.OK) return;
+    switch (retval.value) {
+      case "new":
+        console.log("New fn !!!!", flowPosn);
+    }
   }
 
-  function onnodecontextmenu({
+  async function onnodecontextmenu({
     node,
     event,
   }: {
     node: Node;
     event: MouseEvent;
-  }): void {
-    //showAsCtxMenu(OverlayTriggers.NODE_CTX_MENU, event, { node });
+  }): Promise<void> {
+    console.log("[on-node-context-menu]:", node);
+    const clientXY: ClientXY = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    event.preventDefault();
+    const retval = await xyActions.menuInNode?.(clientXY) as StatusOr<string>;
+    if (retval.status !== ReturnStatus.OK) return;
+    const nodeId = node.id as string;
+    switch (retval.value) {
+      case MenuCodes.RM_NODE:
+        dispatchRmNode({ nodeId });
+    }
   }
 
-  function onedgecontextmenu({
+  async function onedgecontextmenu({
     edge,
     event,
   }: {
     edge: Edge;
     event: MouseEvent;
-  }): void {
-    showAsCtxMenu(OverlayTriggers.EDGE_CTX_MENU, event, { edge });
+  }): Promise<void> {
+    const clientXY: ClientXY = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    event.preventDefault();
+    const retval = await xyActions.menuInEdge?.(clientXY) as StatusOr<string>;
+    if (retval.status !== ReturnStatus.OK) return;
+    const edgeId = edge.id as string;
+    switch (retval.value) {
+      case MenuCodes.RM_EDGE:
+        dispatchRmEdge({ edgeId });
+    }
   }
 
-  function onselectioncontextmenu({
+  async function onselectioncontextmenu({
     nodes,
     event,
   }: {
     nodes: Node[];
     event: MouseEvent;
-  }): void {
-    showAsCtxMenu(OverlayTriggers.SELECTION_CTX_MENU, event, { nodes });
+  }): Promise<void> {
+    console.log("[on-selection-context-menu]:", nodes);
+    console.log("In selection menu @@@@@@@");
+    const clientXY: ClientXY = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    event.preventDefault();
+    const retval = await xyActions.menuInSelection?.(clientXY) as StatusOr<string>;
+    if (retval.status !== ReturnStatus.OK) return;
+    switch (retval.value) {
+      case MenuCodes.RM_SELECTION:
+        dispatchRmSelection({ nodes });
+    }
   }
 
   function openGallery() {
-    showAtTop(OverlayTriggers.GALLERY_POPUP, {});
+    throw new Error("openGallery: Not implemented !");
   }
 
   return {

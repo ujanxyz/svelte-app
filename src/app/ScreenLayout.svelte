@@ -5,7 +5,6 @@ import WasmTester from "../modules/engine/WasmTester.svelte";
 import PropsPanelMain from "../graph/propspanel/PropsPanelMain.svelte";
 import ContentSelector from "./ContentSelector.svelte";
 import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
-import OverlayTesterMain from "../overlayv2/OverlayTesterMain.svelte";
 </script>
 
 <OverlayProvider>
@@ -15,8 +14,7 @@ import OverlayTesterMain from "../overlayv2/OverlayTesterMain.svelte";
       <ContentSelector />
     </header>
     <article id="mainArticle">
-      <!-- <XYFlowWrapper /> -->
-      <OverlayTesterMain />
+      <XYFlowWrapper />
     </article>
     <nav id="mainNav" class="elevation-1">
       <WasmTester />

@@ -13,6 +13,9 @@ import InputNode from "../nodes/InputNode.svelte";
 import { initialNodes, initialEdges } from "./nodes-and-edges";
 import type { Edge, Node } from "@xyflow/svelte";
 import "./xyflow.css";
+// Icons
+import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
+import PlayIcon from "phosphor-svelte/lib/PlayIcon";
 
 const nodeTypes = {
   in: InputNode,
@@ -29,6 +32,10 @@ const {
 
 let nodes = $state.raw<Node[]>(initialNodes);
 let edges = $state.raw<Edge[]>(initialEdges);
+
+function dummyselectionctx() {
+  console.log("dummyselectionctx ==== >");
+}
 </script>
 
 <SvelteFlow
@@ -38,7 +45,7 @@ let edges = $state.raw<Edge[]>(initialEdges);
   onpanecontextmenu={onpanecontextmenu}
   onnodecontextmenu={onnodecontextmenu}
   onedgecontextmenu={onedgecontextmenu}
-  onselectioncontextmenu={onselectioncontextmenu}
+  onselectioncontextmenu={() => dummyselectionctx()}
   fitView
   colorMode={"dark"}
 >
@@ -49,7 +56,12 @@ let edges = $state.raw<Edge[]>(initialEdges);
     size={0.6}
   />
   <Controls position={"top-right"}>
-    <ControlButton onclick={() => openGallery()}>⚡️</ControlButton>
+    <ControlButton onclick={() => openGallery()}>
+      <FunctionIcon/>
+    </ControlButton>
+    <ControlButton onclick={() => openGallery()}>
+      <PlayIcon/>
+    </ControlButton>
   </Controls>
 </SvelteFlow>
 

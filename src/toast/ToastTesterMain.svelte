@@ -4,7 +4,7 @@ import { makeCircularPicker } from "../utils/random";
 import { ToastType } from "./types";
 import useToast from "./useToast";
 
-const {showToast} = useToast();
+const { showToast } = useToast();
 
 const nextInfoMessage = makeCircularPicker(kDummyToasts.info);
 const nextSuccessMessage = makeCircularPicker(kDummyToasts.success);
@@ -28,10 +28,18 @@ function toastError() {
 }
 </script>
 
-<button onclick={toastInfo} class="trigger" style="--toast-color: #2648AA">INFO</button>
-<button onclick={toastSuccess} class="trigger" style="--toast-color: #26AA48">SUCCESS</button>
-<button onclick={toastWarning} class="trigger" style="--toast-color: #AAA826">WARNNG</button>
-<button onclick={toastError} class="trigger" style="--toast-color: #AA4848">ERROR</button>
+<button onclick={toastInfo} class="trigger" style="--toast-color: #2648AA"
+  >INFO</button
+>
+<button onclick={toastSuccess} class="trigger" style="--toast-color: #26AA48"
+  >SUCCESS</button
+>
+<button onclick={toastWarning} class="trigger" style="--toast-color: #AAA826"
+  >WARNNG</button
+>
+<button onclick={toastError} class="trigger" style="--toast-color: #AA4848"
+  >ERROR</button
+>
 
 <style>
 button {

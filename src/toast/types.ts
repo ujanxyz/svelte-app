@@ -3,11 +3,11 @@ export enum ToastType {
   SUCCESS = "success",
   WARNNG = "warning",
   ERROR = "error",
-};
+}
 
 export interface ToastEntry {
   id: string;
-  type: ToastType,
+  type: ToastType;
   message: string;
   startedAt: number;
 }

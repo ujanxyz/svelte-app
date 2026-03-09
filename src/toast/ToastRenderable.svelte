@@ -6,13 +6,14 @@ import TimedCloseBtn from "../components/TimedCloseBtn.svelte";
 interface Props {
   id: string;
   message: string;
-  startedAt: number,
+  startedAt: number;
   themeColor: string;
   subscribeNow: (fn: Subscriber<number>) => Unsubscriber;
   onexpire: (id: string) => void;
-};
+}
 
-const { id, message, startedAt, themeColor, subscribeNow, onexpire }: Props = $props();
+const { id, message, startedAt, themeColor, subscribeNow, onexpire }: Props =
+  $props();
 let progress = $state<number>(0);
 let progressBtn: TimedCloseBtn;
 
@@ -23,20 +24,24 @@ onMount(() => {
 function _onElapsed(timeNow: number): void {
   progress = Math.min((timeNow - startedAt) / 2500.0, 1.0);
   progressBtn.setProgress(progress);
-  (progress >= 1.0) && onexpire(id);
+  progress >= 1.0 && onexpire(id);
 }
 
 function onClose(ev: MouseEvent) {
   ev.preventDefault();
   onexpire(id);
 }
-
 </script>
 
 <div class="toast" style="--toast-color: {themeColor}">
   <span class="accent"></span>
   <span class="text">{message}</span>
-  <TimedCloseBtn bind:this={progressBtn} color={themeColor} iconSize={18} {onClose} />
+  <TimedCloseBtn
+    bind:this={progressBtn}
+    color={themeColor}
+    iconSize={18}
+    onClose={onClose}
+  />
 </div>
 
 <style>

@@ -1,23 +1,27 @@
 <script lang="ts">
 import useNewEventTarget from "./useNewEventTarget";
 import OverlayProvider from "../overlayv2/OverlayProvider.svelte";
-import OverlayTesterMain from "../overlayv2/OverlayTesterMain.svelte";
+import ComponentTesterMain from "./ComponentTesterMain.svelte";
 import Toaster from "../toast/Toaster.svelte";
 import "./app.css";
 
 useNewEventTarget();
-
 </script>
 
 <OverlayProvider>
   <main>
-    <OverlayTesterMain />
+    <ComponentTesterMain />
   </main>
 </OverlayProvider>
 <Toaster />
 
 <style>
 main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   margin: 0;
   padding: 0;
 }

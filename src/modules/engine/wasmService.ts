@@ -65,7 +65,7 @@ async function _loadWasmInternal(): Promise<WasmModuleType> {
     !!wasmModule,
     "WASM module should be loaded and available on globalThis.Module",
   );
-  console.log("Build info:", wasmModule.getBuildInfo());
+  // console.log("Build info:", wasmModule.getBuildInfo());
   return wasmModule;
 }
 
