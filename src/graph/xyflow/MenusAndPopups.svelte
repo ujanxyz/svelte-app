@@ -18,6 +18,7 @@ import PlusIcon from "phosphor-svelte/lib/PlusIcon";
 import StackPlusIcon from "phosphor-svelte/lib/StackPlusIcon";
 import StackMinusIcon from "phosphor-svelte/lib/StackMinusIcon";
 import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+import FnGalleryV2 from "../../modules/fngallery/FnGalleryV2.svelte";
 
 const xyActions = getContext(CONTXT_KEY_XY_ACTIONS) as XYActions;
 
@@ -26,12 +27,15 @@ $effect.pre(() => {
   xyActions.menuInNode = showInNodeContext;
   xyActions.menuInEdge = showInEdgeContext;
   xyActions.menuInSelection = showInSelectionContext;
+  xyActions.popupGallery = popupGallery;
 });
 
 const paneMenu = useOverlayUi(renderPaneMenu);
 const nodeMenu = useOverlayUi(renderNodeMenu);
 const edgeMenu = useOverlayUi(renderEdgeMenu);
 const selectionMenu = useOverlayUi(renderSelectionMenu);
+const galleryPopup = useOverlayUi(renderGalleryPopup);
+
 
 async function showInPaneContext(clientXY: ClientXY): Promise<StatusOr<string>> {
   return await paneMenu.openOverlayAsync<string>({ clientXY });
@@ -47,6 +51,10 @@ async function showInEdgeContext(clientXY: ClientXY): Promise<StatusOr<string>> 
 
 async function showInSelectionContext(clientXY: ClientXY): Promise<StatusOr<string>> {
   return await selectionMenu.openOverlayAsync<string>({ clientXY });
+}
+
+async function popupGallery(): Promise<StatusOr<string>> {
+  return await galleryPopup.openOverlayAsync<string>({});
 }
 
 const icons: Record<string, Snippet> = {
@@ -95,6 +103,10 @@ const icons: Record<string, Snippet> = {
     icons={icons}
     defaultIcon={lineVerticalIcon}
   />
+{/snippet}
+
+{#snippet renderGalleryPopup()}
+  <FnGalleryV2 />
 {/snippet}
 
  <!-- Icons --------------------------------------------------------------------------------------->

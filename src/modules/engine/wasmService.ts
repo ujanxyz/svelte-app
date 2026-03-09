@@ -3,7 +3,7 @@ import type {
   WasmModuleType,
 } from "../../types/WasmModule";
 
-const GLUEJS_PATH = "/webassembly/entrypoint.js";
+const GLUEJS_PATH = "./webassembly/entrypoint.js";
 
 class WasmService {
   private static instance: WasmService | null = null;

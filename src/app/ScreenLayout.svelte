@@ -1,30 +1,27 @@
 <script lang="ts">
 import logo from "../assets/svelte.svg";
-import { OverlayProvider } from "../overlay";
 import WasmTester from "../modules/engine/WasmTester.svelte";
 import PropsPanelMain from "../graph/propspanel/PropsPanelMain.svelte";
 import ContentSelector from "./ContentSelector.svelte";
 import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
 </script>
 
-<OverlayProvider>
-  <div class="screen">
-    <header id="pageHeader">
-      <img src={logo} class="logo" alt="Vite Logo" />
-      <ContentSelector />
-    </header>
-    <article id="mainArticle">
-      <XYFlowWrapper />
-    </article>
-    <nav id="mainNav" class="elevation-1">
-      <WasmTester />
-    </nav>
-    <div id="siteAds">
-      <PropsPanelMain />
-    </div>
-    <footer id="pageFooter">Footer</footer>
+<div class="screen">
+  <header id="pageHeader">
+    <img src={logo} class="logo" alt="Vite Logo" />
+    <ContentSelector />
+  </header>
+  <article id="mainArticle">
+    <XYFlowWrapper />
+  </article>
+  <nav id="mainNav" class="elevation-1">
+    <WasmTester />
+  </nav>
+  <div id="siteAds">
+    <PropsPanelMain />
   </div>
-</OverlayProvider>
+  <footer id="pageFooter">Footer</footer>
+</div>
 
 <style>
 img {

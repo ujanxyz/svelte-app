@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import type { Node } from "@xyflow/svelte";
+import type { Node, XYPosition } from "@xyflow/svelte";
 import { EventKinds } from "../../utils/constants";
 import useEventConsumer from "../../utils/useEventConsumer";
 import useGraphOps from "./useGraphOps";
@@ -17,12 +17,12 @@ onMount(() => {
   return () => clearHandlers();
 });
 
-function _xyAddNode(payload: { code: string }): void {
+function _xyAddNode(payload: { code: string, position: XYPosition }): void {
   const node: Node = {
     id: "n-" + nextNodeId,
     data: { label: payload.code },
     type: "default",
-    position: { x: 200, y: 200 + nextNodeId * 20 },
+    position: payload.position,
   };
   ++nextNodeId;
   ops.addNode(node);

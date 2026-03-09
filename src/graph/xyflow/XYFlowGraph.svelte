@@ -8,7 +8,7 @@ import {
 } from "@xyflow/svelte";
 import "@xyflow/svelte/dist/style.css";
 import DefaultNode from "../nodes/DefaultNode.svelte";
-import useXYMenus from "./useXYMenus";
+import useMenusAndPopups from "./useMenusAndPopups";
 import InputNode from "../nodes/InputNode.svelte";
 import { initialNodes, initialEdges } from "./nodes-and-edges";
 import type { Edge, Node } from "@xyflow/svelte";
@@ -27,15 +27,12 @@ const {
   onnodecontextmenu,
   onedgecontextmenu,
   onselectioncontextmenu,
-  openGallery,
-} = useXYMenus();
+  onpopupgallery,
+} = useMenusAndPopups();
 
 let nodes = $state.raw<Node[]>(initialNodes);
 let edges = $state.raw<Edge[]>(initialEdges);
 
-function dummyselectionctx() {
-  console.log("dummyselectionctx ==== >");
-}
 </script>
 
 <SvelteFlow
@@ -45,7 +42,7 @@ function dummyselectionctx() {
   onpanecontextmenu={onpanecontextmenu}
   onnodecontextmenu={onnodecontextmenu}
   onedgecontextmenu={onedgecontextmenu}
-  onselectioncontextmenu={() => dummyselectionctx()}
+  onselectioncontextmenu={onselectioncontextmenu}
   fitView
   colorMode={"dark"}
 >
@@ -56,10 +53,10 @@ function dummyselectionctx() {
     size={0.6}
   />
   <Controls position={"top-right"}>
-    <ControlButton onclick={() => openGallery()}>
+    <ControlButton onclick={onpopupgallery}>
       <FunctionIcon/>
     </ControlButton>
-    <ControlButton onclick={() => openGallery()}>
+    <ControlButton onclick={onpopupgallery}>
       <PlayIcon/>
     </ControlButton>
   </Controls>

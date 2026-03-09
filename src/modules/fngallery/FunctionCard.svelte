@@ -41,7 +41,8 @@ function onclick(ev: MouseEvent) {
   transition: 100ms linear;
   border-radius: 7px;
 
-  background-color: #30303044;
+  background-color: #232323;
+  color: #EEEEEE;
 }
 
 .gridcell:hover {

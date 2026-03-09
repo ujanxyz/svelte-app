@@ -1,9 +1,9 @@
 <script lang="ts">
 import useNewEventTarget from "./useNewEventTarget";
-import OverlayProvider from "../overlayv2/OverlayProvider.svelte";
 import ComponentTesterMain from "./ComponentTesterMain.svelte";
 import Toaster from "../toast/Toaster.svelte";
 import "./app.css";
+import OverlayProvider from "../overlayv2/OverlayProvider.svelte";
 
 useNewEventTarget();
 </script>

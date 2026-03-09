@@ -1,13 +1,11 @@
 <script lang="ts">
-import { getContext, setContext } from "svelte";
+import { setContext } from "svelte";
 import { SvelteFlowProvider } from "@xyflow/svelte";
 import XYFlowGraph from "./XYFlowGraph.svelte";
 import { CONTXT_KEY_XY_ACTIONS } from "./constants";
-import RegisterXYMenus from "./RegisterXYMenus.svelte";
-import RegisterXYGalleries from "./RegisterXYGalleries.svelte";
 import RegisterEventHandlers from "./RegisterEventHandlers.svelte";
 import type { XYActions } from "./types";
-import ContextMenus from "./ContextMenus.svelte";
+import MenusAndPopups from "./MenusAndPopups.svelte";
 
 setContext(CONTXT_KEY_XY_ACTIONS, { name: "XYActions" } as XYActions);
 </script>
@@ -16,6 +14,6 @@ setContext(CONTXT_KEY_XY_ACTIONS, { name: "XYActions" } as XYActions);
   <XYFlowGraph />
   <!-- <RegisterXYMenus /> -->
   <!-- <RegisterXYGalleries /> -->
-  <ContextMenus />
   <RegisterEventHandlers />
+  <MenusAndPopups />
 </SvelteFlowProvider>
