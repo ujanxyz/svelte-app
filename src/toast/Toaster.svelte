@@ -47,11 +47,11 @@ function onExpireToast(id: string) {
       {@const { id, type, message, startedAt } = renderable}
       {@const themeColor = themeColors[type]}
       <ToastRenderable
-        id={id}
-        startedAt={startedAt}
-        message={message}
-        themeColor={themeColor}
-        subscribeNow={subscribeNow}
+        {id}
+        {startedAt}
+        {message}
+        {themeColor}
+        {subscribeNow}
         onexpire={onExpireToast}
       />
     {/each}

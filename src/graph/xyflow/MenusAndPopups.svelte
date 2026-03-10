@@ -2,7 +2,12 @@
 import { getContext, type Snippet } from "svelte";
 import { CONTXT_KEY_XY_ACTIONS, MenuCodes } from "./constants";
 import { useOverlayUi } from "../../overlayv2/overlayStore";
-import { edgeMenuData, nodeMenuData, paneMenuData, selectionMenuData } from "./menuData";
+import {
+  edgeMenuData,
+  nodeMenuData,
+  paneMenuData,
+  selectionMenuData,
+} from "./menuData";
 import MenuLayer from "../../overlayv2/context-menu/MenuLayer.svelte";
 import type { XYActions } from "./types";
 import type { ClientXY, StatusOr } from "../../overlayv2/types";
@@ -36,20 +41,27 @@ const edgeMenu = useOverlayUi(renderEdgeMenu);
 const selectionMenu = useOverlayUi(renderSelectionMenu);
 const galleryPopup = useOverlayUi(renderGalleryPopup);
 
-
-async function showInPaneContext(clientXY: ClientXY): Promise<StatusOr<string>> {
+async function showInPaneContext(
+  clientXY: ClientXY,
+): Promise<StatusOr<string>> {
   return await paneMenu.openOverlayAsync<string>({ clientXY });
 }
 
-async function showInNodeContext(clientXY: ClientXY): Promise<StatusOr<string>> {
+async function showInNodeContext(
+  clientXY: ClientXY,
+): Promise<StatusOr<string>> {
   return await nodeMenu.openOverlayAsync<string>({ clientXY });
 }
 
-async function showInEdgeContext(clientXY: ClientXY): Promise<StatusOr<string>> {
+async function showInEdgeContext(
+  clientXY: ClientXY,
+): Promise<StatusOr<string>> {
   return await edgeMenu.openOverlayAsync<string>({ clientXY });
 }
 
-async function showInSelectionContext(clientXY: ClientXY): Promise<StatusOr<string>> {
+async function showInSelectionContext(
+  clientXY: ClientXY,
+): Promise<StatusOr<string>> {
   return await selectionMenu.openOverlayAsync<string>({ clientXY });
 }
 
@@ -74,33 +86,21 @@ const icons: Record<string, Snippet> = {
 </script>
 
 {#snippet renderPaneMenu()}
-  <MenuLayer
-    menuItems={paneMenuData}
-    icons={icons}
-    defaultIcon={lineVerticalIcon}
-  />
+  <MenuLayer menuItems={paneMenuData} {icons} defaultIcon={lineVerticalIcon} />
 {/snippet}
 
 {#snippet renderNodeMenu()}
-  <MenuLayer
-    menuItems={nodeMenuData}
-    icons={icons}
-    defaultIcon={lineVerticalIcon}
-  />
+  <MenuLayer menuItems={nodeMenuData} {icons} defaultIcon={lineVerticalIcon} />
 {/snippet}
 
 {#snippet renderEdgeMenu()}
-  <MenuLayer
-    menuItems={edgeMenuData}
-    icons={icons}
-    defaultIcon={lineVerticalIcon}
-  />
+  <MenuLayer menuItems={edgeMenuData} {icons} defaultIcon={lineVerticalIcon} />
 {/snippet}
 
 {#snippet renderSelectionMenu()}
   <MenuLayer
     menuItems={selectionMenuData}
-    icons={icons}
+    {icons}
     defaultIcon={lineVerticalIcon}
   />
 {/snippet}
@@ -109,7 +109,7 @@ const icons: Record<string, Snippet> = {
   <FnGalleryV2 />
 {/snippet}
 
- <!-- Icons --------------------------------------------------------------------------------------->
+<!-- Icons --------------------------------------------------------------------------------------->
 
 {#snippet arrowClockwiseIcon()}
   <ArrowClockwiseIcon size={24} />

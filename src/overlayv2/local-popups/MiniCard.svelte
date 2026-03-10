@@ -39,7 +39,7 @@ async function openLocalPopup(ev: MouseEvent) {
 <div style="--cell-height:{weightY}; --cell-color:{bgcolor}" class="cell">
   <div class="cardbody" bind:this={container}>
     <div class="topbar">
-      <span class="title" title={title}>{title}</span>
+      <span class="title" {title}>{title}</span>
       <button class="actionbtn" onclick={openLocalPopup}>
         {@render cellIcon()}
       </button>

@@ -21,7 +21,10 @@ onMount(() => {
   return () => clearHandlers();
 });
 
-async function _xyAddNodeAsync(payload: { code: string, position: XYPosition }): Promise<void> {
+async function _xyAddNodeAsync(payload: {
+  code: string;
+  position: XYPosition;
+}): Promise<void> {
   const funcspec = await lookupFnDetailsAsync(payload.code);
   if (!funcspec) {
     throw new Error("Function not found: " + payload.code);

@@ -22,7 +22,7 @@ const gridData: MasonryLayoutData = (function () {
 
 <PropsEditorProvider>
   <div class="container">
-    <MasonryGrid gridData={gridData} />
+    <MasonryGrid {gridData} />
   </div>
 </PropsEditorProvider>
 

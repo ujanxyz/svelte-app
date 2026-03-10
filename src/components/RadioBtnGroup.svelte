@@ -13,12 +13,12 @@ const name = group ?? "radio_" + newRandomId();
 
 <div class="radio-group txt-sm-strong">
   <label class="radio-item">
-    <input type="radio" name={name} value="1" checked />
+    <input type="radio" {name} value="1" checked />
     <span class="radio-ui">Opt 1</span>
   </label>
 
   <label class="radio-item">
-    <input type="radio" name={name} value="2" />
+    <input type="radio" {name} value="2" />
     <span class="radio-ui">Opt 2</span>
   </label>
 </div>

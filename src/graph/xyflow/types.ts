@@ -11,4 +11,3 @@ export interface XYActions {
   menuInSelection?: MenuFunction;
   popupGallery?: PopupFunction;
 }
-

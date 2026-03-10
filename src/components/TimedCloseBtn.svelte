@@ -57,7 +57,7 @@ function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
 >
   {@render animatedBgSvg()}
   <div class="icon">
-    <XIcon size={iconSize} color={color} weight="bold" />
+    <XIcon size={iconSize} {color} weight="bold" />
   </div>
 </button>
 

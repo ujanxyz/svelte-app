@@ -18,13 +18,13 @@ let { id, kind }: Props = $props();
 {#if kind === "in"}
   <Handle
     type="target"
-    id={id}
+    {id}
     position={Position.Left}
     data-enabled={true}
     title={id}
     style="--handle-size: {size}px;"
   >
-    <SignInIcon size={size} />
+    <SignInIcon {size} />
   </Handle>
 {:else if kind === "in-x"}
   <Handle
@@ -35,18 +35,18 @@ let { id, kind }: Props = $props();
     title={id}
     style="--handle-size: {size}px;"
   >
-    <EmptyIcon size={size} />
+    <EmptyIcon {size} />
   </Handle>
 {:else if kind === "out"}
   <Handle
     type="source"
-    id={id}
+    {id}
     position={Position.Right}
     data-enabled={true}
     title={id}
     style="--handle-size: {size}px;"
   >
-    <SignOutIcon size={size} />
+    <SignOutIcon {size} />
   </Handle>
 {:else if kind === "out-x"}
   <Handle
@@ -57,7 +57,7 @@ let { id, kind }: Props = $props();
     title={id}
     style="--handle-size: {size}px;"
   >
-    <EmptyIcon size={size} />
+    <EmptyIcon {size} />
   </Handle>
 {/if}
 

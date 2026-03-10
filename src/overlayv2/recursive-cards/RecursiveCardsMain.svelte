@@ -24,7 +24,7 @@ async function openOverlayCards() {
 </script>
 
 {#snippet renderRecursiveCards()}
-  <RecursiveCardWrapper cardColors={cardColors} />
+  <RecursiveCardWrapper {cardColors} />
 {/snippet}
 
 <button class="trigger" onclick={openOverlayCards}>Recursive Cards</button>

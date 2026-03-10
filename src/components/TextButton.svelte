@@ -7,7 +7,7 @@ const { text, onclick }: Props = $props();
 </script>
 
 <div>
-  <button onclick={onclick} class="rounded-sm">
+  <button {onclick} class="rounded-sm">
     <span class="text-md-con txt-md-strong">{text}</span>
   </button>
 </div>

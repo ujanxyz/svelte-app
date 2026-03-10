@@ -7,9 +7,7 @@ export const initialNodes: Node[] = [
       label: "Input Point",
       funcid: "/dummy/in-pt",
       ins: [],
-      outs: [
-        {name: "x", type: "float2"},
-      ],
+      outs: [{ name: "x", type: "float2" }],
       inouts: [],
     },
     type: "default",
@@ -20,12 +18,8 @@ export const initialNodes: Node[] = [
     data: {
       label: "Point Function",
       funcid: "/dummy/fn-b",
-      ins: [
-        {name: "x", type: "float2"},
-      ],
-      outs: [
-        {name: "fx", type: "float"},
-      ],
+      ins: [{ name: "x", type: "float2" }],
+      outs: [{ name: "fx", type: "float" }],
       inouts: [],
     },
     type: "default",
@@ -38,9 +32,7 @@ export const initialNodes: Node[] = [
       funcid: "/dummy/trans-pt",
       ins: [],
       outs: [],
-      inouts: [
-        {name: "x", type: "float2"},
-      ],
+      inouts: [{ name: "x", type: "float2" }],
     },
     type: "default",
     position: { x: 0, y: 100 },
@@ -50,9 +42,7 @@ export const initialNodes: Node[] = [
     data: {
       label: "Result",
       funcid: "/sink/simple-res",
-      ins: [
-        {name: "f", type: "float"},
-      ],
+      ins: [{ name: "f", type: "float" }],
       outs: [],
       inouts: [],
     },

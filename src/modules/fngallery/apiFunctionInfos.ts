@@ -61,7 +61,9 @@ export function fetchFnInfos() {
   return { fetchItemsAsync, abortFetch };
 }
 
-export async function lookupFnDetailsAsync(funcId: string): Promise<FuncSpec | undefined> {
+export async function lookupFnDetailsAsync(
+  funcId: string,
+): Promise<FuncSpec | undefined> {
   if (!USE_DUMMY_DATA) {
     throw new Error("Real api lookup not implemented");
   }

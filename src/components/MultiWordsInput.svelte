@@ -27,7 +27,7 @@ onMount(() => {
     <input
       class="txt-sm-strong"
       type="text"
-      value={value}
+      {value}
       oninput={(ev) => onInput(key, ev)}
     />
   {/each}

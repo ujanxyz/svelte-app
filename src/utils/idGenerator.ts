@@ -22,8 +22,8 @@ function splitmix64(x: bigint): bigint {
   x = (x + 0x9e3779b97f4a7c15n) & MASK_64;
 
   let z = x;
-  z = (z ^ (z >> 30n)) * 0xbf58476d1ce4e5b9n & MASK_64;
-  z = (z ^ (z >> 27n)) * 0x94d049bb133111ebn & MASK_64;
+  z = ((z ^ (z >> 30n)) * 0xbf58476d1ce4e5b9n) & MASK_64;
+  z = ((z ^ (z >> 27n)) * 0x94d049bb133111ebn) & MASK_64;
   z = z ^ (z >> 31n);
 
   return z & MASK_64;
@@ -88,7 +88,7 @@ function encodeBase62(num: bigint, length: number): string {
  *
  * @returns Function that generates the next ID
  */
-export function createIdGenerator(length: number, seed = 0n): (() => string) {
+export function createIdGenerator(length: number, seed = 0n): () => string {
   let counter = 0n;
 
   return () => {

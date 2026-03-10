@@ -89,7 +89,7 @@ function handleWinResize() {
 >
   {@render children()}
   <div class="contents" bind:this={rootDiv}>
-    <LayerList layers={layers} />
+    <LayerList {layers} />
   </div>
 </div>
 

@@ -22,6 +22,6 @@ const [nextColor, ...childColors] = cardColors;
   <RecursiveOverlayCard
     cardIndex={nextCardIndex ?? 1}
     selfColor={nextColor}
-    childColors={childColors}
+    {childColors}
   />
 {/if}

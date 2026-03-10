@@ -15,7 +15,7 @@ function onclick(ev: MouseEvent) {
 }
 </script>
 
-<button class="gridcell" data-uj-fn-id={id} onclick={onclick}>
+<button class="gridcell" data-uj-fn-id={id} {onclick}>
   <p class="celltypo">{label}</p>
   <p class="celldesc">{desc}</p>
   <p>
@@ -42,7 +42,7 @@ function onclick(ev: MouseEvent) {
   border-radius: 7px;
 
   background-color: #232323;
-  color: #EEEEEE;
+  color: #eeeeee;
 }
 
 .gridcell:hover {

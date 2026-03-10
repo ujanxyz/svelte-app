@@ -8,7 +8,10 @@ type AsyncCustomEventHandler = (ev: Event) => Promise<void>;
 
 function useEventConsumer() {
   const target = getContext(Symbol.for(EventTarget.name)) as EventTarget;
-  const cleanups: { kind: string; handler: CustomEventHandler | AsyncCustomEventHandler }[] = [];
+  const cleanups: {
+    kind: string;
+    handler: CustomEventHandler | AsyncCustomEventHandler;
+  }[] = [];
 
   function handleEvent(kind: string, fn: PayloadFunction): void {
     const handler: CustomEventHandler = (ev: Event) => {
@@ -20,7 +23,9 @@ function useEventConsumer() {
   }
 
   function handleEventAsync(kind: string, fn: AsyncPayloadFunction): void {
-    const handler: AsyncCustomEventHandler = async (ev: Event): Promise<void> => {
+    const handler: AsyncCustomEventHandler = async (
+      ev: Event,
+    ): Promise<void> => {
       const payload = (ev as CustomEvent).detail as any;
       await fn(payload);
     };

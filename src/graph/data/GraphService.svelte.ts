@@ -1,4 +1,11 @@
-import { useEdges, useNodes, type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/svelte";
+import {
+  useEdges,
+  useNodes,
+  type Edge,
+  type EdgeProps,
+  type Node,
+  type NodeProps,
+} from "@xyflow/svelte";
 import { initialEdges, initialNodes } from "../xyflow/nodes-and-edges";
 
 class GraphService {
@@ -12,10 +19,10 @@ class GraphService {
 
   public constructor() {
     const {
-        current: currentNodes,
-        update: updateNodes,
-        set: setNodes,
-      } = useNodes();
+      current: currentNodes,
+      update: updateNodes,
+      set: setNodes,
+    } = useNodes();
     const { update: updateEdges } = useEdges();
     this.updateNodes = updateNodes;
     this.updateEdges = updateEdges;
@@ -61,7 +68,6 @@ class GraphService {
       return edges.filter((e: Edge) => e.id !== egeId);
     });
   }
-
 }
 
 export default GraphService;

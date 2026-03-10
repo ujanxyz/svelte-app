@@ -9,7 +9,7 @@ type Props = {
 const { children, onclick, tooltip }: Props = $props();
 </script>
 
-<button onclick={onclick} class="rounded-sm" title={tooltip}>
+<button {onclick} class="rounded-sm" title={tooltip}>
   {@render children()}
 </button>
 

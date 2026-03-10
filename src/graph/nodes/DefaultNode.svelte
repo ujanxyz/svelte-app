@@ -8,7 +8,11 @@ import { EventKinds } from "../../utils/constants";
 import XYNodeTopBar from "./XYNodeTopBar.svelte";
 import type { NodeDetailsData } from "./types";
 
-const { data: nodeDetails, id: nodeId, ...restProps }: NodeProps<Node<NodeDetailsData>> = $props();
+const {
+  data: nodeDetails,
+  id: nodeId,
+  ...restProps
+}: NodeProps<Node<NodeDetailsData>> = $props();
 
 let containerDiv: HTMLDivElement | undefined;
 const slots = {
@@ -34,7 +38,11 @@ onDestroy(() => {
   <h3 class="card-title">{nodeDetails.label}</h3>
   <span class="nodeid">{nodeId}</span>
   <!-- <a href="#" class="card-button">View</a> -->
-  <SlotsArray ins={nodeDetails.ins} outs={nodeDetails.outs} inouts={nodeDetails.inouts} />
+  <SlotsArray
+    ins={nodeDetails.ins}
+    outs={nodeDetails.outs}
+    inouts={nodeDetails.inouts}
+  />
 </div>
 <XYNodeTopBar />
 

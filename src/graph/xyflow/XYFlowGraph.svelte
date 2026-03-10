@@ -41,17 +41,17 @@ const graph = new GraphService();
 
 // let nodes = $state.raw<Node[]>(initialNodes);
 // let edges = $state.raw<Edge[]>(initialEdges);
-
 </script>
 
 <SvelteFlow
   bind:nodes={graph.bindableNodes}
   bind:edges={graph.bindableEdges}
-  {nodeTypes} {edgeTypes}
-  onpanecontextmenu={onpanecontextmenu}
-  onnodecontextmenu={onnodecontextmenu}
-  onedgecontextmenu={onedgecontextmenu}
-  onselectioncontextmenu={onselectioncontextmenu}
+  {nodeTypes}
+  {edgeTypes}
+  {onpanecontextmenu}
+  {onnodecontextmenu}
+  {onedgecontextmenu}
+  {onselectioncontextmenu}
   fitView
   colorMode={"dark"}
 >
@@ -63,10 +63,10 @@ const graph = new GraphService();
   />
   <Controls position={"top-right"}>
     <ControlButton onclick={onpopupgallery}>
-      <FunctionIcon/>
+      <FunctionIcon />
     </ControlButton>
     <ControlButton onclick={onpopupgallery}>
-      <PlayIcon/>
+      <PlayIcon />
     </ControlButton>
   </Controls>
 </SvelteFlow>

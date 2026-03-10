@@ -40,7 +40,7 @@ function onClose(ev: MouseEvent) {
     bind:this={progressBtn}
     color={themeColor}
     iconSize={18}
-    onClose={onClose}
+    {onClose}
   />
 </div>
 

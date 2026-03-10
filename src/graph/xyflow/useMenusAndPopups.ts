@@ -1,4 +1,9 @@
-import { useSvelteFlow, type Edge, type Node, type XYPosition } from "@xyflow/svelte";
+import {
+  useSvelteFlow,
+  type Edge,
+  type Node,
+  type XYPosition,
+} from "@xyflow/svelte";
 import { CONTXT_KEY_XY_ACTIONS, MenuCodes } from "./constants";
 import type { ClientXY, StatusOr } from "../../overlayv2/types";
 import { getContext } from "svelte";
@@ -16,7 +21,11 @@ export default function useMenusAndPopups() {
   const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
   const dispatchPickFn = useEventDispatch(EventKinds.FN_GALLERY_SELECT);
 
-  async function onpanecontextmenu({ event }: { event: MouseEvent }): Promise<void> {
+  async function onpanecontextmenu({
+    event,
+  }: {
+    event: MouseEvent;
+  }): Promise<void> {
     console.log("In onpanecontextmenu ..", xyActions);
     const clientXY: ClientXY = {
       x: event.clientX,
@@ -24,7 +33,9 @@ export default function useMenusAndPopups() {
     };
     event.preventDefault();
     const flowPosn = screenToFlowPosition(clientXY);
-    const retval = await (xyActions.menuInPane as MenuFunction)(clientXY) as StatusOr<string>;
+    const retval = (await (xyActions.menuInPane as MenuFunction)(
+      clientXY,
+    )) as StatusOr<string>;
     if (retval.status !== ReturnStatus.OK) return;
     switch (retval.value) {
       case MenuCodes.NEW_NODE:
@@ -46,7 +57,9 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await (xyActions.menuInNode as MenuFunction)(clientXY) as StatusOr<string>;
+    const retval = (await (xyActions.menuInNode as MenuFunction)(
+      clientXY,
+    )) as StatusOr<string>;
     if (retval.status !== ReturnStatus.OK) return;
     const nodeId = node.id as string;
     switch (retval.value) {
@@ -67,7 +80,9 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await (xyActions.menuInEdge as MenuFunction)(clientXY) as StatusOr<string>;
+    const retval = (await (xyActions.menuInEdge as MenuFunction)(
+      clientXY,
+    )) as StatusOr<string>;
     if (retval.status !== ReturnStatus.OK) return;
     const edgeId = edge.id as string;
     switch (retval.value) {
@@ -89,7 +104,9 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await (xyActions.menuInSelection as MenuFunction)(clientXY) as StatusOr<string>;
+    const retval = (await (xyActions.menuInSelection as MenuFunction)(
+      clientXY,
+    )) as StatusOr<string>;
     if (retval.status !== ReturnStatus.OK) return;
     switch (retval.value) {
       case MenuCodes.RM_SELECTION:
@@ -108,7 +125,9 @@ export default function useMenusAndPopups() {
   }
 
   async function _internalOpenGallery(position: XYPosition): Promise<void> {
-    const retval = await (xyActions.popupGallery as PopupFunction)() as StatusOr<string>;
+    const retval = (await (
+      xyActions.popupGallery as PopupFunction
+    )()) as StatusOr<string>;
     if (retval.status !== ReturnStatus.OK) return;
     console.log(retval.value);
     dispatchPickFn({ code: retval.value, position });

@@ -30,11 +30,7 @@ const icons = {
 </script>
 
 {#snippet renderContextMenu()}
-  <MenuLayer
-    menuItems={demoMenuData}
-    icons={icons}
-    defaultIcon={lineVerticalIcon}
-  />
+  <MenuLayer menuItems={demoMenuData} {icons} defaultIcon={lineVerticalIcon} />
 {/snippet}
 
 {#snippet pentagonIcon()}

@@ -27,7 +27,7 @@ const iconPicker = makeRandomPicker(
     <div class="column">
       {#each column as cellData: CellData}
         {@const cellIcon = iconPicker.pick()}
-        <MiniCard cellData={cellData} cellIcon={cellIcon} />
+        <MiniCard {cellData} {cellIcon} />
       {/each}
     </div>
   {/each}

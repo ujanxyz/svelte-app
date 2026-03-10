@@ -14,7 +14,6 @@ interface Props {
 }
 
 const { ins, outs, inouts }: Props = $props();
-
 </script>
 
 <div class="flex-fitted-rows">
@@ -30,7 +29,7 @@ const { ins, outs, inouts }: Props = $props();
 </div>
 
 {#snippet inSlot(param: InParam)}
-  {@const {name: paramName, type: paramType} = param}
+  {@const { name: paramName, type: paramType } = param}
   <div class="slot rounded-sm flex-fitted-cells">
     <span class="label rounded-sm" title={paramType}>{paramName}</span>
     <MyHandle kind="in" id={paramName} />
@@ -39,7 +38,7 @@ const { ins, outs, inouts }: Props = $props();
 {/snippet}
 
 {#snippet outSlot(param: OutParam)}
-  {@const {name: paramName, type: paramType} = param}
+  {@const { name: paramName, type: paramType } = param}
   <div class="slot rounded-sm flex-fitted-cells">
     <span class="label rounded-sm" title={paramType}>{paramName}</span>
     <MyHandle kind="in-x" />
@@ -48,7 +47,7 @@ const { ins, outs, inouts }: Props = $props();
 {/snippet}
 
 {#snippet inoutSlot(param: InOutParam)}
-  {@const {name: paramName, type: paramType} = param}
+  {@const { name: paramName, type: paramType } = param}
   <div class="slot rounded-sm flex-fitted-cells">
     <span class="label rounded-sm" title={paramType}>{paramName}</span>
     <MyHandle kind="in" id={paramName + "/in"} />

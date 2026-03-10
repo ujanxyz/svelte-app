@@ -1,9 +1,9 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import useCurrentOverlay from '../../overlayv2/useCurrentOverlay';
-import FunctionCard from './FunctionCard.svelte';
-import type { FuncSpec } from './types';
-import { fetchFnInfos } from './apiFunctionInfos';
+import { onMount } from "svelte";
+import useCurrentOverlay from "../../overlayv2/useCurrentOverlay";
+import FunctionCard from "./FunctionCard.svelte";
+import type { FuncSpec } from "./types";
+import { fetchFnInfos } from "./apiFunctionInfos";
 
 const overlay = useCurrentOverlay();
 const { fetchItemsAsync, abortFetch } = fetchFnInfos();
@@ -21,7 +21,6 @@ function closeGallery() {
 function onSelect(spec: FuncSpec) {
   overlay.settleOverlay(spec.id);
 }
-
 </script>
 
 <!-- elevated-rounded-md" -->
@@ -30,9 +29,7 @@ function onSelect(spec: FuncSpec) {
     <h2 class="header-l1">www.mockaroo.com</h2>
     <div class="flex-remaining">m</div>
     <input type="text" name="search" class="textfield" value="search" />
-    <button aria-label="close" class="iconbtn" onclick={closeGallery}
-      >X</button
-    >
+    <button aria-label="close" class="iconbtn" onclick={closeGallery}>X</button>
   </div>
   {#await itemsPromise}
     <p>Loading...</p>
@@ -40,7 +37,7 @@ function onSelect(spec: FuncSpec) {
     <div class="contentroot">
       <div class="gridbox">
         {#each items as item}
-          <FunctionCard spec={item} onSelect={onSelect} />
+          <FunctionCard spec={item} {onSelect} />
         {/each}
       </div>
       <div class="bottombox">Bottom box.</div>
