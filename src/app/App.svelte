@@ -1,9 +1,10 @@
 <script lang="ts">
 import useNewEventTarget from "./useNewEventTarget";
 import ComponentTesterMain from "./ComponentTesterMain.svelte";
-import Toaster from "../toast/Toaster.svelte";
 import "./app.css";
 import OverlayProvider from "../overlayv2/OverlayProvider.svelte";
+import Toaster from "../modules/toast/Toaster.svelte";
+import MemLogger from "../memlogging/MemLogger.svelte";
 
 useNewEventTarget();
 </script>
@@ -13,6 +14,7 @@ useNewEventTarget();
     <ComponentTesterMain />
   </main>
 </OverlayProvider>
+<MemLogger />
 <Toaster />
 
 <style>

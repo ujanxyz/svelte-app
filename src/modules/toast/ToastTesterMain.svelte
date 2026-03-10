@@ -1,6 +1,6 @@
 <script lang="ts">
-import { kDummyToasts } from "../utils/dummyData";
-import { makeCircularPicker } from "../utils/random";
+import { kDummyToasts } from "../../utils/dummyData";
+import { makeCircularPicker } from "../../utils/random";
 import { ToastType } from "./types";
 import useToast from "./useToast";
 

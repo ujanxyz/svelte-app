@@ -2,12 +2,13 @@
 import {
   BaseEdge,
   BezierEdge,
+  EdgeToolbar,
   getBezierPath,
   getSmoothStepPath,
   type EdgeProps,
 } from "@xyflow/svelte";
 
-let { sourceX, sourceY, targetX, targetY, ...props }: EdgeProps = $props();
+let { id, sourceX, sourceY, targetX, targetY, ...props }: EdgeProps = $props();
 /* svelte-ignore state_referenced_locally */
 const { markerStart, markerEnd, interactionWidth, label, labelStyle } = props;
 
@@ -18,18 +19,15 @@ const { markerStart, markerEnd, interactionWidth, label, labelStyle } = props;
 //     targetY,
 // }));
 /* svelte-ignore state_referenced_locally */
-const [edgePath] = $derived(
-  getSmoothStepPath({
+const [edgePath, labelX, labelY] = $derived(
+  getBezierPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
-    stepPosition: 1, // edge break closer to target node
-    borderRadius: 7,
   }),
 );
 
-const animated = true;
 </script>
 
 <!-- <BaseEdge
@@ -52,3 +50,6 @@ const animated = true;
 <circle r="4" fill="#ff00ff">
   <animateMotion dur="2s" repeatCount="indefinite" path={edgePath} />
 </circle>
+<EdgeToolbar edgeId={id} x={labelX} y={labelY} isVisible={false}>
+	<button>{id}</button>
+</EdgeToolbar>

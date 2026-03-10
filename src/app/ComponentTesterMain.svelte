@@ -1,11 +1,12 @@
 <script lang="ts">
 import ButtonGroup from "../components/ButtonGroup.svelte";
-import ToastTestermain from "../toast/ToastTesterMain.svelte";
 import ContextMenuMain from "../overlayv2/context-menu/ContextMenuMain.svelte";
 import LocalPopupsMain from "../overlayv2/local-popups/LocalPopupsMain.svelte";
 import RecursiveCardsMain from "../overlayv2/recursive-cards/RecursiveCardsMain.svelte";
 import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
 import ScreenLayout from "./ScreenLayout.svelte";
+import ToastTesterMain from "../modules/toast/ToastTesterMain.svelte";
+import MemLogTesterMain from "../memlogging/MemLogTesterMain.svelte";
 
 const modes = [
   { code: "recursive", label: "Cards" },
@@ -14,6 +15,7 @@ const modes = [
   { code: "graph", label: "Graph" },
   // { code: "screen", label: "Screen" },
   { code: "toast", label: "Toast" },
+  { code: "memlog", label: "Mem-logging" },
 ];
 
 let selected = $state<string>("graph");
@@ -40,7 +42,9 @@ function handleSelect(code: string) {
   {:else if selected === "screen"}
     <ScreenLayout />
   {:else if selected === "toast"}
-    <ToastTestermain />
+    <ToastTesterMain />
+  {:else if selected === "memlog"}
+    <MemLogTesterMain />
   {:else}
     No component to show.
   {/if}

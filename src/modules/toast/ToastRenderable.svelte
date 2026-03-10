@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { Subscriber, Unsubscriber } from "svelte/store";
 import { onMount } from "svelte";
-import TimedCloseBtn from "../components/TimedCloseBtn.svelte";
+import TimedCloseBtn from "../../components/TimedCloseBtn.svelte";
 
 interface Props {
   id: string;

@@ -70,7 +70,7 @@ export const initialEdges: Edge[] = [
     target: "an52dSd9",
     sourceHandle: "x",
     targetHandle: "x/in",
-    type: "bezier",
+    type: "default",
     data: {
       label: "Dummy A to Transform",
     },
@@ -82,7 +82,7 @@ export const initialEdges: Edge[] = [
     target: "kL34e1dex",
     sourceHandle: "fx",
     targetHandle: "f",
-    type: "bezier",
+    type: "default",
     data: {
       label: "reconnectable edge",
     },
@@ -94,7 +94,7 @@ export const initialEdges: Edge[] = [
     target: "kL34e1dex",
     sourceHandle: "x/out",
     targetHandle: "f",
-    type: "bezier",
+    type: "default",
     data: {
       label: "Transform to Result",
     },
