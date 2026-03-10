@@ -1,50 +1,58 @@
 <script lang="ts">
 import MyHandle from "./MyHandle.svelte";
+import type { NodeDetailsData } from "./types";
 
-interface Slots {
-  ins: string[];
-  outs: string[];
-  ios: string[];
-}
+// Derive the param types without explicitly importing.
+type InParam = NodeDetailsData["ins"][number];
+type OutParam = NodeDetailsData["outs"][number];
+type InOutParam = NodeDetailsData["inouts"][number];
 
 interface Props {
-  slots: Slots;
+  ins: InParam[];
+  outs: OutParam[];
+  inouts: InOutParam[];
 }
 
-let nextId = 0;
-function getNodeId() {
-  return `n-${++nextId}`;
-}
+const { ins, outs, inouts }: Props = $props();
+
 </script>
 
 <div class="flex-fitted-rows">
-  {@render inSlot()}
-  {@render outSlot()}
-  {@render inoutSlot()}
+  {#each ins as param (param.name)}
+    {@render inSlot(param)}
+  {/each}
+  {#each outs as param (param.name)}
+    {@render outSlot(param)}
+  {/each}
+  {#each inouts as param (param.name)}
+    {@render inoutSlot(param)}
+  {/each}
 </div>
 
-{#snippet inSlot()}
+{#snippet inSlot(param: InParam)}
+  {@const {name: paramName, type: paramType} = param}
   <div class="slot rounded-sm flex-fitted-cells">
-    <span class="label rounded-sm">an in param</span>
-    <MyHandle kind="in" id={"in0"} />
+    <span class="label rounded-sm" title={paramType}>{paramName}</span>
+    <MyHandle kind="in" id={paramName} />
     <MyHandle kind="out-x" />
   </div>
 {/snippet}
 
-{#snippet outSlot()}
+{#snippet outSlot(param: OutParam)}
+  {@const {name: paramName, type: paramType} = param}
   <div class="slot rounded-sm flex-fitted-cells">
-    <span class="label rounded-sm">an out param</span>
-
+    <span class="label rounded-sm" title={paramType}>{paramName}</span>
     <MyHandle kind="in-x" />
-    <MyHandle kind="out" id={"out0"} />
+    <MyHandle kind="out" id={paramName} />
   </div>
 {/snippet}
 
-{#snippet inoutSlot()}
+{#snippet inoutSlot(param: InOutParam)}
+  {@const {name: paramName, type: paramType} = param}
   <div class="slot rounded-sm flex-fitted-cells">
-    <span class="label rounded-sm">an in/out param</span>
-    <MyHandle kind="in" id={"mut0i"} />
-    <MyHandle kind="out" id={"mut0o"} />
+    <span class="label rounded-sm" title={paramType}>{paramName}</span>
+    <MyHandle kind="in" id={paramName + "/in"} />
+    <MyHandle kind="out" id={paramName + "/out"} />
   </div>
 {/snippet}
 

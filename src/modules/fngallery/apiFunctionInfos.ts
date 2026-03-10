@@ -32,10 +32,10 @@ async function delayedDummyData<T>(
   });
 }
 
-function useFetchFnInfos() {
+export function fetchFnInfos() {
   let controller: AbortController | null = null;
 
-  async function fetchItems(): Promise<FuncSpec[]> {
+  async function fetchItemsAsync(): Promise<FuncSpec[]> {
     if (controller) {
       controller.abort();
     }
@@ -58,7 +58,13 @@ function useFetchFnInfos() {
     controller?.abort();
   }
 
-  return { fetchItems, abortFetch };
+  return { fetchItemsAsync, abortFetch };
 }
 
-export default useFetchFnInfos;
+export async function lookupFnDetailsAsync(funcId: string): Promise<FuncSpec | undefined> {
+  if (!USE_DUMMY_DATA) {
+    throw new Error("Real api lookup not implemented");
+  }
+  const specs = getFunctionSpecs();
+  return specs.find((fn: FuncSpec) => fn.id === funcId);
+}

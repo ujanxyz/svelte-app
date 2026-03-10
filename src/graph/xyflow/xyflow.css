@@ -16,3 +16,18 @@
   border-radius: 100%;
   background-color: #556f85;
 }
+
+.svelte-flow__edge {
+  /* stroke-width: 16; */
+}
+
+.svelte-flow__edge-path {
+  stroke: #a143d8;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+  stroke-dashoffset: 2;
+}
+
+.svelte-flow__edge.animated {
+  stroke: #FF8800;
+}

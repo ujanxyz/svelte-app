@@ -21,6 +21,7 @@ let { id, kind }: Props = $props();
     id={id}
     position={Position.Left}
     data-enabled={true}
+    title={id}
     style="--handle-size: {size}px;"
   >
     <SignInIcon size={size} />
@@ -31,6 +32,7 @@ let { id, kind }: Props = $props();
     position={Position.Left}
     data-enabled={false}
     isConnectable={false}
+    title={id}
     style="--handle-size: {size}px;"
   >
     <EmptyIcon size={size} />
@@ -41,6 +43,7 @@ let { id, kind }: Props = $props();
     id={id}
     position={Position.Right}
     data-enabled={true}
+    title={id}
     style="--handle-size: {size}px;"
   >
     <SignOutIcon size={size} />
@@ -51,6 +54,7 @@ let { id, kind }: Props = $props();
     position={Position.Right}
     data-enabled={false}
     isConnectable={false}
+    title={id}
     style="--handle-size: {size}px;"
   >
     <EmptyIcon size={size} />

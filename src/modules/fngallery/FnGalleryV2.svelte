@@ -3,12 +3,12 @@ import { onMount } from 'svelte';
 import useCurrentOverlay from '../../overlayv2/useCurrentOverlay';
 import FunctionCard from './FunctionCard.svelte';
 import type { FuncSpec } from './types';
-import useFetchFnInfos from './useFetchFnInfos';
+import { fetchFnInfos } from './apiFunctionInfos';
 
 const overlay = useCurrentOverlay();
-const { fetchItems, abortFetch } = useFetchFnInfos();
+const { fetchItemsAsync, abortFetch } = fetchFnInfos();
 
-let itemsPromise = $state(fetchItems());
+let itemsPromise = $state(fetchItemsAsync());
 
 onMount(() => {
   return () => abortFetch();

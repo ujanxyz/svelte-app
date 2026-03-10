@@ -1,14 +1,14 @@
 <script lang="ts">
 import SlotsArray from "./SlotsArray.svelte";
 import { onDestroy, onMount } from "svelte";
-import { type NodeProps } from "@xyflow/svelte";
+import { type Node, type NodeProps } from "@xyflow/svelte";
 import useNodeOpsContext from "./useNodeOpsContext";
 import useEventDispatch from "../../utils/useEventDispatch";
 import { EventKinds } from "../../utils/constants";
 import XYNodeTopBar from "./XYNodeTopBar.svelte";
+import type { NodeDetailsData } from "./types";
 
-const { data: nodeData, id: nodeId, ...restProps }: NodeProps = $props();
-const { label } = nodeData as { label: string };
+const { data: nodeDetails, id: nodeId, ...restProps }: NodeProps<Node<NodeDetailsData>> = $props();
 
 let containerDiv: HTMLDivElement | undefined;
 const slots = {
@@ -31,9 +31,10 @@ onDestroy(() => {
 </script>
 
 <div bind:this={containerDiv} class="noderoot">
-  <h3 class="card-title">{label}</h3>
+  <h3 class="card-title">{nodeDetails.label}</h3>
+  <span class="nodeid">{nodeId}</span>
   <!-- <a href="#" class="card-button">View</a> -->
-  <SlotsArray slots={slots} />
+  <SlotsArray ins={nodeDetails.ins} outs={nodeDetails.outs} inouts={nodeDetails.inouts} />
 </div>
 <XYNodeTopBar />
 
@@ -65,5 +66,9 @@ onDestroy(() => {
 .card-button {
   font-size: small;
   margin: 0;
+}
+.nodeid {
+  font-size: 0.5rem;
+  color: var(--color-text-md-con);
 }
 </style>

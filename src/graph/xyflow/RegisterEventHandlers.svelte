@@ -3,29 +3,32 @@ import { onMount } from "svelte";
 import type { Node, XYPosition } from "@xyflow/svelte";
 import { EventKinds } from "../../utils/constants";
 import useEventConsumer from "../../utils/useEventConsumer";
-import useGraphOps from "./useGraphOps";
+import useGraphOps from "../data/useGraphOps";
+import { lookupFnDetailsAsync } from "../../modules/fngallery/apiFunctionInfos";
+import { makeNodeCreator } from "../nodes/nodeCreator";
 
-const { handleEvent, clearHandlers } = useEventConsumer();
+const { handleEvent, handleEventAsync, clearHandlers } = useEventConsumer();
 const ops = useGraphOps();
 let nextNodeId = 10;
+const nodeCreator = makeNodeCreator();
 
 onMount(() => {
-  handleEvent(EventKinds.FN_GALLERY_SELECT, _xyAddNode);
+  handleEventAsync(EventKinds.FN_GALLERY_SELECT, _xyAddNodeAsync);
   handleEvent(EventKinds.XY_RM_NODE, _xyRmNode);
   handleEvent(EventKinds.XY_RM_EDGE, _xyRmEdge);
   handleEvent(EventKinds.XY_RM_SELECTION, _xyRmSelection);
+
   return () => clearHandlers();
 });
 
-function _xyAddNode(payload: { code: string, position: XYPosition }): void {
-  const node: Node = {
-    id: "n-" + nextNodeId,
-    data: { label: payload.code },
-    type: "default",
-    position: payload.position,
-  };
-  ++nextNodeId;
-  ops.addNode(node);
+async function _xyAddNodeAsync(payload: { code: string, position: XYPosition }): Promise<void> {
+  const funcspec = await lookupFnDetailsAsync(payload.code);
+  if (!funcspec) {
+    throw new Error("Function not found: " + payload.code);
+  }
+  const newNode = nodeCreator.newNodFromFunc(funcspec, payload.position);
+  console.log(newNode);
+  ops.addNode(newNode);
 }
 
 function _xyRmNode(payload: { nodeId: string }): void {

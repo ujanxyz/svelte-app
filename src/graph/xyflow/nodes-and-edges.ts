@@ -2,70 +2,112 @@ import type { Node, Edge } from "@xyflow/svelte";
 
 export const initialNodes: Node[] = [
   {
-    id: "fnA",
-    data: { label: "Func A" },
+    id: "lwnfPJ0",
+    data: {
+      label: "Input Point",
+      funcid: "/dummy/in-pt",
+      ins: [],
+      outs: [
+        {name: "x", type: "float2"},
+      ],
+      inouts: [],
+    },
     type: "default",
-    position: { x: 0, y: 0 },
+    position: { x: -200, y: 0 },
   },
   {
-    id: "fnB",
-    data: { label: "Func B" },
+    id: "gMn6deH",
+    data: {
+      label: "Point Function",
+      funcid: "/dummy/fn-b",
+      ins: [
+        {name: "x", type: "float2"},
+      ],
+      outs: [
+        {name: "fx", type: "float"},
+      ],
+      inouts: [],
+    },
     type: "default",
-    position: { x: 0, y: 200 },
+    position: { x: 0, y: -100 },
   },
   {
-    id: "fnC",
-    data: { label: "Func C" },
+    id: "an52dSd9",
+    data: {
+      label: "Transform Point",
+      funcid: "/dummy/trans-pt",
+      ins: [],
+      outs: [],
+      inouts: [
+        {name: "x", type: "float2"},
+      ],
+    },
+    type: "default",
+    position: { x: 0, y: 100 },
+  },
+  {
+    id: "kL34e1dex",
+    data: {
+      label: "Result",
+      funcid: "/sink/simple-res",
+      ins: [
+        {name: "f", type: "float"},
+      ],
+      outs: [],
+      inouts: [],
+    },
     type: "default",
     position: { x: 200, y: 0 },
   },
-  {
-    id: "fnD",
-    data: { label: "Func D" },
-    type: "default",
-    position: { x: 200, y: 200 },
-  },
-
-  // {
-  //   id: "in1",
-  //   data: { label: "Input 1" },
-  //   type: "in",
-  //   position: { x: 150, y: 0 },
-  // },
 ];
 
 export const initialEdges: Edge[] = [
   {
-    id: "AD",
-    source: "fnA",
-    target: "fnD",
-    sourceHandle: "mut0o",
-    targetHandle: "in0",
-    type: "custom",
+    id: "a/x-b/x",
+    source: "lwnfPJ0",
+    target: "gMn6deH",
+    sourceHandle: "x",
+    targetHandle: "x",
+    type: "bezier",
     data: {
-      label: "reconnectable edge",
+      label: "Dummy A to Point func",
     },
+    animated: true,
   },
   {
-    id: "AC",
-    source: "fnA",
-    target: "fnC",
-    sourceHandle: "out0",
-    targetHandle: "mut0i",
-    type: "custom",
+    id: "a/x-p/x",
+    source: "lwnfPJ0",
+    target: "an52dSd9",
+    sourceHandle: "x",
+    targetHandle: "x/in",
+    type: "bezier",
     data: {
-      label: "reconnectable edge",
+      label: "Dummy A to Transform",
     },
+    animated: true,
   },
   {
-    id: "BC",
-    source: "fnB",
-    target: "fnC",
-    sourceHandle: "mut0o",
-    targetHandle: "in0",
-    type: "custom",
+    id: "b/fx-r",
+    source: "gMn6deH",
+    target: "kL34e1dex",
+    sourceHandle: "fx",
+    targetHandle: "f",
+    type: "bezier",
     data: {
       label: "reconnectable edge",
     },
+    animated: true,
+  },
+  {
+    id: "t/x-r/f",
+    source: "an52dSd9",
+    target: "kL34e1dex",
+    sourceHandle: "x/out",
+    targetHandle: "f",
+    type: "bezier",
+    data: {
+      label: "Transform to Result",
+    },
+    animated: true,
   },
 ];
