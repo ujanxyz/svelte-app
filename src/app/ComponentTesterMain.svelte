@@ -1,12 +1,12 @@
 <script lang="ts">
 import ButtonGroup from "../components/ButtonGroup.svelte";
-import ContextMenuMain from "../overlayv2/context-menu/ContextMenuMain.svelte";
-import LocalPopupsMain from "../overlayv2/local-popups/LocalPopupsMain.svelte";
-import RecursiveCardsMain from "../overlayv2/recursive-cards/RecursiveCardsMain.svelte";
+import ContextMenuMain from "../overlay/context-menu/ContextMenuMain.svelte";
+import LocalPopupsMain from "../overlay/local-popups/LocalPopupsMain.svelte";
+import RecursiveCardsMain from "../overlay/recursive-cards/RecursiveCardsMain.svelte";
 import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
 import ScreenLayout from "./ScreenLayout.svelte";
 import ToastTesterMain from "../modules/toast/ToastTesterMain.svelte";
-import MemLogTesterMain from "../memlogging/MemLogTesterMain.svelte";
+import MemLogTesterMain from "../modules/memlogging/MemLogTesterMain.svelte";
 
 const modes = [
   { code: "recursive", label: "Cards" },

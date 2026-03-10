@@ -1,4 +1,4 @@
-import type { ClientXY, StatusOr } from "../../overlayv2/types";
+import type { ClientXY, StatusOr } from "../../overlay/types";
 
 export type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
 export type PopupFunction = () => Promise<StatusOr<string>>;

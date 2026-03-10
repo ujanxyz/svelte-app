@@ -1,8 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import useMemlogging from "./useMemlogging";
-import { kDummyLogs } from "../utils/dummyData";
-import { makeCircularPicker, makeRandomPicker } from "../utils/random";
+import { kDummyLogs } from "../../utils/dummyData";
+import { makeCircularPicker, makeRandomPicker } from "../../utils/random";
 import { LogLevel } from "./types";
 
 const { debugLog, infoLog, warnLog, errorLog } = useMemlogging();

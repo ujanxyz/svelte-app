@@ -5,10 +5,10 @@ import {
   type XYPosition,
 } from "@xyflow/svelte";
 import { CONTXT_KEY_XY_ACTIONS, MenuCodes } from "./constants";
-import type { ClientXY, StatusOr } from "../../overlayv2/types";
+import type { ClientXY, StatusOr } from "../../overlay/types";
 import { getContext } from "svelte";
 import type { MenuFunction, PopupFunction, XYActions } from "./types";
-import { ReturnStatus } from "../../overlayv2/constants";
+import { ReturnStatus } from "../../overlay/constants";
 import useEventDispatch from "../../utils/useEventDispatch";
 import { EventKinds } from "../../utils/constants";
 

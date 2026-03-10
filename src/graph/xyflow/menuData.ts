@@ -1,4 +1,4 @@
-import type { MenuItem } from "../../overlayv2/context-menu/menu";
+import type { MenuItem } from "../../overlay/context-menu/menu";
 import { MenuCodes } from "./constants";
 
 export const paneMenuData: MenuItem[] = [

@@ -1,16 +1,16 @@
 <script lang="ts">
 import { getContext, type Snippet } from "svelte";
 import { CONTXT_KEY_XY_ACTIONS, MenuCodes } from "./constants";
-import { useOverlayUi } from "../../overlayv2/overlayStore";
+import { useOverlayUi } from "../../overlay/overlayStore";
 import {
   edgeMenuData,
   nodeMenuData,
   paneMenuData,
   selectionMenuData,
 } from "./menuData";
-import MenuLayer from "../../overlayv2/context-menu/MenuLayer.svelte";
+import MenuLayer from "../../overlay/context-menu/MenuLayer.svelte";
 import type { XYActions } from "./types";
-import type { ClientXY, StatusOr } from "../../overlayv2/types";
+import type { ClientXY, StatusOr } from "../../overlay/types";
 
 // Icons.
 import ArrowClockwiseIcon from "phosphor-svelte/lib/ArrowClockwiseIcon";

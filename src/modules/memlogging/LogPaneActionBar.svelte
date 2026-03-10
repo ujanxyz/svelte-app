@@ -1,5 +1,5 @@
 <script lang="ts">
-import IconButton from "../components/IconButton.svelte";
+import IconButton from "../../components/IconButton.svelte";
 import XCircleIcon from "phosphor-svelte/lib/XCircleIcon";
 
 type Props = {
