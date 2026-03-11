@@ -3,10 +3,10 @@ import ButtonGroup from "../components/ButtonGroup.svelte";
 import ContextMenuMain from "../overlay/context-menu/ContextMenuMain.svelte";
 import LocalPopupsMain from "../overlay/local-popups/LocalPopupsMain.svelte";
 import RecursiveCardsMain from "../overlay/recursive-cards/RecursiveCardsMain.svelte";
-import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
 import ScreenLayout from "./ScreenLayout.svelte";
 import ToastTesterMain from "../modules/toast/ToastTesterMain.svelte";
 import MemLogTesterMain from "../modules/memlogging/MemLogTesterMain.svelte";
+import GraphEditorWithRealOps from "../graph/GraphEditorWithRealOps.svelte";
 
 const modes = [
   { code: "recursive", label: "Cards" },
@@ -38,7 +38,7 @@ function handleSelect(code: string) {
   {:else if selected === "local"}
     <LocalPopupsMain />
   {:else if selected === "graph"}
-    <XYFlowWrapper />
+    <GraphEditorWithRealOps />
   {:else if selected === "screen"}
     <ScreenLayout />
   {:else if selected === "toast"}

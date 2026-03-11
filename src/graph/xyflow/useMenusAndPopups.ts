@@ -4,38 +4,38 @@ import {
   type Node,
   type XYPosition,
 } from "@xyflow/svelte";
-import { CONTXT_KEY_XY_ACTIONS, MenuCodes } from "./constants";
-import type { ClientXY, StatusOr } from "../../overlay/types";
-import { getContext } from "svelte";
-import type { MenuFunction, PopupFunction, XYActions } from "./types";
+import { MenuCodes } from "../constants";
+import type { ClientXY } from "../../overlay/types";
 import { ReturnStatus } from "../../overlay/constants";
-import useEventDispatch from "../../utils/useEventDispatch";
-import { EventKinds } from "../../utils/constants";
+import { useGraphService } from "../graph-services";
+import { lookupFnDetailsAsync } from "../../modules/fngallery/apiFunctionInfos";
+import { makeNodeCreator } from "../nodes/nodeCreator";
 
 export default function useMenusAndPopups() {
-  const xyActions = getContext(CONTXT_KEY_XY_ACTIONS) as XYActions;
+  const flowGraphService = useGraphService("flowGraphService");
+  const menuService = useGraphService("menuService");
+  const galleryService = useGraphService("galleryService");
+
+  const nodeCreator = makeNodeCreator();
   const { screenToFlowPosition } = useSvelteFlow();
 
-  const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
-  const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
-  const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
-  const dispatchPickFn = useEventDispatch(EventKinds.FN_GALLERY_SELECT);
+  // const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
+  // const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
+  // const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
+  // const dispatchPickFn = useEventDispatch(EventKinds.FN_GALLERY_SELECT);
 
   async function onpanecontextmenu({
     event,
   }: {
     event: MouseEvent;
   }): Promise<void> {
-    console.log("In onpanecontextmenu ..", xyActions);
     const clientXY: ClientXY = {
       x: event.clientX,
       y: event.clientY,
     };
     event.preventDefault();
     const flowPosn = screenToFlowPosition(clientXY);
-    const retval = (await (xyActions.menuInPane as MenuFunction)(
-      clientXY,
-    )) as StatusOr<string>;
+    const retval = await menuService.menuInPane(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
     switch (retval.value) {
       case MenuCodes.NEW_NODE:
@@ -51,20 +51,17 @@ export default function useMenusAndPopups() {
     node: Node;
     event: MouseEvent;
   }): Promise<void> {
-    console.log("[on-node-context-menu]:", node);
     const clientXY: ClientXY = {
       x: event.clientX,
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = (await (xyActions.menuInNode as MenuFunction)(
-      clientXY,
-    )) as StatusOr<string>;
+    const retval = await menuService.menuInNode(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
     const nodeId = node.id as string;
     switch (retval.value) {
       case MenuCodes.RM_NODE:
-        dispatchRmNode({ nodeId });
+        await flowGraphService.deleteNode(nodeId);
     }
   }
 
@@ -80,14 +77,12 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = (await (xyActions.menuInEdge as MenuFunction)(
-      clientXY,
-    )) as StatusOr<string>;
+    const retval = await menuService.menuInEdge(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
     const edgeId = edge.id as string;
     switch (retval.value) {
       case MenuCodes.RM_EDGE:
-        dispatchRmEdge({ edgeId });
+        await flowGraphService.deleteEdge(edgeId);
     }
   }
 
@@ -98,19 +93,30 @@ export default function useMenusAndPopups() {
     nodes: Node[];
     event: MouseEvent;
   }): Promise<void> {
-    console.log("[on-selection-context-menu]:", nodes);
     const clientXY: ClientXY = {
       x: event.clientX,
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = (await (xyActions.menuInSelection as MenuFunction)(
-      clientXY,
-    )) as StatusOr<string>;
+    const retval = await menuService.menuInSelection(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
     switch (retval.value) {
       case MenuCodes.RM_SELECTION:
-        dispatchRmSelection({ nodes });
+        console.log(nodes);
+        await flowGraphService.deleteNodes(nodes.map((n: Node) => n.id));
+    }
+  }
+
+  async function onconnectend(
+    event: MouseEvent | TouchEvent,
+    connectionState: any,
+  ): Promise<void> {
+    const clientXY: ClientXY = getClientXY(event);
+    event.preventDefault();
+    const retval = await menuService.menuInConnEnd(clientXY);
+    if (retval.status !== ReturnStatus.OK) return;
+    console.log(retval);
+    switch (retval.value) {
     }
   }
 
@@ -125,12 +131,26 @@ export default function useMenusAndPopups() {
   }
 
   async function _internalOpenGallery(position: XYPosition): Promise<void> {
-    const retval = (await (
-      xyActions.popupGallery as PopupFunction
-    )()) as StatusOr<string>;
+    const retval = await galleryService.pickFnFromGallery();
     if (retval.status !== ReturnStatus.OK) return;
     console.log(retval.value);
-    dispatchPickFn({ code: retval.value, position });
+    const funcId = retval.value as string;
+    const funcspec = await lookupFnDetailsAsync(funcId);
+    if (!funcspec) {
+      // TODO: Make error toast.
+      throw new Error("Function not found: " + funcId);
+    }
+    const newNode = nodeCreator.newNodFromFunc(funcspec, position);
+    await flowGraphService.appendNode(newNode);
+  }
+
+  function getClientXY(event: MouseEvent | TouchEvent): ClientXY {
+    if (event instanceof MouseEvent) {
+      return { x: event.clientX, y: event.clientY };
+    } else {
+      const touch = event.touches[0] ?? event.changedTouches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    }
   }
 
   return {
@@ -138,6 +158,7 @@ export default function useMenusAndPopups() {
     onnodecontextmenu,
     onedgecontextmenu,
     onselectioncontextmenu,
+    onconnectend,
     // Custom app-declared handlers.
     onpopupgallery,
   };

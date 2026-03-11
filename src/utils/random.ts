@@ -59,7 +59,10 @@ export function createRNG(seed: number): () => number {
  * - If `values.length === 0`, the behavior is undefined.
  * - Designed for lightweight sampling, not cryptographic randomness.
  */
-export function makeRandomPicker<T>(values: T[], seed: number): {pick: () => T;} {
+export function makeRandomPicker<T>(
+  values: T[],
+  seed: number,
+): { pick: () => T } {
   const rng = createRNG(seed);
   function pick(): T {
     const index = ((rng() * 100000) | 0) % values.length;
@@ -94,7 +97,7 @@ export function makeRandomPicker<T>(values: T[], seed: number): {pick: () => T;}
  * picker.pick(); // "A"
  * ```
  */
-export function makeCircularPicker<T>(values: T[]): {pick: () => T;} {
+export function makeCircularPicker<T>(values: T[]): { pick: () => T } {
   let index = 0;
   function pick(): T {
     const picked = values[index];

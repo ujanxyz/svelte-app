@@ -2,7 +2,6 @@ import store from "./store";
 import { LogLevel } from "./types";
 
 function useMemlogging() {
-
   function debugLog(message: string): void {
     store.appendLog(LogLevel.DEBUG, message);
   }
@@ -23,5 +22,3 @@ function useMemlogging() {
 }
 
 export default useMemlogging;
-
-

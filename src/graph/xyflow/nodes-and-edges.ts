@@ -98,6 +98,6 @@ export const initialEdges: Edge[] = [
     data: {
       label: "Transform to Result",
     },
-    animated: true,
+    animated: false,
   },
 ];

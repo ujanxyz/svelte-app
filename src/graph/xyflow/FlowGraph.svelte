@@ -1,51 +1,62 @@
 <script lang="ts">
+import { type Component } from "svelte";
 import {
   Background,
   BackgroundVariant,
   ControlButton,
   Controls,
   SvelteFlow,
+  type Edge,
+  type Node,
 } from "@xyflow/svelte";
-import "@xyflow/svelte/dist/style.css";
 import DefaultNode from "../nodes/DefaultNode.svelte";
 import useMenusAndPopups from "./useMenusAndPopups";
 import InputNode from "../nodes/InputNode.svelte";
-import { initialNodes, initialEdges } from "./nodes-and-edges";
-import type { Component } from "svelte";
-import type { Edge, EdgeProps, Node, NodeProps } from "@xyflow/svelte";
+import DefaultEdge from "../edges/DefaultEdge.svelte";
+import useDebugActions from "./useDebugActions";
+import type { UjEdgeProps, UjNodeProps } from "../types";
+import "@xyflow/svelte/dist/style.css";
 import "./xyflow.css";
 // Icons
 import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
 import PlayIcon from "phosphor-svelte/lib/PlayIcon";
-import DefaultEdge from "../edges/DefaultEdge.svelte";
-import GraphService from "../data/GraphService.svelte";
+import { initialEdges, initialNodes } from "./nodes-and-edges";
 
-const nodeTypes: Record<string, Component<NodeProps>> = {
+const nodeTypes: Record<string, Component<UjNodeProps>> = {
   in: InputNode,
   default: DefaultNode,
 };
 
-const edgeTypes: Record<string, Component<EdgeProps>> = {
+const edgeTypes: Record<string, Component<UjEdgeProps>> = {
   default: DefaultEdge,
 };
+
+let _nodes = $state.raw<Node[]>(initialNodes);
+let _edges = $state.raw<Edge[]>(initialEdges);
 
 const {
   onpanecontextmenu,
   onnodecontextmenu,
   onedgecontextmenu,
   onselectioncontextmenu,
+  onconnectend,
   onpopupgallery,
 } = useMenusAndPopups();
 
-const graph = new GraphService();
-
-// let nodes = $state.raw<Node[]>(initialNodes);
-// let edges = $state.raw<Edge[]>(initialEdges);
+const {
+  isValidConnection,
+  onbeforeconnect,
+  onconnect,
+  onconnectstart,
+  // onconnectend,
+  ondelete,
+  onpaneclick,
+} = useDebugActions();
 </script>
 
 <SvelteFlow
-  bind:nodes={graph.bindableNodes}
-  bind:edges={graph.bindableEdges}
+  bind:nodes={_nodes}
+  bind:edges={_edges}
   {nodeTypes}
   {edgeTypes}
   {onpanecontextmenu}
@@ -54,12 +65,21 @@ const graph = new GraphService();
   {onselectioncontextmenu}
   fitView
   colorMode={"dark"}
+  // Debug actions:
+  {isValidConnection}
+  {onbeforeconnect}
+  {onconnect}
+  {onconnectstart}
+  {onconnectend}
+  {ondelete}
+  {onpaneclick}
+  multiSelectionKey={null}
 >
   <Background
     variant={BackgroundVariant.Dots}
     gap={5}
     patternClass={"dots"}
-    size={0.6}
+    size={0.75}
   />
   <Controls position={"top-right"}>
     <ControlButton onclick={onpopupgallery}>

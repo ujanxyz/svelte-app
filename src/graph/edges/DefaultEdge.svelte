@@ -27,7 +27,7 @@ const [edgePath, labelX, labelY] = $derived(
     targetY,
   }),
 );
-
+console.log(edgePath);
 </script>
 
 <!-- <BaseEdge
@@ -39,6 +39,7 @@ const [edgePath, labelX, labelY] = $derived(
   {labelStyle}
 /> -->
 
+<!-- <path d={edgePath} class="thickpath"  fill="none" /> -->
 <BaseEdge
   path={edgePath}
   {markerStart}
@@ -47,9 +48,28 @@ const [edgePath, labelX, labelY] = $derived(
   {label}
   {labelStyle}
 />
-<circle r="4" fill="#ff00ff">
-  <animateMotion dur="2s" repeatCount="indefinite" path={edgePath} />
-</circle>
+
+{#each Array(5).keys() as i}
+  <circle r="3" fill="blue">
+    <animateMotion
+      dur="5s"
+      repeatCount="indefinite"
+      path={edgePath}
+      begin="{i}s"
+    />
+  </circle>
+{/each}
+
 <EdgeToolbar edgeId={id} x={labelX} y={labelY} isVisible={false}>
-	<button>{id}</button>
+  <button>{id}</button>
 </EdgeToolbar>
+
+<style>
+.thickpath {
+  stroke: #30c3d3;
+  stroke-width: 20;
+  stroke-opacity: 20%;
+  stroke-dasharray: none;
+  stroke-linecap: round;
+}
+</style>

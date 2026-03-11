@@ -1,11 +1,11 @@
 <script lang="ts">
 import MyHandle from "./MyHandle.svelte";
-import type { NodeDetailsData } from "./types";
+import type { UjNodeData } from "../types";
 
 // Derive the param types without explicitly importing.
-type InParam = NodeDetailsData["ins"][number];
-type OutParam = NodeDetailsData["outs"][number];
-type InOutParam = NodeDetailsData["inouts"][number];
+type InParam = UjNodeData["ins"][number];
+type OutParam = UjNodeData["outs"][number];
+type InOutParam = UjNodeData["inouts"][number];
 
 interface Props {
   ins: InParam[];

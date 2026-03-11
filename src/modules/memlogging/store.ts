@@ -10,7 +10,7 @@ const store = (function () {
   function appendLog(level: LogLevel, message: string) {
     const id = ++nextId;
     const timestamp = Date.now();
-    const entry: MemLogEntry = {id, level, timestamp, message};
+    const entry: MemLogEntry = { id, level, timestamp, message };
     entries.update((n) => [entry, ...n].slice(0, MAX_LOGS_COUNT));
   }
 

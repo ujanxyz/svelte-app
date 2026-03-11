@@ -1,15 +1,15 @@
 <script lang="ts">
-import { getContext, type Snippet } from "svelte";
-import { CONTXT_KEY_XY_ACTIONS, MenuCodes } from "./constants";
+import { type Snippet } from "svelte";
+import { MenuCodes } from "../constants";
 import { useOverlayUi } from "../../overlay/overlayStore";
 import {
+  connEndMenuData,
   edgeMenuData,
   nodeMenuData,
   paneMenuData,
   selectionMenuData,
 } from "./menuData";
 import MenuLayer from "../../overlay/context-menu/MenuLayer.svelte";
-import type { XYActions } from "./types";
 import type { ClientXY, StatusOr } from "../../overlay/types";
 
 // Icons.
@@ -23,23 +23,21 @@ import PlusIcon from "phosphor-svelte/lib/PlusIcon";
 import StackPlusIcon from "phosphor-svelte/lib/StackPlusIcon";
 import StackMinusIcon from "phosphor-svelte/lib/StackMinusIcon";
 import TrashIcon from "phosphor-svelte/lib/TrashIcon";
-import FnGalleryV2 from "../../modules/fngallery/FnGalleryV2.svelte";
+import { registerGraphService } from "../graph-services";
 
-const xyActions = getContext(CONTXT_KEY_XY_ACTIONS) as XYActions;
-
-$effect.pre(() => {
-  xyActions.menuInPane = showInPaneContext;
-  xyActions.menuInNode = showInNodeContext;
-  xyActions.menuInEdge = showInEdgeContext;
-  xyActions.menuInSelection = showInSelectionContext;
-  xyActions.popupGallery = popupGallery;
+registerGraphService("menuService", {
+  menuInPane: showInPaneContext,
+  menuInNode: showInNodeContext,
+  menuInEdge: showInEdgeContext,
+  menuInSelection: showInSelectionContext,
+  menuInConnEnd: showInConnEndContext,
 });
 
 const paneMenu = useOverlayUi(renderPaneMenu);
 const nodeMenu = useOverlayUi(renderNodeMenu);
 const edgeMenu = useOverlayUi(renderEdgeMenu);
 const selectionMenu = useOverlayUi(renderSelectionMenu);
-const galleryPopup = useOverlayUi(renderGalleryPopup);
+const connEndMenu = useOverlayUi(renderConnEndMenu);
 
 async function showInPaneContext(
   clientXY: ClientXY,
@@ -65,8 +63,10 @@ async function showInSelectionContext(
   return await selectionMenu.openOverlayAsync<string>({ clientXY });
 }
 
-async function popupGallery(): Promise<StatusOr<string>> {
-  return await galleryPopup.openOverlayAsync<string>({});
+async function showInConnEndContext(
+  clientXY: ClientXY,
+): Promise<StatusOr<string>> {
+  return await connEndMenu.openOverlayAsync<string>({ clientXY });
 }
 
 const icons: Record<string, Snippet> = {
@@ -97,6 +97,14 @@ const icons: Record<string, Snippet> = {
   <MenuLayer menuItems={edgeMenuData} {icons} defaultIcon={lineVerticalIcon} />
 {/snippet}
 
+{#snippet renderConnEndMenu()}
+  <MenuLayer
+    menuItems={connEndMenuData}
+    {icons}
+    defaultIcon={lineVerticalIcon}
+  />
+{/snippet}
+
 {#snippet renderSelectionMenu()}
   <MenuLayer
     menuItems={selectionMenuData}
@@ -104,11 +112,6 @@ const icons: Record<string, Snippet> = {
     defaultIcon={lineVerticalIcon}
   />
 {/snippet}
-
-{#snippet renderGalleryPopup()}
-  <FnGalleryV2 />
-{/snippet}
-
 <!-- Icons --------------------------------------------------------------------------------------->
 
 {#snippet arrowClockwiseIcon()}

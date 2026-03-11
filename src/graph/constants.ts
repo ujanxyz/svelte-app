@@ -1,5 +1,3 @@
-export const CONTXT_KEY_XY_ACTIONS = "xy-actions";
-
 export const OverlayTriggers = {
   PANE_CTX_MENU: "p",
   NODE_CTX_MENU: "n",

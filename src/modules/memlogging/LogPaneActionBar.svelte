@@ -9,9 +9,7 @@ const { onclose }: Props = $props();
 </script>
 
 <div class="container">
-  <div class="title">
-    Mem logs
-  </div>
+  <div class="title">Mem logs</div>
   <div class="icon">
     <IconButton tooltip="close" onclick={onclose}>
       <XCircleIcon size={26} />
@@ -33,5 +31,6 @@ const { onclose }: Props = $props();
 .title {
   flex-grow: 1;
 }
-.icon {}
+.icon {
+}
 </style>

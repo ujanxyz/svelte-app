@@ -42,20 +42,19 @@ type Props = {
 
 const { level, timestamp, message, now }: Props = $props();
 const strTimestamp = $derived(formatAgoFast(now, timestamp));
-
 </script>
 
 <div class="logentry" data-log-level={kLevelToStr[level]}>
-  {#if level === LogLevel.DEBUG }
+  {#if level === LogLevel.DEBUG}
     <BugIcon size={18} />
-  {:else if level === LogLevel.INFO }
+  {:else if level === LogLevel.INFO}
     <InfoIcon size={18} />
-  {:else if level === LogLevel.WARNING }
+  {:else if level === LogLevel.WARNING}
     <WarningIcon size={18} />
-  {:else if level === LogLevel.ERROR }
+  {:else if level === LogLevel.ERROR}
     <XCircleIcon size={18} />
   {/if}
-    
+
   [{strTimestamp}]: {message}
 </div>
 

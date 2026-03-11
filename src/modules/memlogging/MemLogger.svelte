@@ -29,18 +29,17 @@ function onClickClose() {
 }
 </script>
 
-{#if !closedWidget && renderables.length > 0 }
+{#if !closedWidget && renderables.length > 0}
   <div class="container">
     <LogPaneActionBar onclose={onClickClose} />
     <div class="logspanel">
-      {#each renderables as renderable: MemLogEntry (renderable.id) }
-        {@const { id, level, timestamp, message } = renderable }
+      {#each renderables as renderable: MemLogEntry (renderable.id)}
+        {@const { id, level, timestamp, message } = renderable}
         <MemLogLine {level} {timestamp} {message} now={timeNow} />
       {/each}
     </div>
   </div>
 {/if}
-
 
 <style>
 .container {

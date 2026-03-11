@@ -1,5 +1,6 @@
-import type { XYPosition } from "@xyflow/svelte";
-import type { FuncSpec } from "../../modules/fngallery/types";
+import type { Edge, EdgeProps, Node, NodeProps } from "@xyflow/svelte";
+import type { FuncSpec } from "../modules/fngallery/types";
+import type { ClientXY, StatusOr } from "../overlay/types";
 
 type ParamBase = {
   name: string;
@@ -20,7 +21,7 @@ type InParam = ParamBase & InConnection;
 type OutParam = ParamBase & OutConnection;
 type InOutParam = ParamBase & InConnection & OutConnection;
 
-export interface NodeDetailsData extends Record<string, unknown> {
+export interface UjNodeData extends Record<string, unknown> {
   label: string;
   funcid: string;
   _funspec: FuncSpec; // Debug only.
@@ -28,3 +29,10 @@ export interface NodeDetailsData extends Record<string, unknown> {
   outs: OutParam[];
   inouts: InOutParam[];
 }
+
+export interface UjEdgeData extends Record<string, unknown> {}
+
+export type UjNode = Node<UjNodeData>;
+export type UjNodeProps = NodeProps<UjNode>;
+export type UjEdge = Edge<UjEdgeData>;
+export type UjEdgeProps = EdgeProps<UjEdge>;

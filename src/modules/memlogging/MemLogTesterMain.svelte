@@ -6,24 +6,27 @@ import { makeCircularPicker, makeRandomPicker } from "../../utils/random";
 import { LogLevel } from "./types";
 
 const { debugLog, infoLog, warnLog, errorLog } = useMemlogging();
-const logMaker = (function() {
-  type LogPicker = { pick: () => string};
+const logMaker = (function () {
+  type LogPicker = { pick: () => string };
   const debugLogPicker = makeCircularPicker(kDummyLogs.debug) as LogPicker;
   const infoLogPicker = makeCircularPicker(kDummyLogs.info) as LogPicker;
   const warnLogPicker = makeCircularPicker(kDummyLogs.warn) as LogPicker;
   const errorLogPicker = makeCircularPicker(kDummyLogs.error) as LogPicker;
-  const pickerOfPicker = makeRandomPicker<[LogLevel, LogPicker]>([
-    [LogLevel.DEBUG, debugLogPicker],
-    [LogLevel.INFO, infoLogPicker],
-    [LogLevel.WARNING, warnLogPicker],
-    [LogLevel.ERROR, errorLogPicker],
-   ], 0);
-  
+  const pickerOfPicker = makeRandomPicker<[LogLevel, LogPicker]>(
+    [
+      [LogLevel.DEBUG, debugLogPicker],
+      [LogLevel.INFO, infoLogPicker],
+      [LogLevel.WARNING, warnLogPicker],
+      [LogLevel.ERROR, errorLogPicker],
+    ],
+    0,
+  );
+
   function makeLog(): [LogLevel, string] {
     const [logLevel, textPicker] = pickerOfPicker.pick();
     return [logLevel, textPicker.pick()];
   }
-  return {makeLog};
+  return { makeLog };
 })();
 
 let emitIntervalId = $state<number | null>(null);
@@ -65,7 +68,7 @@ onMount(() => {
 </script>
 
 <button onclick={toggleLogging} class="trigger" style="--toast-color: #2648AA">
-  {(emitIntervalId === null) ? "Start" : "Pause"}
+  {emitIntervalId === null ? "Start" : "Pause"}
 </button>
 
 <style>

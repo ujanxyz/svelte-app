@@ -3,7 +3,6 @@ import logo from "../assets/svelte.svg";
 import WasmTester from "../modules/engine/WasmTester.svelte";
 import PropsPanelMain from "../graph/propspanel/PropsPanelMain.svelte";
 import ContentSelector from "./ContentSelector.svelte";
-import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
 </script>
 
 <div class="screen">
@@ -11,9 +10,7 @@ import XYFlowWrapper from "../graph/xyflow/XYFlowWrapper.svelte";
     <img src={logo} class="logo" alt="Vite Logo" />
     <ContentSelector />
   </header>
-  <article id="mainArticle">
-    <XYFlowWrapper />
-  </article>
+  <article id="mainArticle">Graph editor goes here ..</article>
   <nav id="mainNav" class="elevation-1">
     <WasmTester />
   </nav>
