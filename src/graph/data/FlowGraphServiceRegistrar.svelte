@@ -1,36 +1,43 @@
 <script lang="ts">
-import { useEdges, useNodes, type Edge, type Node } from "@xyflow/svelte";
+import {
+  useEdges,
+  useNodes,
+  useSvelteFlow,
+  type Edge,
+  type Node,
+} from "@xyflow/svelte";
 import { registerGraphService } from "../graph-services";
 
 const { update: updateNodes } = useNodes();
 const { update: updateEdges } = useEdges();
+const { deleteElements } = useSvelteFlow();
 
 registerGraphService("flowGraphService", {
   deleteNode,
   deleteNodes,
   deleteEdge,
+  deleteEdges,
   appendNode,
 });
 
 async function deleteNode(nodeId: string): Promise<void> {
-  console.log("In deleteNode @ flowGraphService .. ", nodeId);
-  updateNodes((nodes: Node[]) => {
-    console.log("Inside delete ... len: ", nodes.length);
-    return nodes.filter((n: Node) => n.id !== nodeId);
-  });
+  const node = { id: nodeId };
+  deleteElements({ nodes: [node], edges: [] });
 }
 
 async function deleteNodes(nodeIds: string[]): Promise<void> {
-  const lookup = new Set<string>(nodeIds);
-  updateNodes((nodes: Node[]) => {
-    return nodes.filter((n: Node) => !lookup.has(n.id));
-  });
+  const nodes = nodeIds.map((id: string) => ({ id }));
+  deleteElements({ nodes, edges: [] });
 }
 
 async function deleteEdge(edgeId: string): Promise<void> {
-  updateEdges((edges: Edge[]): Edge[] => {
-    return edges.filter((e: Edge) => e.id !== edgeId);
-  });
+  const edge = { id: edgeId };
+  deleteElements({ nodes: [], edges: [edge] });
+}
+
+async function deleteEdges(edgeIds: string[]): Promise<void> {
+  const edges = edgeIds.map((id: string) => ({ id }));
+  deleteElements({ nodes: [], edges });
 }
 
 async function appendNode(newNode: Node): Promise<void> {

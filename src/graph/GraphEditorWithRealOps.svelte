@@ -5,6 +5,7 @@ import FlowGraphServiceRegistrar from "./data/FlowGraphServiceRegistrar.svelte";
 import GalleryServiceRegistrar from "./data/GalleryServiceRegistrar.svelte";
 import FlowGraphWrapper from "./xyflow/FlowGraphWrapper.svelte";
 import ObserveConnection from "./xyflow/ObserveConnection.svelte";
+import ObserveEdges from "./xyflow/ObserveEdges.svelte";
 </script>
 
 <FlowGraphWrapper
@@ -21,4 +22,5 @@ import ObserveConnection from "./xyflow/ObserveConnection.svelte";
 {#snippet afterFlowRealOps()}
   <ExternalEventHandlers />
   <ObserveConnection />
+  <ObserveEdges />
 {/snippet}

@@ -7,12 +7,14 @@ import ScreenLayout from "./ScreenLayout.svelte";
 import ToastTesterMain from "../modules/toast/ToastTesterMain.svelte";
 import MemLogTesterMain from "../modules/memlogging/MemLogTesterMain.svelte";
 import GraphEditorWithRealOps from "../graph/GraphEditorWithRealOps.svelte";
+import StageViewMain from "../modules/stageview/StageViewMain.svelte";
 
 const modes = [
   { code: "recursive", label: "Cards" },
   { code: "ctxmenu", label: "Ctx Menu" },
   { code: "local", label: "Local Edits" },
   { code: "graph", label: "Graph" },
+  { code: "stage", label: "Stage" },
   // { code: "screen", label: "Screen" },
   { code: "toast", label: "Toast" },
   { code: "memlog", label: "Mem-logging" },
@@ -39,6 +41,9 @@ function handleSelect(code: string) {
     <LocalPopupsMain />
   {:else if selected === "graph"}
     <GraphEditorWithRealOps />
+  {:else if selected === "stage"}
+    <GraphEditorWithRealOps />
+    <StageViewMain />
   {:else if selected === "screen"}
     <ScreenLayout />
   {:else if selected === "toast"}

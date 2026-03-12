@@ -1,7 +1,6 @@
-import { getContext } from "svelte";
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
-import type { Edge, Node } from "@xyflow/svelte";
+import type { Node } from "@xyflow/svelte";
 
 export type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
 export type PickFunction = () => Promise<StatusOr<string>>;
@@ -22,6 +21,7 @@ interface FlowGraphService {
   deleteNode: (nodeId: string) => Promise<void>;
   deleteNodes: (nodeIds: string[]) => Promise<void>;
   deleteEdge: (edgeId: string) => Promise<void>;
+  deleteEdges: (edgeIds: string[]) => Promise<void>;
   appendNode: (newNode: Node) => Promise<void>;
 }
 
@@ -42,9 +42,9 @@ function provideGraphContext(): void {
 function registerGraphService<K extends keyof GraphServices>(
   key: K,
   service: NonNullable<GraphServices[K]>,
-): void {
+) {
   // TODO: Throw if already registered.
-  graphContext.registerService(key, service);
+  return graphContext.registerService(key, service);
 }
 
 function useGraphService<K extends keyof GraphServices>(
