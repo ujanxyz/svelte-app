@@ -16,7 +16,10 @@
     "allowJs": true,
     "checkJs": true,
     "strict": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "paths": {
+      "@/*": ["./src/*"],
+    }
   }
   // "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "app.d.ts", "app.d.ts"],
   //"references": [{ "path": "./tsconfig.node.json" }]
