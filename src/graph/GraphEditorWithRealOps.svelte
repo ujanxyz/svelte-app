@@ -3,7 +3,10 @@ import ContextMenuServiceRegistrar from "./data/ContextMenuServiceRegistrar.svel
 import ExternalEventHandlers from "./data/ExternalEventHandlers.svelte";
 import FlowGraphServiceRegistrar from "./data/FlowGraphServiceRegistrar.svelte";
 import GalleryServiceRegistrar from "./data/GalleryServiceRegistrar.svelte";
+import IoManager from "./data/IoManager.svelte";
+import IoServiceRegistrar from "./data/IoServiceRegistrar.svelte";
 import ObserveSlots from "./data/ObserveSlots.svelte";
+import RawStoreServiceRegistrar from "./data/RawStoreServiceRegistrar.svelte";
 import FlowGraphWrapper from "./xyflow/FlowGraphWrapper.svelte";
 import ObserveConnection from "./xyflow/ObserveConnection.svelte";
 import ObserveEdges from "./xyflow/ObserveEdges.svelte";
@@ -15,6 +18,8 @@ import ObserveEdges from "./xyflow/ObserveEdges.svelte";
 />
 
 {#snippet beforeFlowRealOps()}
+  <RawStoreServiceRegistrar />
+  <IoServiceRegistrar />
   <FlowGraphServiceRegistrar />
   <ContextMenuServiceRegistrar />
   <GalleryServiceRegistrar />
@@ -26,4 +31,5 @@ import ObserveEdges from "./xyflow/ObserveEdges.svelte";
 
 {#snippet afterFlowRealOps()}
   <ExternalEventHandlers />
+  <IoManager />
 {/snippet}

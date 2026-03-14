@@ -8,10 +8,9 @@ import PickCoords2D from "./PickCoords2D.svelte";
 import PickTexts from "./PickTexts.svelte";
 import type { UjOverrideData } from "@/graph/types";
 
-interface Props {
-}
+interface Props {}
 
-const { }: Props = $props();
+const {}: Props = $props();
 
 let clientXY = $state<ClientXY>({ x: 0, y: 0 });
 let datatype = $state<string>("");
@@ -27,13 +26,17 @@ const styleString: string = $derived(
 const current = useCurrentOverlay();
 
 $effect.pre(() => {
-  const { anchor, datatype: payloadDatatype, prior } = current.getLayerPayload();
+  const {
+    anchor,
+    datatype: payloadDatatype,
+    prior,
+  } = current.getLayerPayload();
   if (prior === undefined) {
     // `prior` can be null, but still should be set in overlay caller.
     throw new Error("Not found: prior");
   }
   const rect = (anchor as HTMLDivElement).getBoundingClientRect();
-  clientXY = {x: rect.left, y: rect.bottom};
+  clientXY = { x: rect.left, y: rect.bottom };
   datatype = payloadDatatype;
   const priorData = prior as UjOverrideData | null;
   if (priorData === null) return;
@@ -51,16 +54,15 @@ function onData(typedPayload: object) {
   };
   current.settleOverlay(ujData);
 }
-
 </script>
 
 <div class="layer contextmenu" style={styleString}>
   <span class="title"> Picker: {datatype} </span>
-  {#if datatype === "color" }
+  {#if datatype === "color"}
     <PickColors {onData} {initial} />
-  {:else if datatype === "coord2d" }
+  {:else if datatype === "coord2d"}
     <PickCoords2D {onData} {initial} />
-  {:else if datatype === "text" }
+  {:else if datatype === "text"}
     <PickTexts {onData} {initial} />
   {:else}
     Unsupported data type: {datatype}

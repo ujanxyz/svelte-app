@@ -1,5 +1,4 @@
 <script lang="ts">
-import MyHandle from "./MyHandle.svelte";
 import type { UjNodeData, UjOverrideData } from "../types";
 import { slotStore } from "../data/slot-store";
 import NodeSlot from "./NodeSlot.svelte";
@@ -26,7 +25,6 @@ function onDataEntry(slotName: string, data: UjOverrideData): void {
 function onDataLookup(slotName: string): UjOverrideData | null {
   return slotStore.lookupOverride(nodeId, slotName);
 }
-
 </script>
 
 <div class="flex-fitted-rows">
@@ -42,19 +40,26 @@ function onDataLookup(slotName: string): UjOverrideData | null {
 </div>
 
 {#snippet inSlot(param: InParam)}
-  {@const slotInfoIn = slotStore.useSlotInfo(nodeId, param.name) }
-  <NodeSlot access="in" {param} {slotInfoIn} {onDataEntry} {onDataLookup}/>
+  {@const slotInfoIn = slotStore.useSlotInfo(nodeId, param.name)}
+  <NodeSlot access="in" {param} {slotInfoIn} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet outSlot(param: OutParam)}
-  {@const slotInfoOut = slotStore.useSlotInfo(nodeId, param.name) }
-  <NodeSlot access="out" {param} {slotInfoOut} {onDataEntry} {onDataLookup}/>
+  {@const slotInfoOut = slotStore.useSlotInfo(nodeId, param.name)}
+  <NodeSlot access="out" {param} {slotInfoOut} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet inoutSlot(param: InOutParam)}
-  {@const slotInfoIn = slotStore.useSlotInfo(nodeId, param.name + "/in") }
-  {@const slotInfoOut = slotStore.useSlotInfo(nodeId, param.name + "/out") }
-  <NodeSlot access="inout" {param} {slotInfoIn} {slotInfoOut} {onDataEntry} {onDataLookup}/>
+  {@const slotInfoIn = slotStore.useSlotInfo(nodeId, param.name + "/in")}
+  {@const slotInfoOut = slotStore.useSlotInfo(nodeId, param.name + "/out")}
+  <NodeSlot
+    access="inout"
+    {param}
+    {slotInfoIn}
+    {slotInfoOut}
+    {onDataEntry}
+    {onDataLookup}
+  />
 {/snippet}
 
 <style>

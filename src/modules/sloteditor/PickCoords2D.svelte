@@ -1,5 +1,10 @@
 <script lang="ts">
-import { Button, Point, type ButtonClickEvent, type PointValue2d } from "svelte-tweakpane-ui";
+import {
+  Button,
+  Point,
+  type ButtonClickEvent,
+  type PointValue2d,
+} from "svelte-tweakpane-ui";
 
 interface Props {
   initial: object | null;
@@ -17,7 +22,7 @@ $effect.pre(() => {
 
 function onClickAdd(ev: ButtonClickEvent) {
   ev.preventDefault();
-  valueArray.push({x: 0, y: 0});
+  valueArray.push({ x: 0, y: 0 });
   //_updated();
 }
 

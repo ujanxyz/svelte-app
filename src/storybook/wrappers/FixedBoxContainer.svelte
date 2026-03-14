@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { Snippet } from 'svelte';
-import type { HTMLAttributes } from 'svelte/elements';
+import type { Snippet } from "svelte";
+import type { HTMLAttributes } from "svelte/elements";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   children: Snippet;
@@ -14,7 +14,13 @@ const styleWidth = $derived(width ? `${width}px` : "100%");
 const styleHeight = $derived(height ? `${height}px` : "100%");
 </script>
 
-<div class={["container", "div-columns"]} style:width={styleWidth} style:height={styleHeight} style:background-color={bgcolor} {...rest}>
+<div
+  class={["container", "div-columns"]}
+  style:width={styleWidth}
+  style:height={styleHeight}
+  style:background-color={bgcolor}
+  {...rest}
+>
   {@render children()}
 </div>
 

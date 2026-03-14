@@ -8,6 +8,7 @@ import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
 import BracketsSquareIcon from "phosphor-svelte/lib/BracketsSquareIcon";
 import DotOutlineIcon from "phosphor-svelte/lib/DotOutlineIcon";
 import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
+import LinkSimpleBreakIcon from "phosphor-svelte/lib/LinkSimpleBreakIcon";
 import SquareLogoIcon from "phosphor-svelte/lib/SquareLogoIcon";
 
 // Derive the param types without explicitly importing.
@@ -41,20 +42,19 @@ interface Props {
   onDataLookup?: (slotName: string) => UjOverrideData | null;
 }
 
-const { access, param, slotInfoIn, slotInfoOut, onDataEntry, onDataLookup }: Props = $props();
+const {
+  access,
+  param,
+  slotInfoIn,
+  slotInfoOut,
+  onDataEntry,
+  onDataLookup,
+}: Props = $props();
 
 const inState: SlotState = $derived(slotInfoIn?.state ?? "blank");
 const outState: SlotState = $derived(slotInfoOut?.state ?? "blank");
 
-
-
 const editorPopup = useOverlayUi(miniEditor);
-
-
-
-// The manually edited data if it exists.
-// Applicable only to "in" and "inout" nodes.
-let overrideData: object | null = null;
 
 // TODO: Re-visit this logic later, there are several corner cases.
 async function onClickPane(ev: MouseEvent): Promise<void> {
@@ -67,49 +67,65 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
     return;
   }
   if (slotInfoIn?.state === "edge") {
-    window.alert("Cannot enter data. Delete the connection(s) at the input slot and try again.");
+    window.alert(
+      "Cannot enter data. Delete the connection(s) at the input slot and try again.",
+    );
     return;
   }
-  const slotName = (access === "in") ? param.name : param.name + "/in";
+  const slotName = access === "in" ? param.name : param.name + "/in";
   const prior = onDataLookup?.(slotName) ?? null;
 
   const anchor = ev.currentTarget as HTMLButtonElement;
   const datatype = param.type;
-  const editedData = await editorPopup.openOverlayAsync<UjOverrideData>({ anchor, datatype, prior });
+  const editedData = await editorPopup.openOverlayAsync<UjOverrideData>({
+    anchor,
+    datatype,
+    prior,
+  });
   if (editedData.status !== ReturnStatus.OK) return;
   console.log(access, "slotName -> ", slotName, slotInfoIn);
   onDataEntry(slotName, editedData.value!);
 }
-
 </script>
 
 <div class="slotrow rounded-sm flex-centered-cells">
   {#if access === "in"}
-    <button class="panebtn flex-centered-cells rounded-sm" onclick={onClickPane} data-debug-name="slot-pane-btn">
+    <button
+      class="panebtn flex-centered-cells rounded-sm"
+      onclick={onClickPane}
+      data-debug-name="slot-pane-btn"
+    >
       <div class="grow">
         {param.name}
       </div>
-      {@render stateIcon(inState)}
+      {@render stateIcon(inState, false)}
       {@render blankIcon()}
     </button>
   {:else if access === "out"}
-    <button class="panebtn flex-centered-cells rounded-sm" disabled={true} data-debug-name="slot-pane-btn">
+    <button
+      class="panebtn flex-centered-cells rounded-sm"
+      disabled={true}
+      data-debug-name="slot-pane-btn"
+    >
       <div class="grow">
         {param.name}
       </div>
       {@render blankIcon()}
-      {@render stateIcon(outState)}
+      {@render stateIcon(outState, true)}
     </button>
   {:else}
-    <button class="panebtn flex-centered-cells rounded-sm" onclick={onClickPane} data-debug-name="slot-pane-btn">
+    <button
+      class="panebtn flex-centered-cells rounded-sm"
+      onclick={onClickPane}
+      data-debug-name="slot-pane-btn"
+    >
       <div class="grow">
         {param.name}
       </div>
-      {@render stateIcon(inState)}
-      {@render stateIcon(outState)}
+      {@render stateIcon(inState, false)}
+      {@render stateIcon(outState, true)}
     </button>
   {/if}
-
 
   {#if access === "in"}
     <MyHandle kind="in" id={param.name} />
@@ -118,24 +134,31 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
     <MyHandle kind="in-x" />
     <MyHandle kind="out" id={param.name} />
   {:else}
-    {@const [paramNameIn, paramNameOut] = [`${param.name}/in`, `${param.name}/out`] }
+    {@const [paramNameIn, paramNameOut] = [
+      `${param.name}/in`,
+      `${param.name}/out`,
+    ]}
     <MyHandle kind="in" id={paramNameIn} />
     <MyHandle kind="out" id={paramNameOut} />
   {/if}
 </div>
 
-{#snippet stateIcon(slotState: SlotState)}
+{#snippet stateIcon(slotState: SlotState, isOutSlot: boolean)}
   {#if slotState === "blank"}
-    <BracketsSquareIcon size={8}/>
-  {:else if slotState === "edge" }
-    <LinkSimpleIcon size={8}/>
-  {:else if slotState === "data" }
-    <SquareLogoIcon size={8}/>
+    {#if isOutSlot}
+      <LinkSimpleBreakIcon size={8} />
+    {:else}
+      <BracketsSquareIcon size={8} />
+    {/if}
+  {:else if slotState === "edge"}
+    <LinkSimpleIcon size={8} />
+  {:else if slotState === "data"}
+    <SquareLogoIcon size={8} />
   {/if}
 {/snippet}
 
 {#snippet blankIcon()}
-  <DotOutlineIcon size={8}/>
+  <DotOutlineIcon size={8} />
 {/snippet}
 
 {#snippet miniEditor()}

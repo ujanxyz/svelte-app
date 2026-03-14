@@ -17,8 +17,9 @@
     "checkJs": true,
     "strict": true,
     "isolatedModules": true,
+    "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"]
     }
   }
   // "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "app.d.ts", "app.d.ts"],

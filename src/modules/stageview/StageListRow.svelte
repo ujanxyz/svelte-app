@@ -32,7 +32,11 @@ const state = $derived(
 );
 </script>
 
-<button class={["row", state]} onclick={handleClick} data-debug-name="stage-view-row">
+<button
+  class={["row", state]}
+  onclick={handleClick}
+  data-debug-name="stage-view-row"
+>
   <div class="header" data-debug-name="stage-view-header">{stage.label}</div>
   <div class="slots" data-debug-name="stage-view-slots">
     <div class="inputs">
@@ -52,7 +56,6 @@ const state = $derived(
       {/each}
     </div>
   </div>
-
 </button>
 
 <style>

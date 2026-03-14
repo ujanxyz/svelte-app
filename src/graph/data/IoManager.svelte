@@ -1,0 +1,65 @@
+<script lang="ts">
+import useAppLocalData from "@/modules/persistence/useAppLocalData";
+import { useEdges, useNodes } from "@xyflow/svelte";
+import { useGraphService } from "../graph-services";
+import { initialEdges, initialNodes } from "../xyflow/nodes-and-edges";
+import type { UjGraphStorage } from "../types";
+
+const ioService = useGraphService("ioService");
+const flowGraphService = useGraphService("flowGraphService");
+
+const localDataOps = useAppLocalData<UjGraphStorage>(
+  "graph",
+  (): UjGraphStorage | null => {
+    const nodes = flowGraphService.allNodes();
+    const edges = flowGraphService.allEdges();
+    if (nodes.length === 0) return null;
+    const graph = ioService.serializeObject(nodes, edges);
+    return graph;
+  },
+);
+
+const nodesStore = useNodes();
+const edgesStore = useEdges();
+
+$effect.pre(() => {
+  if (currentGraphSize() > 0) {
+    // Graph not empty, do not populate.
+    return;
+  }
+  if (tryPopulateFromLocalStorage()) {
+    return;
+  }
+  if (import.meta.env.DEV) {
+    if (tryPopulateFromFixedData()) {
+      return;
+    }
+  }
+  // Empty graph to build from scratch.
+});
+
+$effect(() => {
+  nodesStore.current;
+  edgesStore.current;
+  localDataOps.signalUpdate();
+});
+
+function tryPopulateFromLocalStorage(): boolean {
+  const loadedData = localDataOps.getLoadedData();
+  if (loadedData === null) return false;
+  const { nodes, edges } = loadedData;
+  flowGraphService.populateGraph(nodes, edges);
+  return currentGraphSize() > 0;
+}
+
+function tryPopulateFromFixedData(): boolean {
+  flowGraphService.populateGraph(initialNodes, initialEdges);
+  return currentGraphSize() > 0;
+}
+
+function currentGraphSize(): number {
+  return (
+    flowGraphService.allNodes().length + flowGraphService.allEdges().length
+  );
+}
+</script>

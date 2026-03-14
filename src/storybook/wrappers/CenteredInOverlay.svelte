@@ -1,7 +1,7 @@
 <script lang="ts">
-import OverlayProvider from '@/overlay/OverlayProvider.svelte';
-import type { Snippet } from 'svelte';
-import type { HTMLAttributes } from 'svelte/elements';
+import OverlayProvider from "@/overlay/OverlayProvider.svelte";
+import type { Snippet } from "svelte";
+import type { HTMLAttributes } from "svelte/elements";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   children: Snippet;
@@ -13,14 +13,19 @@ const { children, bgcolor, ...rest }: Props = $props();
 
 <OverlayProvider>
   In pregress:
-  <div class={["container"]} style:background-color={bgcolor} {...rest} data-debug-name="centered-in-overlay">
+  <div
+    class={["container"]}
+    style:background-color={bgcolor}
+    {...rest}
+    data-debug-name="centered-in-overlay"
+  >
     {@render children()}
   </div>
 </OverlayProvider>
 
 <style>
 .container {
-  width:100%;
+  width: 100%;
   height: 100%;
   text-align: center;
   vertical-align: middle;

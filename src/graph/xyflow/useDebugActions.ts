@@ -9,7 +9,7 @@ import useMemlogging from "../../modules/memlogging/useMemlogging";
 import { slotStore } from "../data/slot-store";
 
 function useDebugActions() {
-  const { debugLog, infoLog, warnLog } = useMemlogging();
+  const { debugLog, warnLog } = useMemlogging();
 
   function isValidConnection(edge: Edge | Connection): boolean {
     //console.log("isValidConnection ... ", edge);
@@ -46,10 +46,6 @@ function useDebugActions() {
     console.log("onconnectend ... ", connectionState);
   }
 
-  function onpaneclick({ event }: { event: MouseEvent }): void {
-    console.log("In onpaneclick ...");
-  }
-
   function ondelete({ nodes, edges }: { nodes: Node[]; edges: Edge[] }): void {
     console.log("In ondelete ...");
     slotStore.deleteElements(nodes, edges);
@@ -64,7 +60,6 @@ function useDebugActions() {
     onconnectstart,
     onconnectend,
     ondelete,
-    onpaneclick,
   };
 }
 

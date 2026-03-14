@@ -1,5 +1,10 @@
 <script lang="ts">
-import { Button, Color, type ButtonClickEvent, type ColorChangeEvent } from "svelte-tweakpane-ui";
+import {
+  Button,
+  Color,
+  type ButtonClickEvent,
+  type ColorChangeEvent,
+} from "svelte-tweakpane-ui";
 
 interface Props {
   initial: object | null;
@@ -28,7 +33,7 @@ function onClickApply(ev: ButtonClickEvent) {
 }
 
 function onChangeCell(ev: ColorChangeEvent) {
-  const {value: color} = ev.detail;
+  const { value: color } = ev.detail;
   if (typeof color === "string") {
     lastColor = color;
   }

@@ -1,28 +1,35 @@
-import {
-  useSvelteFlow,
-  type Edge,
-  type Node,
-  type XYPosition,
-} from "@xyflow/svelte";
+import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
 import { MenuCodes } from "../constants";
 import type { ClientXY } from "../../overlay/types";
 import { ReturnStatus } from "../../overlay/constants";
 import { useGraphService } from "../graph-services";
 import { lookupFnDetailsAsync } from "../../modules/fngallery/apiFunctionInfos";
-import { makeNodeCreator } from "../nodes/nodeCreator";
+
+function getClientXY(event: MouseEvent | TouchEvent): ClientXY {
+  if (event instanceof MouseEvent) {
+    return { x: event.clientX, y: event.clientY };
+  } else {
+    const touch = event.touches[0] ?? event.changedTouches[0];
+    return { x: touch.clientX, y: touch.clientY };
+  }
+}
 
 export default function useMenusAndPopups() {
+  const rawStoreService = useGraphService("rawStoreService");
+  const ioService = useGraphService("ioService");
   const flowGraphService = useGraphService("flowGraphService");
   const menuService = useGraphService("menuService");
   const galleryService = useGraphService("galleryService");
-
-  const nodeCreator = makeNodeCreator();
-  const { screenToFlowPosition } = useSvelteFlow();
 
   // const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
   // const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
   // const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
   // const dispatchPickFn = useEventDispatch(EventKinds.FN_GALLERY_SELECT);
+
+  async function onpaneclick({ event }: { event: MouseEvent }): Promise<void> {
+    event.preventDefault();
+    rawStoreService.pivot = flowGraphService.screenToFlowXY(event);
+  }
 
   async function onpanecontextmenu({
     event,
@@ -34,7 +41,7 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const flowPosn = screenToFlowPosition(clientXY);
+    const flowPosn = flowGraphService.screenToFlowXY(event);
     const retval = await menuService.menuInPane(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
     switch (retval.value) {
@@ -126,8 +133,7 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const flowPosn = screenToFlowPosition(clientXY);
-    await _internalOpenGallery(flowPosn);
+    await _internalOpenGallery(rawStoreService.pivot);
   }
 
   async function _internalOpenGallery(position: XYPosition): Promise<void> {
@@ -140,20 +146,19 @@ export default function useMenusAndPopups() {
       // TODO: Make error toast.
       throw new Error("Function not found: " + funcId);
     }
-    const newNode = nodeCreator.newNodFromFunc(funcspec, position);
+    const newNode = ioService.createNodeAt(funcspec, position);
     await flowGraphService.appendNode(newNode);
   }
 
-  function getClientXY(event: MouseEvent | TouchEvent): ClientXY {
-    if (event instanceof MouseEvent) {
-      return { x: event.clientX, y: event.clientY };
-    } else {
-      const touch = event.touches[0] ?? event.changedTouches[0];
-      return { x: touch.clientX, y: touch.clientY };
-    }
+  async function onsavelocalstorage(): Promise<void> {
+    const nodes = flowGraphService.allNodes();
+    const edges = flowGraphService.allEdges();
+    const graph = ioService.serializeObject(nodes, edges);
+    console.log("Save json .. ", graph);
   }
 
   return {
+    onpaneclick,
     onpanecontextmenu,
     onnodecontextmenu,
     onedgecontextmenu,
@@ -161,5 +166,6 @@ export default function useMenusAndPopups() {
     onconnectend,
     // Custom app-declared handlers.
     onpopupgallery,
+    onsavelocalstorage,
   };
 }

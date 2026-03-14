@@ -24,7 +24,11 @@ function handleSelect(code: string) {
 
 <div class="container" data-debug-name="pipeline-view">
   <div class="centered">
-    <ButtonGroup buttons={modes} bind:value={selected} onselect={handleSelect} />
+    <ButtonGroup
+      buttons={modes}
+      bind:value={selected}
+      onselect={handleSelect}
+    />
   </div>
   {@render renderChoice(selected)}
 </div>
