@@ -1,5 +1,4 @@
 <script lang="ts">
-import { background } from 'storybook/theming';
 import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
 

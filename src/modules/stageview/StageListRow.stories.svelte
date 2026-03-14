@@ -69,12 +69,3 @@ type Args = Omit<ComponentProps<typeof StageListRow>, 'width' | 'height'> & {
     </FixedBoxContainer>
   {/snippet}
 </Story>
-
-<style>
-.div-columns {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  background-color: pink;
-}
-</style>

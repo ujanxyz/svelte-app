@@ -4,10 +4,10 @@ export const initialNodes: Node[] = [
   {
     id: "lwnfPJ0",
     data: {
-      label: "Input Point",
+      label: "Input Text",
       funcid: "/dummy/in-pt",
       ins: [],
-      outs: [{ name: "x", type: "float2" }],
+      outs: [{ name: "x", type: "text" }],
       inouts: [],
     },
     type: "default",
@@ -16,9 +16,9 @@ export const initialNodes: Node[] = [
   {
     id: "gMn6deH",
     data: {
-      label: "Point Function",
+      label: "Coord Function",
       funcid: "/dummy/fn-b",
-      ins: [{ name: "x", type: "float2" }],
+      ins: [{ name: "x", type: "coord2d" }],
       outs: [{ name: "fx", type: "float" }],
       inouts: [],
     },
@@ -28,11 +28,15 @@ export const initialNodes: Node[] = [
   {
     id: "an52dSd9",
     data: {
-      label: "Transform Point",
+      label: "Transform Color",
       funcid: "/dummy/trans-pt",
-      ins: [],
+      ins: [
+        { name: "in1", type: "color" },
+        { name: "in2", type: "text" },
+        { name: "in3", type: "coord2d" },
+      ],
       outs: [],
-      inouts: [{ name: "x", type: "float2" }],
+      inouts: [{ name: "x", type: "color" }],
     },
     type: "default",
     position: { x: 0, y: 100 },

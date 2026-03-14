@@ -6,6 +6,7 @@ import {
   type OnConnectStartParams,
 } from "@xyflow/svelte";
 import useMemlogging from "../../modules/memlogging/useMemlogging";
+import { slotStore } from "../data/slot-store";
 
 function useDebugActions() {
   const { debugLog, infoLog, warnLog } = useMemlogging();
@@ -51,7 +52,8 @@ function useDebugActions() {
 
   function ondelete({ nodes, edges }: { nodes: Node[]; edges: Edge[] }): void {
     console.log("In ondelete ...");
-    const message = `Deleted ${nodes.length} nodes, ${edges} edges`;
+    slotStore.deleteElements(nodes, edges);
+    const message = `Deleted ${nodes.length} nodes, ${edges.length} edges`;
     debugLog(message);
   }
 

@@ -28,7 +28,7 @@ const layerUse: LayerUse = {
 setContext(LAYER_CONTEXT_KEY, layerUse);
 
 function getLayerPayload(): LayerPayload {
-  return layerPayload;
+  return $state.snapshot(layerPayload);
 }
 
 function setDebugName(name: string): void {

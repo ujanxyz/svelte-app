@@ -1,0 +1,172 @@
+<script lang="ts">
+import { useOverlayUi } from "@/overlay/overlayStore";
+import DataPicker from "@/modules/sloteditor/DataPicker.svelte";
+import MyHandle from "./MyHandle.svelte";
+import { ReturnStatus } from "@/overlay/constants";
+import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
+// Icons.
+import BracketsSquareIcon from "phosphor-svelte/lib/BracketsSquareIcon";
+import DotOutlineIcon from "phosphor-svelte/lib/DotOutlineIcon";
+import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
+import SquareLogoIcon from "phosphor-svelte/lib/SquareLogoIcon";
+
+// Derive the param types without explicitly importing.
+type InParam = UjNodeData["ins"][number];
+type OutParam = UjNodeData["outs"][number];
+type InOutParam = UjNodeData["inouts"][number];
+type SlotState = UjSlotInfo["state"];
+
+interface Props {
+  access: "in" | "out" | "inout";
+  param: InParam | OutParam | InOutParam;
+  /**
+   * slotInfoIn is used in "in" and "inout" slots. This is reactive optional (SvelteMap value)
+   */
+  slotInfoIn?: UjSlotInfo;
+  /**
+   * slotInfoOut is used in "out" and "inout" slots. This is reactive optional (SvelteMap value)
+   */
+  slotInfoOut?: UjSlotInfo;
+  /**
+   * Invoked when use manually enters data and applies.
+   * @param slotName The name of this slot.
+   * @param data The entered data.
+   */
+  onDataEntry?: (slotName: string, data: UjOverrideData) => void;
+
+  /**
+   * Used in "in" and "inout" slots
+   * @param slotName The name of this slot.
+   */
+  onDataLookup?: (slotName: string) => UjOverrideData | null;
+}
+
+const { access, param, slotInfoIn, slotInfoOut, onDataEntry, onDataLookup }: Props = $props();
+
+const inState: SlotState = $derived(slotInfoIn?.state ?? "blank");
+const outState: SlotState = $derived(slotInfoOut?.state ?? "blank");
+
+
+
+const editorPopup = useOverlayUi(miniEditor);
+
+
+
+// The manually edited data if it exists.
+// Applicable only to "in" and "inout" nodes.
+let overrideData: object | null = null;
+
+// TODO: Re-visit this logic later, there are several corner cases.
+async function onClickPane(ev: MouseEvent): Promise<void> {
+  ev.preventDefault();
+  if (!onDataEntry) {
+    return;
+  }
+  if (access === "out") {
+    alert("On click out param not implemented");
+    return;
+  }
+  if (slotInfoIn?.state === "edge") {
+    window.alert("Cannot enter data. Delete the connection(s) at the input slot and try again.");
+    return;
+  }
+  const slotName = (access === "in") ? param.name : param.name + "/in";
+  const prior = onDataLookup?.(slotName) ?? null;
+
+  const anchor = ev.currentTarget as HTMLButtonElement;
+  const datatype = param.type;
+  const editedData = await editorPopup.openOverlayAsync<UjOverrideData>({ anchor, datatype, prior });
+  if (editedData.status !== ReturnStatus.OK) return;
+  console.log(access, "slotName -> ", slotName, slotInfoIn);
+  onDataEntry(slotName, editedData.value!);
+}
+
+</script>
+
+<div class="slotrow rounded-sm flex-centered-cells">
+  {#if access === "in"}
+    <button class="panebtn flex-centered-cells rounded-sm" onclick={onClickPane} data-debug-name="slot-pane-btn">
+      <div class="grow">
+        {param.name}
+      </div>
+      {@render stateIcon(inState)}
+      {@render blankIcon()}
+    </button>
+  {:else if access === "out"}
+    <button class="panebtn flex-centered-cells rounded-sm" disabled={true} data-debug-name="slot-pane-btn">
+      <div class="grow">
+        {param.name}
+      </div>
+      {@render blankIcon()}
+      {@render stateIcon(outState)}
+    </button>
+  {:else}
+    <button class="panebtn flex-centered-cells rounded-sm" onclick={onClickPane} data-debug-name="slot-pane-btn">
+      <div class="grow">
+        {param.name}
+      </div>
+      {@render stateIcon(inState)}
+      {@render stateIcon(outState)}
+    </button>
+  {/if}
+
+
+  {#if access === "in"}
+    <MyHandle kind="in" id={param.name} />
+    <MyHandle kind="out-x" />
+  {:else if access === "out"}
+    <MyHandle kind="in-x" />
+    <MyHandle kind="out" id={param.name} />
+  {:else}
+    {@const [paramNameIn, paramNameOut] = [`${param.name}/in`, `${param.name}/out`] }
+    <MyHandle kind="in" id={paramNameIn} />
+    <MyHandle kind="out" id={paramNameOut} />
+  {/if}
+</div>
+
+{#snippet stateIcon(slotState: SlotState)}
+  {#if slotState === "blank"}
+    <BracketsSquareIcon size={8}/>
+  {:else if slotState === "edge" }
+    <LinkSimpleIcon size={8}/>
+  {:else if slotState === "data" }
+    <SquareLogoIcon size={8}/>
+  {/if}
+{/snippet}
+
+{#snippet blankIcon()}
+  <DotOutlineIcon size={8}/>
+{/snippet}
+
+{#snippet miniEditor()}
+  <DataPicker />
+{/snippet}
+
+<style>
+.slotrow {
+  position: relative;
+  /* margin-left: var(--space-2);
+  margin-right: var(--space-2); */
+  /* padding-left: var(--space-3);
+  padding-right: var(--space-3); */
+}
+.panebtn {
+  flex-grow: 1;
+  background-color: #3a516c;
+  color: var(--color-text-hi-con);
+  margin-left: calc(var(--space-4) + 4px);
+  margin-right: calc(var(--space-4) + 4px);
+  padding: var(--space-1) var(--space-2);
+  text-align: start;
+  font-size: 0.5rem;
+  cursor: pointer;
+}
+.flex-centered-cells {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  /* column-gap: var(--space-2); */
+  column-gap: 0;
+}
+</style>

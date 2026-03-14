@@ -25,6 +25,7 @@ useNodeOpsContext().setNodeOps({
   <span class="nodeid">{nodeId}</span>
 
   <SlotsArray
+    {nodeId}
     ins={nodeDetails.ins}
     outs={nodeDetails.outs}
     inouts={nodeDetails.inouts}

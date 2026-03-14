@@ -30,6 +30,20 @@ export interface UjNodeData extends Record<string, unknown> {
   inouts: InOutParam[];
 }
 
+// Keep this flat object, it is used as non-reactive value in SvelteMap.
+export interface UjSlotInfo {
+  parentNode: string;
+  paramname: string;
+  datatype: string;
+  state: "blank" | "edge" | "data";
+}
+
+export interface UjOverrideData {
+  datatype: string;
+  timestamp: number;
+  payload: object;
+}
+
 export interface UjEdgeData extends Record<string, unknown> {}
 
 export type UjNode = Node<UjNodeData>;
