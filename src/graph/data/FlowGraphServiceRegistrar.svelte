@@ -12,9 +12,9 @@ import type { ClientXY } from "@/overlay/types";
 
 import { registerGraphService } from "../graph-services";
 
-const { current: _currentNodes, update: _updateNodes } = useNodes();
+const { current: _currentNodes, update: _updateNodes, set: _setNodes } = useNodes();
 
-const { update: _updateEdges } = useEdges();
+const { update: _updateEdges, set: _setEdges } = useEdges();
 
 const {
   deleteElements: _deleteElements,
@@ -31,6 +31,8 @@ registerGraphService("flowGraphService", {
   deleteNodes,
   deleteEdge,
   deleteEdges,
+  deleteAllEdges,
+  deleteGraph,
   appendNode,
   populateGraph,
 });
@@ -52,32 +54,46 @@ function allEdges(): Edge[] {
 
 async function deleteNode(nodeId: string): Promise<void> {
   const node = { id: nodeId };
-  _deleteElements({ nodes: [node], edges: [] });
+  await _deleteElements({ nodes: [node], edges: [] });
 }
 
 async function deleteNodes(nodeIds: string[]): Promise<void> {
   const nodes = nodeIds.map((id: string) => ({ id }));
-  _deleteElements({ nodes, edges: [] });
+  await _deleteElements({ nodes, edges: [] });
 }
 
 async function deleteEdge(edgeId: string): Promise<void> {
   const edge = { id: edgeId };
-  _deleteElements({ nodes: [], edges: [edge] });
+  await _deleteElements({ nodes: [], edges: [edge] });
 }
 
 async function deleteEdges(edgeIds: string[]): Promise<void> {
   const edges = edgeIds.map((id: string) => ({ id }));
-  _deleteElements({ nodes: [], edges });
+  await _deleteElements({ nodes: [], edges });
+}
+
+async function deleteAllEdges(): Promise<void> {
+  _setEdges([]);
+}
+
+async function deleteGraph(): Promise<void> {
+  console.log("deleteGraph ...");
+  _setEdges([]);
+  _setNodes([]);
 }
 
 async function appendNode(newNode: Node): Promise<void> {
+  const existingIds = new Set<string>(_getNodes().map((n: Node) => n.id));
+    if (existingIds.has(newNode.id)) {
+      throw new Error("Node id conflict at append");
+    }
   _updateNodes((nodes: Node[]) => {
     return [...nodes, newNode];
   });
 }
 
 function populateGraph(newNodes: Node[], newEdges: Edge[]): void {
-  console.log("populateGraph ---");
+  console.log("populateGraph ---", newNodes.length, newEdges.length);
   const newNodeIds: string[] = newNodes.map((n: Node) => n.id);
   const newEdgeIds: string[] = newEdges.map((e: Edge) => e.id);
 

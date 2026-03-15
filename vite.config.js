@@ -19,6 +19,7 @@ export default defineConfig({
   // assetsInclude: ['**/*.wasm'],
   // This ensures assets are linked relatively
   base: "./",
+  envDir: "./env",
   server: {
     port: 3000,
   },

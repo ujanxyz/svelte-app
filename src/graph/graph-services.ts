@@ -46,6 +46,8 @@ interface FlowGraphService {
   deleteNodes: (nodeIds: string[]) => Promise<void>;
   deleteEdge: (edgeId: string) => Promise<void>;
   deleteEdges: (edgeIds: string[]) => Promise<void>;
+  deleteAllEdges: () => Promise<void>;
+  deleteGraph: () => Promise<void>;
   appendNode: (newNode: Node) => Promise<void>;
   populateGraph: (newNodes: Node[], newEdges: Edge[]) => void;
 }

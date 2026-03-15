@@ -45,9 +45,16 @@ export default function useMenusAndPopups() {
     const flowPosn = flowGraphService.screenToFlowXY(event);
     const retval = await menuService.menuInPane(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
+    console.log(retval.value);
     switch (retval.value) {
       case MenuCodes.NEW_NODE:
         await _internalOpenGallery(flowPosn);
+        break;
+      case MenuCodes.RM_EDGES:
+        await flowGraphService.deleteAllEdges();
+        break;
+      case MenuCodes.RM_NODES:
+        await flowGraphService.deleteGraph();
         break;
     }
   }

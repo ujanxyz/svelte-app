@@ -34,7 +34,7 @@ function saveProject(doc: AppData) {
   }
 }
 
-export const persistenceStore = (function () {
+function makePersistenceStore() {
   let loadedAppData: AppData | null = loadProject();
   console.log("@loadedAppData == ", loadedAppData);
 
@@ -54,7 +54,7 @@ export const persistenceStore = (function () {
   }
 
   function createValueUpdater(key: string) {
-    const featuredata = appdata.featuredata || (appdata.featuredata = {});
+    appdata.featuredata || (appdata.featuredata = {});
     return (snapshot: object) => {
       appdata.featuredata[key] = snapshot;
       scheduleSave();
@@ -73,4 +73,7 @@ export const persistenceStore = (function () {
   }
 
   return { createValueReader, createValueUpdater };
-})();
+}
+
+export { makePersistenceStore };
+

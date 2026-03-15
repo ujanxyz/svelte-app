@@ -1,6 +1,6 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
-  "include": ["src/**/*", "global.d.ts"],
+  "include": ["src/**/*", "global.d.ts", "vite-env.d.ts"],
   "exclude": ["node_modules/*", "public/*"],
   "compilerOptions": {
     "target": "ESNext",
