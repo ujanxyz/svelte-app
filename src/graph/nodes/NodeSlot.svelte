@@ -1,15 +1,17 @@
 <script lang="ts">
-import { useOverlayUi } from "@/overlay/overlayStore";
-import DataPicker from "@/modules/sloteditor/DataPicker.svelte";
-import MyHandle from "./MyHandle.svelte";
-import { ReturnStatus } from "@/overlay/constants";
-import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
 // Icons.
 import BracketsSquareIcon from "phosphor-svelte/lib/BracketsSquareIcon";
 import DotOutlineIcon from "phosphor-svelte/lib/DotOutlineIcon";
-import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
 import LinkSimpleBreakIcon from "phosphor-svelte/lib/LinkSimpleBreakIcon";
+import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
 import SquareLogoIcon from "phosphor-svelte/lib/SquareLogoIcon";
+
+import DataPicker from "@/modules/sloteditor/DataPicker.svelte";
+import { ReturnStatus } from "@/overlay/constants";
+import { useOverlayUi } from "@/overlay/overlayStore";
+
+import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
+import MyHandle from "./MyHandle.svelte";
 
 // Derive the param types without explicitly importing.
 type InParam = UjNodeData["ins"][number];

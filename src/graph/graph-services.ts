@@ -1,7 +1,9 @@
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
+
+import type { FuncSpec } from "@/modules/fngallery/types";
+
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
-import type { FuncSpec } from "@/modules/fngallery/types";
 import type { UjGraphStorage } from "./types";
 
 export type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;

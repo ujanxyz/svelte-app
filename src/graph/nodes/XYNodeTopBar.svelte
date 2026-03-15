@@ -1,11 +1,12 @@
 <script lang="ts">
 import { NodeToolbar, Position } from "@xyflow/svelte";
-import IconButton from "../../components/IconButton.svelte";
 // Icons:
 import EyeIcon from "phosphor-svelte/lib/EyeIcon";
 import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
 import SelectionIcon from "phosphor-svelte/lib/SelectionIcon";
 import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+
+import IconButton from "../../components/IconButton.svelte";
 import useNodeOpsContext from "./useNodeOpsContext";
 
 const nodeOps = useNodeOpsContext().getNodeOps();

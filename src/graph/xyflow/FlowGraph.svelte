@@ -1,5 +1,7 @@
 <script lang="ts">
-import { type Component } from "svelte";
+import "@xyflow/svelte/dist/style.css";
+import "./xyflow.css";
+
 import {
   Background,
   BackgroundVariant,
@@ -7,20 +9,20 @@ import {
   Controls,
   SvelteFlow,
 } from "@xyflow/svelte";
-import DefaultNode from "../nodes/DefaultNode.svelte";
-import useMenusAndPopups from "./useMenusAndPopups";
-import InputNode from "../nodes/InputNode.svelte";
-import DefaultEdge from "../edges/DefaultEdge.svelte";
-import useDebugActions from "./useDebugActions";
-import type { UjEdgeProps, UjNodeProps } from "../types";
-import "@xyflow/svelte/dist/style.css";
-import "./xyflow.css";
 // Icons
 import DownloadSimpleIcon from "phosphor-svelte/lib/DownloadSimpleIcon";
 import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
 //import PlayIcon from "phosphor-svelte/lib/PlayIcon";
 import UploadSimpleIcon from "phosphor-svelte/lib/UploadSimpleIcon";
+import { type Component } from "svelte";
+
+import DefaultEdge from "../edges/DefaultEdge.svelte";
 import { useGraphService } from "../graph-services";
+import DefaultNode from "../nodes/DefaultNode.svelte";
+import InputNode from "../nodes/InputNode.svelte";
+import type { UjEdgeProps, UjNodeProps } from "../types";
+import useDebugActions from "./useDebugActions";
+import useMenusAndPopups from "./useMenusAndPopups";
 
 const nodeTypes: Record<string, Component<UjNodeProps>> = {
   in: InputNode,

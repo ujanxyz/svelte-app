@@ -1,8 +1,8 @@
 <script lang="ts">
-import StyleGalleryMain from "../../modules/stylegallery/StyleGalleryMain.svelte";
 import { Button } from "svelte-tweakpane-ui";
-
 import { Color } from "svelte-tweakpane-ui";
+
+import StyleGalleryMain from "../../modules/stylegallery/StyleGalleryMain.svelte";
 
 let startColor = "#fff000";
 let endColor = "#ff00ff";

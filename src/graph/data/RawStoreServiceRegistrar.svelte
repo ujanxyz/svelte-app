@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { Edge, Node, XYPosition } from "@xyflow/svelte";
+
 import { registerGraphService } from "../graph-services";
 
 let _nodes = $state.raw<Node[]>([]);

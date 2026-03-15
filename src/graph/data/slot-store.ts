@@ -1,5 +1,6 @@
 import type { Edge, Node } from "@xyflow/svelte";
 import { SvelteMap } from "svelte/reactivity";
+
 import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
 
 function createSlotStore() {

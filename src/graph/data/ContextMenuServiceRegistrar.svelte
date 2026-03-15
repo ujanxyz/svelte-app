@@ -1,17 +1,4 @@
 <script lang="ts">
-import { type Snippet } from "svelte";
-import { MenuCodes } from "../constants";
-import { useOverlayUi } from "../../overlay/overlayStore";
-import {
-  connEndMenuData,
-  edgeMenuData,
-  nodeMenuData,
-  paneMenuData,
-  selectionMenuData,
-} from "./menuData";
-import MenuLayer from "../../overlay/context-menu/MenuLayer.svelte";
-import type { ClientXY, StatusOr } from "../../overlay/types";
-
 // Icons.
 import ArrowClockwiseIcon from "phosphor-svelte/lib/ArrowClockwiseIcon";
 import ClipboardIcon from "phosphor-svelte/lib/ClipboardIcon";
@@ -20,10 +7,23 @@ import InfoIcon from "phosphor-svelte/lib/InfoIcon";
 import LineVerticalIcon from "phosphor-svelte/lib/LineVerticalIcon";
 import PentagonIcon from "phosphor-svelte/lib/PentagonIcon";
 import PlusIcon from "phosphor-svelte/lib/PlusIcon";
-import StackPlusIcon from "phosphor-svelte/lib/StackPlusIcon";
 import StackMinusIcon from "phosphor-svelte/lib/StackMinusIcon";
+import StackPlusIcon from "phosphor-svelte/lib/StackPlusIcon";
 import TrashIcon from "phosphor-svelte/lib/TrashIcon";
+import { type Snippet } from "svelte";
+
+import MenuLayer from "../../overlay/context-menu/MenuLayer.svelte";
+import { useOverlayUi } from "../../overlay/overlayStore";
+import type { ClientXY, StatusOr } from "../../overlay/types";
+import { MenuCodes } from "../constants";
 import { registerGraphService } from "../graph-services";
+import {
+  connEndMenuData,
+  edgeMenuData,
+  nodeMenuData,
+  paneMenuData,
+  selectionMenuData,
+} from "./menuData";
 
 registerGraphService("menuService", {
   menuInPane: showInPaneContext,

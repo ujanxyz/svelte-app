@@ -1,14 +1,16 @@
 <script lang="ts">
 import {
+  type Edge,
+  type Node,
   useEdges,
   useNodes,
   useSvelteFlow,
-  type Edge,
-  type Node,
   type XYPosition,
 } from "@xyflow/svelte";
-import { registerGraphService } from "../graph-services";
+
 import type { ClientXY } from "@/overlay/types";
+
+import { registerGraphService } from "../graph-services";
 
 const { current: _currentNodes, update: _updateNodes } = useNodes();
 

@@ -1,11 +1,12 @@
 <script lang="ts">
-import SlotsArray from "./SlotsArray.svelte";
 import { type Node, type NodeProps } from "@xyflow/svelte";
-import useNodeOpsContext from "./useNodeOpsContext";
-import useEventDispatch from "../../utils/useEventDispatch";
+
 import { EventKinds } from "../../utils/constants";
-import XYNodeTopBar from "./XYNodeTopBar.svelte";
+import useEventDispatch from "../../utils/useEventDispatch";
 import type { UjNodeData } from "../types";
+import SlotsArray from "./SlotsArray.svelte";
+import useNodeOpsContext from "./useNodeOpsContext";
+import XYNodeTopBar from "./XYNodeTopBar.svelte";
 
 const {
   data: nodeDetails,

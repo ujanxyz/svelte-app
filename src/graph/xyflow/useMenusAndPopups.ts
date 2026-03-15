@@ -1,9 +1,10 @@
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
-import { MenuCodes } from "../constants";
-import type { ClientXY } from "../../overlay/types";
-import { ReturnStatus } from "../../overlay/constants";
-import { useGraphService } from "../graph-services";
+
 import { lookupFnDetailsAsync } from "../../modules/fngallery/apiFunctionInfos";
+import { ReturnStatus } from "../../overlay/constants";
+import type { ClientXY } from "../../overlay/types";
+import { MenuCodes } from "../constants";
+import { useGraphService } from "../graph-services";
 
 function getClientXY(event: MouseEvent | TouchEvent): ClientXY {
   if (event instanceof MouseEvent) {

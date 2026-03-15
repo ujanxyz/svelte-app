@@ -1,9 +1,11 @@
 <script lang="ts">
-import type { FuncParam, FuncSpec } from "@/modules/fngallery/types";
-import { registerGraphService } from "../graph-services";
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
+
+import type { FuncParam, FuncSpec } from "@/modules/fngallery/types";
 import { createIdGenerator } from "@/utils/idGenerator";
-import type { UjGraphStorage, UjNodeData } from "../types";
+
+import { registerGraphService } from "../graph-services";
+import { type UjGraphStorage, type UjNodeData } from "../types";
 
 type UjNode = UjGraphStorage["nodes"][number];
 type UjEdge = UjGraphStorage["edges"][number];

@@ -2,10 +2,10 @@
 import {
   BaseEdge,
   BezierEdge,
+  type EdgeProps,
   EdgeToolbar,
   getBezierPath,
   getSmoothStepPath,
-  type EdgeProps,
 } from "@xyflow/svelte";
 
 let { id, sourceX, sourceY, targetX, targetY, ...props }: EdgeProps = $props();

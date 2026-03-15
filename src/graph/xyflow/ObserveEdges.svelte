@@ -1,6 +1,7 @@
 <script lang="ts">
 import { useEdges } from "@xyflow/svelte";
 import { onMount } from "svelte";
+
 import useEventDispatch from "../../utils/useEventDispatch";
 
 const dispatchUpdatedEdges = useEventDispatch("eee");

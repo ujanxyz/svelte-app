@@ -1,9 +1,11 @@
 <script lang="ts">
-import useAppLocalData from "@/modules/persistence/useAppLocalData";
 import { useEdges, useNodes } from "@xyflow/svelte";
+
+import useAppLocalData from "@/modules/persistence/useAppLocalData";
+
 import { useGraphService } from "../graph-services";
-import { initialEdges, initialNodes } from "../xyflow/nodes-and-edges";
 import type { UjGraphStorage } from "../types";
+import { initialEdges, initialNodes } from "../xyflow/nodes-and-edges";
 
 const ioService = useGraphService("ioService");
 const flowGraphService = useGraphService("flowGraphService");

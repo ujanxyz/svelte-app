@@ -1,6 +1,7 @@
 <script lang="ts">
 import { useEdges, useNodes } from "@xyflow/svelte";
 import { onMount } from "svelte";
+
 import { slotStore } from "./slot-store";
 
 //const dispatchUpdatedEdges = useEventDispatch("eee");

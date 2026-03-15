@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { UjNodeData, UjOverrideData } from "../types";
 import { slotStore } from "../data/slot-store";
+import type { UjNodeData, UjOverrideData } from "../types";
 import NodeSlot from "./NodeSlot.svelte";
 
 // Derive the param types without explicitly importing.

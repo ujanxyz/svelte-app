@@ -1,10 +1,11 @@
 import {
-  useStore,
   type Connection,
   type Edge,
   type Node,
   type OnConnectStartParams,
+  useStore,
 } from "@xyflow/svelte";
+
 import useMemlogging from "../../modules/memlogging/useMemlogging";
 import { slotStore } from "../data/slot-store";
 

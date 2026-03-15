@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Handle, Position, type HandleProps } from "@xyflow/svelte";
+import { Handle, type HandleProps, Position } from "@xyflow/svelte";
 // Icons.
 import EmptyIcon from "phosphor-svelte/lib/EmptyIcon";
 import SignInIcon from "phosphor-svelte/lib/SignInIcon";
