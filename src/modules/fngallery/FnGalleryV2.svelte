@@ -1,9 +1,10 @@
 <script lang="ts">
 import { onMount } from "svelte";
+
 import useCurrentOverlay from "../../overlay/useCurrentOverlay";
+import { fetchFnInfos } from "./apiFunctionInfos";
 import FunctionCard from "./FunctionCard.svelte";
 import type { FuncSpec } from "./types";
-import { fetchFnInfos } from "./apiFunctionInfos";
 
 const overlay = useCurrentOverlay();
 const { fetchItemsAsync, abortFetch } = fetchFnInfos();

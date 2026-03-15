@@ -1,10 +1,12 @@
 <script lang="ts" module>
-import { type ComponentProps } from "svelte";
 import { defineMeta, type StoryContext } from "@storybook/addon-svelte-csf";
 import { fn } from "storybook/test";
-import { type PipelineStage } from "./types";
+import { type ComponentProps } from "svelte";
+
 import FixedBoxContainer from "@/storybook/wrappers/FixedBoxContainer.svelte";
+
 import StageViewStages from "./StageViewStages.svelte";
+import { type PipelineStage } from "./types";
 
 const stage1: PipelineStage = {
   id: "abcd01",

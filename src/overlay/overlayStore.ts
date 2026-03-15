@@ -1,14 +1,15 @@
-import { writable, type Unsubscriber, type Writable } from "svelte/store";
+import { type Unsubscriber, type Writable, writable } from "svelte/store";
+
+import { ReturnStatus } from "./constants";
 import type {
-  LayerSnippetFn,
-  DescendantUse,
-  OverlayEntry,
   CreatorUse,
+  DescendantUse,
+  LayerPayload,
+  LayerSnippetFn,
+  OverlayEntry,
   ResolveFn,
   StatusOr,
-  LayerPayload,
 } from "./types";
-import { ReturnStatus } from "./constants";
 
 class SelfAbortedError extends Error {
   customStatus?: string;

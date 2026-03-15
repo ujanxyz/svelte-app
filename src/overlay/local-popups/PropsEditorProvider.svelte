@@ -1,9 +1,10 @@
 <script lang="ts">
 import { setContext, type Snippet } from "svelte";
+
+import { ReturnStatus } from "../constants";
 import { useOverlayUi } from "../overlayStore";
 import type { ClientXY } from "../types";
 import PropsEditor from "./PropsEditor.svelte";
-import { ReturnStatus } from "../constants";
 
 interface Props {
   children: Snippet;

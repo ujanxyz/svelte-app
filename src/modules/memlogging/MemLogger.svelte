@@ -1,9 +1,10 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import store from "./store";
-import { type MemLogEntry } from "./types";
+
 import LogPaneActionBar from "./LogPaneActionBar.svelte";
 import MemLogLine from "./MemLogLine.svelte";
+import store from "./store";
+import { type MemLogEntry } from "./types";
 
 let renderables = $state<MemLogEntry[]>([]);
 let timeNow = $state<number>(Date.now());

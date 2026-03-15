@@ -1,7 +1,8 @@
 <script lang="ts">
-import OverlayProvider from "@/overlay/OverlayProvider.svelte";
 import type { Snippet } from "svelte";
 import type { HTMLAttributes } from "svelte/elements";
+
+import OverlayProvider from "@/overlay/OverlayProvider.svelte";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   children: Snippet;

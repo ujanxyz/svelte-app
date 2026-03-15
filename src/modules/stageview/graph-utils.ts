@@ -1,7 +1,8 @@
 // utils/graph-utils.ts
 
 import type { Edge } from "@xyflow/svelte";
-import type { PipelineStage, PipelineEdge, PipelineVar } from "./types";
+
+import type { PipelineEdge, PipelineStage, PipelineVar } from "./types";
 
 /* ============================================================
    Node Lookup

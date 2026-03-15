@@ -1,8 +1,9 @@
 <script lang="ts">
 import { onMount } from "svelte";
+
 import store from "./store";
-import { ToastType, type ToastEntry } from "./types";
 import ToastRenderable from "./ToastRenderable.svelte";
+import { type ToastEntry, ToastType } from "./types";
 
 const { subscribeNow } = store;
 let renderables = $state<ToastEntry[]>([]);

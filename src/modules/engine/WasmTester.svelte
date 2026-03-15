@@ -1,11 +1,12 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
-import wasmService from "./wasmService";
-import type { HelloClassInstance } from "../../types/WasmModule";
-import { graphStore } from "./graphStore";
-import OutlinedSvgIcon from "../../icons/OutlinedSvgIcon.svelte";
+
 import MultiWordsInput from "../../components/MultiWordsInput.svelte";
 import TextButton from "../../components/TextButton.svelte";
+import OutlinedSvgIcon from "../../icons/OutlinedSvgIcon.svelte";
+import type { HelloClassInstance } from "../../types/WasmModule";
+import { graphStore } from "./graphStore";
+import wasmService from "./wasmService";
 
 let graphApi: HelloClassInstance | null = null;
 

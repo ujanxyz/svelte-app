@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
+
 import type { ClientXY } from "../types";
 import useCurrentOverlay from "../useCurrentOverlay";
 import type { MenuItem, MenuRow } from "./menu";

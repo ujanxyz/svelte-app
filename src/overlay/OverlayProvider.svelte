@@ -1,9 +1,10 @@
 <script lang="ts">
 import { onMount, type Snippet } from "svelte";
-import overlayStore from "./overlayStore";
-import LayerList from "./LayerList.svelte";
-import type { LayerData, OverlayEntry } from "./types";
+
 import clickoutside from "./clickoutside";
+import LayerList from "./LayerList.svelte";
+import overlayStore from "./overlayStore";
+import type { LayerData, OverlayEntry } from "./types";
 
 interface Props {
   children: Snippet;

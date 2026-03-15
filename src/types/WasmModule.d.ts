@@ -21,4 +21,4 @@ interface HelloClassInstance {
   processData(input: number): number;
 }
 
-export { WasmModuleType, HelloClassInstance };
+export { HelloClassInstance, WasmModuleType };

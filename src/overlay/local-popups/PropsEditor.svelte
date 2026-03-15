@@ -1,7 +1,7 @@
 <script lang="ts">
-import { fly } from "svelte/transition";
-import { quadOut } from "svelte/easing";
 import CheckIcon from "phosphor-svelte/lib/CheckIcon";
+import { quadOut } from "svelte/easing";
+import { fly } from "svelte/transition";
 
 import type { ClientRect } from "../types";
 import useCurrentOverlay from "../useCurrentOverlay";

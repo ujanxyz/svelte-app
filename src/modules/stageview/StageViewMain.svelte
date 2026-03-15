@@ -1,11 +1,12 @@
 <script lang="ts">
-import { onMount } from "svelte";
-import type { PipelineEdge, PipelineStage } from "./types";
-import useEventConsumer from "../../utils/useEventConsumer";
-import { EventKinds } from "../../utils/constants";
 import type { Edge } from "@xyflow/svelte";
+import { onMount } from "svelte";
+
+import { EventKinds } from "../../utils/constants";
+import useEventConsumer from "../../utils/useEventConsumer";
 import { edgesToPipeline } from "./graph-utils";
 import PipelineEditorTabs from "./PipelineEditorTabs.svelte";
+import type { PipelineEdge, PipelineStage } from "./types";
 
 const { handleEvent, clearHandlers } = useEventConsumer();
 

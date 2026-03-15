@@ -1,4 +1,5 @@
 import { get, writable } from "svelte/store";
+
 import type { ToastEntry } from "./types";
 
 const MAX_TOASTS_COUNT = 10;

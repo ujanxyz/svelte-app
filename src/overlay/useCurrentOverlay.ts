@@ -1,6 +1,7 @@
 import { getContext } from "svelte";
-import type { LayerUse } from "./types";
+
 import { LAYER_CONTEXT_KEY } from "./constants";
+import type { LayerUse } from "./types";
 
 const kNoContextErr =
   "Overlay context not found. Was the UI launched via openOverlayAsync ?";

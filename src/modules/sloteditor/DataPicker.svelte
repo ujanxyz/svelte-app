@@ -1,12 +1,14 @@
 <script lang="ts">
 import { Color } from "svelte-tweakpane-ui";
 import { Button } from "svelte-tweakpane-ui";
-import PickColors from "./PickColors.svelte";
-import useCurrentOverlay from "@/overlay/useCurrentOverlay";
+
+import type { UjOverrideData } from "@/graph/types";
 import type { ClientXY } from "@/overlay/types";
+import useCurrentOverlay from "@/overlay/useCurrentOverlay";
+
+import PickColors from "./PickColors.svelte";
 import PickCoords2D from "./PickCoords2D.svelte";
 import PickTexts from "./PickTexts.svelte";
-import type { UjOverrideData } from "@/graph/types";
 
 interface Props {}
 

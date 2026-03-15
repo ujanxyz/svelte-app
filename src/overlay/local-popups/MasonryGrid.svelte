@@ -1,7 +1,4 @@
 <script lang="ts">
-import MiniCard from "./MiniCard.svelte";
-import type { MasonryLayoutData } from "./types";
-
 // Icons.
 import CloudRainIcon from "phosphor-svelte/lib/CloudRainIcon";
 import CodeIcon from "phosphor-svelte/lib/CodeIcon";
@@ -9,7 +6,10 @@ import LightningIcon from "phosphor-svelte/lib/LightningIcon";
 import PaletteIcon from "phosphor-svelte/lib/PaletteIcon";
 import TrainIcon from "phosphor-svelte/lib/TrainIcon";
 import TreeIcon from "phosphor-svelte/lib/TreeIcon";
+
 import { makeRandomPicker } from "../../utils/random";
+import MiniCard from "./MiniCard.svelte";
+import type { MasonryLayoutData } from "./types";
 
 interface Props {
   gridData: MasonryLayoutData;

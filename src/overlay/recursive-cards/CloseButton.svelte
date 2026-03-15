@@ -1,8 +1,9 @@
 <script lang="ts">
-import useCurrentOverlay from "../useCurrentOverlay";
+import CheckIcon from "phosphor-svelte/lib/CheckIcon";
 // Icons
 import XIcon from "phosphor-svelte/lib/XIcon";
-import CheckIcon from "phosphor-svelte/lib/CheckIcon";
+
+import useCurrentOverlay from "../useCurrentOverlay";
 
 const overlay = useCurrentOverlay();
 

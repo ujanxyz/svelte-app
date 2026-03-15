@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --fix",
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
-    "format": "prettier --write .",
+    "format": "eslint . --fix && prettier . --write",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "storybook": "storybook dev -p 6006",

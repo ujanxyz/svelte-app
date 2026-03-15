@@ -1,5 +1,6 @@
 <script lang="ts">
 import { getContext, type Snippet } from "svelte";
+
 import type { CellData } from "./types";
 
 interface Props {

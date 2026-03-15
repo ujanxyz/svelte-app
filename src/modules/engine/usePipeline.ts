@@ -1,4 +1,5 @@
-import { onMount, onDestroy } from "svelte";
+import { onDestroy, onMount } from "svelte";
+
 import WasmPipelineService from "./WasmPipelineService";
 
 export function usePipeline() {

@@ -1,12 +1,13 @@
 <script lang="ts">
 import { setContext } from "svelte";
-import type {
-  LayerSnippetFn,
-  DescendantUse,
-  LayerUse,
-  LayerPayload,
-} from "./types";
+
 import { LAYER_CONTEXT_KEY } from "./constants";
+import type {
+  DescendantUse,
+  LayerPayload,
+  LayerSnippetFn,
+  LayerUse,
+} from "./types";
 
 interface Props {
   layerId: string;

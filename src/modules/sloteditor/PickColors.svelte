@@ -1,8 +1,8 @@
 <script lang="ts">
 import {
   Button,
-  Color,
   type ButtonClickEvent,
+  Color,
   type ColorChangeEvent,
 } from "svelte-tweakpane-ui";
 

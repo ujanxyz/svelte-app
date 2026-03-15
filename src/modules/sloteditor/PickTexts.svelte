@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Button, Textarea, type ButtonClickEvent } from "svelte-tweakpane-ui";
+import { Button, type ButtonClickEvent, Textarea } from "svelte-tweakpane-ui";
 
 interface Props {
   initial: object | null;

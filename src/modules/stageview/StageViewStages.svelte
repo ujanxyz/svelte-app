@@ -1,7 +1,8 @@
 <script lang="ts">
+import ArrowDownIcon from "phosphor-svelte/lib/ArrowDownIcon";
+
 import StageListRow from "./StageListRow.svelte";
 import { type PipelineStage } from "./types";
-import ArrowDownIcon from "phosphor-svelte/lib/ArrowDownIcon";
 
 interface Props {
   stages: PipelineStage[];

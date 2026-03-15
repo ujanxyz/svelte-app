@@ -1,9 +1,10 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import useMemlogging from "./useMemlogging";
+
 import { kDummyLogs } from "../../utils/dummyData";
 import { makeCircularPicker, makeRandomPicker } from "../../utils/random";
 import { LogLevel } from "./types";
+import useMemlogging from "./useMemlogging";
 
 const { debugLog, infoLog, warnLog, errorLog } = useMemlogging();
 const logMaker = (function () {

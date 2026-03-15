@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+
 import type { IGraph } from "../../types/Graph";
 
 function createGraphStore() {

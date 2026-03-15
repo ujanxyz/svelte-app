@@ -1,8 +1,8 @@
 <script lang="ts">
 import {
   Button,
-  Point,
   type ButtonClickEvent,
+  Point,
   type PointValue2d,
 } from "svelte-tweakpane-ui";
 

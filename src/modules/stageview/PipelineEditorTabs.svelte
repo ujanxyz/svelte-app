@@ -1,7 +1,8 @@
 <script lang="ts">
 import ButtonGroup from "@/components/ButtonGroup.svelte";
-import type { PipelineEdge, PipelineStage } from "./types";
+
 import StageViewStages from "./StageViewStages.svelte";
+import type { PipelineEdge, PipelineStage } from "./types";
 
 interface Props {
   nodes: PipelineStage[];

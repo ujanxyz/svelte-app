@@ -1,4 +1,5 @@
 import { get, writable } from "svelte/store";
+
 import type { LogLevel, MemLogEntry } from "./types";
 
 const MAX_LOGS_COUNT = 25;

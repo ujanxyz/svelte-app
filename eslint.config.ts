@@ -1,8 +1,8 @@
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 import svelte from "eslint-plugin-svelte";
 import svelteParser from "svelte-eslint-parser";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
 
 export default [
   {

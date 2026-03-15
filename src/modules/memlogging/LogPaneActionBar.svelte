@@ -1,6 +1,7 @@
 <script lang="ts">
-import IconButton from "../../components/IconButton.svelte";
 import XCircleIcon from "phosphor-svelte/lib/XCircleIcon";
+
+import IconButton from "../../components/IconButton.svelte";
 
 type Props = {
   onclose: () => void;

@@ -20,4 +20,4 @@ interface IGraph {
   edges: IGraphEdge[];
 }
 
-export type { IGraph, IGraphNode, IGraphEdge };
+export type { IGraph, IGraphEdge, IGraphNode };

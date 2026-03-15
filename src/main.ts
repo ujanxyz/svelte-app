@@ -1,4 +1,5 @@
 import { mount } from "svelte";
+
 import App from "./app/App.svelte";
 import wasmService from "./modules/engine/wasmService";
 

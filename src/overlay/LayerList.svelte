@@ -1,7 +1,6 @@
 <script lang="ts">
-import type { Snippet } from "svelte";
 import Layer from "./Layer.svelte";
-import type { LayerData, DescendantUse } from "./types";
+import { type LayerData } from "./types";
 
 interface Props {
   layers: LayerData[];

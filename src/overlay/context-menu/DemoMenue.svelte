@@ -1,16 +1,15 @@
 <script lang="ts">
-// Icons.
-import PentagonIcon from "phosphor-svelte/lib/PentagonIcon";
-import StackPlusIcon from "phosphor-svelte/lib/StackPlusIcon";
-import StackMinusIcon from "phosphor-svelte/lib/StackMinusIcon";
-import CodeIcon from "phosphor-svelte/lib/CodeIcon";
 import ClipboardIcon from "phosphor-svelte/lib/ClipboardIcon";
+import CodeIcon from "phosphor-svelte/lib/CodeIcon";
 import LineVerticalIcon from "phosphor-svelte/lib/LineVerticalIcon";
+import PentagonIcon from "phosphor-svelte/lib/PentagonIcon";
+import StackMinusIcon from "phosphor-svelte/lib/StackMinusIcon";
+import StackPlusIcon from "phosphor-svelte/lib/StackPlusIcon";
 
 import { useOverlayUi } from "../overlayStore";
 import type { ClientXY, StatusOr } from "../types";
-import MenuLayer from "./MenuLayer.svelte";
 import demoMenuData from "./demoMenuData";
+import MenuLayer from "./MenuLayer.svelte";
 
 const overlayMenu = useOverlayUi(renderContextMenu);
 
