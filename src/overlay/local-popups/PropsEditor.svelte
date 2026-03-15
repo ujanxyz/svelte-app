@@ -1,5 +1,6 @@
 <script lang="ts">
 import CheckIcon from "phosphor-svelte/lib/CheckIcon";
+import { onMount } from "svelte";
 import { quadOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 
@@ -18,7 +19,7 @@ const containerStyle: string = $derived(
   `--client-x: ${clientRect.x}px; --client-y: ${clientRect.y}px; --client-w: ${clientRect.w}px; --client-h: ${clientRect.h}px;`,
 );
 
-$effect.pre(() => {
+onMount(() => {
   const { anchor, lorem } = current.getLayerPayload();
   currentText = lorem;
   const rect = (anchor as HTMLDivElement).getBoundingClientRect();

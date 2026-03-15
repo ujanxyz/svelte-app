@@ -1,4 +1,5 @@
 <script lang="ts">
+import { onMount } from "svelte";
 import {
   Button,
   type ButtonClickEvent,
@@ -16,7 +17,7 @@ const { initial, onData }: Props = $props();
 let valueArray = $state<string[]>([]);
 let lastColor: string = "#000000";
 
-$effect.pre(() => {
+onMount(() => {
   if (initial === null) return;
   valueArray = initial as string[];
 });

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { onMount } from "svelte";
 import {
   Button,
   type ButtonClickEvent,
@@ -15,7 +16,7 @@ const { initial, onData }: Props = $props();
 
 let valueArray = $state<PointValue2d[]>([]);
 
-$effect.pre(() => {
+onMount(() => {
   if (initial === null) return;
   valueArray = initial as PointValue2d[];
 });

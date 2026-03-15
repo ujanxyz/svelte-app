@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Snippet } from "svelte";
+import { onMount, type Snippet } from "svelte";
 
 import type { ClientXY } from "../types";
 import useCurrentOverlay from "../useCurrentOverlay";
@@ -24,7 +24,7 @@ const styleString: string = $derived(
 
 const current = useCurrentOverlay();
 
-$effect.pre(() => {
+onMount(() => {
   const { clientXY: payloadXY } = current.getLayerPayload();
   clientXY = payloadXY;
 });

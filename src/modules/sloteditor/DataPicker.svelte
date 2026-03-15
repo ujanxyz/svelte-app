@@ -1,6 +1,5 @@
 <script lang="ts">
-import { Color } from "svelte-tweakpane-ui";
-import { Button } from "svelte-tweakpane-ui";
+import { onMount } from "svelte";
 
 import type { UjOverrideData } from "@/graph/types";
 import type { ClientXY } from "@/overlay/types";
@@ -27,7 +26,7 @@ const styleString: string = $derived(
 
 const current = useCurrentOverlay();
 
-$effect.pre(() => {
+onMount(() => {
   const {
     anchor,
     datatype: payloadDatatype,

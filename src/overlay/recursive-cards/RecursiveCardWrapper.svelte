@@ -1,4 +1,6 @@
 <script lang="ts">
+import { onMount } from "svelte";
+
 import RecursiveOverlayCard from "./RecursiveOverlayCard.svelte";
 
 interface Props {
@@ -8,7 +10,7 @@ interface Props {
 
 const { cardColors, nextCardIndex }: Props = $props();
 
-$effect.pre(() => {
+onMount(() => {
   if (cardColors.length === 0) {
     throw new Error("Empty colors");
   }

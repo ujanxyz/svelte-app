@@ -1,5 +1,6 @@
 <script lang="ts">
 import { useEdges, useNodes } from "@xyflow/svelte";
+import { onMount } from "svelte";
 
 import useAppLocalData from "@/modules/persistence/useAppLocalData";
 
@@ -28,7 +29,8 @@ if (import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE === "true") {
 const nodesStore = useNodes();
 const edgesStore = useEdges();
 
-$effect.pre(() => {
+onMount(() => {
+  console.log("effect.pre called on IoManager !!");
   if (currentGraphSize() > 0) {
     // Graph not empty, do not populate.
     return;
