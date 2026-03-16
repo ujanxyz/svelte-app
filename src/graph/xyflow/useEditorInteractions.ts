@@ -3,13 +3,11 @@ import {
   type Edge,
   type Node,
   type OnConnectStartParams,
-  useStore,
 } from "@xyflow/svelte";
 
 import useMemlogging from "../../modules/memlogging/useMemlogging";
-import { slotStore } from "../data/slot-store";
 
-function useDebugActions() {
+export default function useEditorInteractions() {
   const { debugLog, warnLog } = useMemlogging();
 
   function isValidConnection(edge: Edge | Connection): boolean {
@@ -47,11 +45,8 @@ function useDebugActions() {
     console.log("onconnectend ... ", connectionState);
   }
 
-  function ondelete({ nodes, edges }: { nodes: Node[]; edges: Edge[] }): void {
-    console.log("In ondelete ...");
-    slotStore.deleteElements(nodes, edges);
-    const message = `Deleted ${nodes.length} nodes, ${edges.length} edges`;
-    debugLog(message);
+  function onedgeclick({ edge, event }: { edge: Edge; event: MouseEvent; }): void {
+    console.log("@ Edge click ... ", edge);
   }
 
   return {
@@ -60,8 +55,6 @@ function useDebugActions() {
     onconnect,
     onconnectstart,
     onconnectend,
-    ondelete,
+    onedgeclick,
   };
 }
-
-export default useDebugActions;

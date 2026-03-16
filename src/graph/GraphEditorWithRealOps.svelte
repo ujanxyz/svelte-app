@@ -1,15 +1,16 @@
 <script lang="ts">
-import ContextMenuServiceRegistrar from "./data/ContextMenuServiceRegistrar.svelte";
 import ExternalEventHandlers from "./data/ExternalEventHandlers.svelte";
-import FlowGraphServiceRegistrar from "./data/FlowGraphServiceRegistrar.svelte";
-import GalleryServiceRegistrar from "./data/GalleryServiceRegistrar.svelte";
-import IoManager from "./data/IoManager.svelte";
-import IoServiceRegistrar from "./data/IoServiceRegistrar.svelte";
-import ObserveSlots from "./data/ObserveSlots.svelte";
-import RawStoreServiceRegistrar from "./data/RawStoreServiceRegistrar.svelte";
+import ManageConnection from "./data/ManageConnection.svelte";
+import ManageGraphIO from "./data/ManageGraphIO.svelte";
+import ManageGraphUpdates from "./data/ManageGraphUpdates.svelte";
+import ObserveEdges from "./data/ObserveEdges.svelte";
+import RegisterContextMenuService from "./data/RegisterContextMenuService.svelte";
+import RegisterFlowGraphService from "./data/RegisterFlowGraphService.svelte";
+import RegisterIoService from "./data/RegisterIoService.svelte";
+import RegisterPopupService from "./data/RegisterPopupService.svelte";
+import RegisterRawStoreService from "./data/RegisterRawStoreService.svelte";
+import RegisterSlotService from "./data/RegisterSlotService.svelte";
 import FlowGraphWrapper from "./xyflow/FlowGraphWrapper.svelte";
-import ObserveConnection from "./xyflow/ObserveConnection.svelte";
-import ObserveEdges from "./xyflow/ObserveEdges.svelte";
 </script>
 
 <FlowGraphWrapper
@@ -18,18 +19,19 @@ import ObserveEdges from "./xyflow/ObserveEdges.svelte";
 />
 
 {#snippet beforeFlowRealOps()}
-  <RawStoreServiceRegistrar />
-  <IoServiceRegistrar />
-  <FlowGraphServiceRegistrar />
-  <ContextMenuServiceRegistrar />
-  <GalleryServiceRegistrar />
+  <RegisterRawStoreService />
+  <RegisterSlotService />
+  <RegisterIoService />
+  <RegisterFlowGraphService />
+  <RegisterContextMenuService />
+  <RegisterPopupService />
   <!-- Observers.. -->
-  <ObserveConnection />
   <ObserveEdges />
-  <ObserveSlots />
 {/snippet}
 
 {#snippet afterFlowRealOps()}
+  <ManageConnection />
+  <ManageGraphIO />
+  <ManageGraphUpdates />
   <ExternalEventHandlers />
-  <IoManager />
 {/snippet}

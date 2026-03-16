@@ -3,6 +3,7 @@ import type {
   EdgeProps,
   Node,
   NodeProps,
+  Viewport,
   XYPosition,
 } from "@xyflow/svelte";
 
@@ -54,6 +55,7 @@ interface UjEdgeStorage {
 export interface UjGraphStorage {
   nodes: UjNodeStorage[];
   edges: UjEdgeStorage[];
+  viewport: Viewport;
 }
 
 // Keep this flat object, it is used as non-reactive value in SvelteMap.

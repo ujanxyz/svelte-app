@@ -21,7 +21,7 @@ import { useGraphService } from "../graph-services";
 import DefaultNode from "../nodes/DefaultNode.svelte";
 import InputNode from "../nodes/InputNode.svelte";
 import type { UjEdgeProps, UjNodeProps } from "../types";
-import useDebugActions from "./useDebugActions";
+import useEditorInteractions from "./useEditorInteractions";
 import useMenusAndPopups from "./useMenusAndPopups";
 
 const nodeTypes: Record<string, Component<UjNodeProps>> = {
@@ -51,18 +51,20 @@ const {
   onbeforeconnect,
   onconnect,
   onconnectstart,
+  onedgeclick,
   // onconnectend,
-  ondelete,
-} = useDebugActions();
+} = useEditorInteractions();
 </script>
 
 <SvelteFlow
   bind:nodes={rawStoreService.nodes}
   bind:edges={rawStoreService.edges}
+  bind:viewport={rawStoreService.viewport}
   {nodeTypes}
   {edgeTypes}
   {onpanecontextmenu}
   {onnodecontextmenu}
+  {onedgeclick}
   {onedgecontextmenu}
   {onselectioncontextmenu}
   fitView
@@ -73,7 +75,6 @@ const {
   {onconnect}
   {onconnectstart}
   {onconnectend}
-  {ondelete}
   {onpaneclick}
   multiSelectionKey={null}
 >

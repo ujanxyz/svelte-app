@@ -22,10 +22,10 @@
 }
 
 .svelte-flow__edge-path {
-  stroke: #a143d8;
-  stroke-width: 1.5;
+  stroke: #8d9fb5;
+  /* stroke-width: 1.5;
   stroke-dasharray: 3 2;
-  stroke-dashoffset: 2;
+  stroke-dashoffset: 2; */
 }
 
 .svelte-flow__edge.animated {

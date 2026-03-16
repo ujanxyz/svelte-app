@@ -1,6 +1,9 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
+import useMemlogging from "@/modules/memlogging/useMemlogging";
+
+import { ReturnStatus } from "../constants";
 import { useOverlayUi } from "../overlayStore";
 import useCurrentOverlay from "../useCurrentOverlay";
 import RecursiveCardWrapper from "./RecursiveCardWrapper.svelte";
@@ -16,16 +19,20 @@ const { cardIndex, selfColor, childColors }: Props = $props();
 
 const current = useCurrentOverlay();
 const overlay = useOverlayUi(renderContent);
-
-/* svelte-ignore state_referenced_locally */
-current.setDebugName(`card-${cardIndex}`);
+const { debugLog, errorLog } = useMemlogging();
 
 onMount(() => {
+  // Launch another child card after N msecs, unless it is the last card.
   if (childColors.length > 0) {
     const timeoutId = window.setTimeout(async () => {
-      const retVal = await overlay.openOverlayAsync({});
+      const retVal = await overlay.openOverlayAsync({}, {movable: true});
+      if (ReturnStatus.OK === retVal.status) {
+        debugLog(`Card# ${cardIndex} received OK. value: ${JSON.stringify(retVal.value)}`);
+      } else {
+        errorLog(`Card# ${cardIndex} received status: ${retVal.status}. Reason: ${JSON.stringify(retVal.reason)}`);
+      }
       console.log(retVal);
-    }, 20);
+    }, 30);
     return () => {
       window.clearTimeout(timeoutId);
     };

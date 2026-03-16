@@ -66,7 +66,7 @@ export const initialEdges: Edge[] = [
     data: {
       label: "Dummy A to Point func",
     },
-    animated: true,
+    animated: false,
   },
   {
     id: "a/x-p/x",
@@ -78,7 +78,7 @@ export const initialEdges: Edge[] = [
     data: {
       label: "Dummy A to Transform",
     },
-    animated: true,
+    animated: false,
   },
   {
     id: "b/fx-r",
@@ -90,7 +90,7 @@ export const initialEdges: Edge[] = [
     data: {
       label: "reconnectable edge",
     },
-    animated: true,
+    animated: false,
   },
   {
     id: "t/x-r/f",

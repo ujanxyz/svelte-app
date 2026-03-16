@@ -1,5 +1,6 @@
 <script lang="ts">
 import CloseButton from "./CloseButton.svelte";
+import MoveButton from "./MoveButton.svelte";
 
 interface Props {
   title: string;
@@ -10,6 +11,7 @@ const { title }: Props = $props();
 
 <div class="container">
   <span class="title">{title}</span>
+  <MoveButton width={160} height={30} debugTitle={title} />
   <CloseButton />
 </div>
 

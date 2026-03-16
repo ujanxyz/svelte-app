@@ -10,7 +10,7 @@ import {
 
 let { id, sourceX, sourceY, targetX, targetY, ...props }: EdgeProps = $props();
 /* svelte-ignore state_referenced_locally */
-const { markerStart, markerEnd, interactionWidth, label, labelStyle } = props;
+const { markerStart, markerEnd, interactionWidth, label, labelStyle, selected } = props;
 
 // const [edgePath] = $derived(getBezierPath({
 //     sourceX,
@@ -48,7 +48,7 @@ console.log(edgePath);
   {label}
   {labelStyle}
 />
-
+<!-- 
 {#each Array(5).keys() as i}
   <circle r="3" fill="blue">
     <animateMotion
@@ -58,9 +58,9 @@ console.log(edgePath);
       begin="{i}s"
     />
   </circle>
-{/each}
+{/each} -->
 
-<EdgeToolbar edgeId={id} x={labelX} y={labelY} isVisible={false}>
+<EdgeToolbar edgeId={id} x={labelX} y={labelY} isVisible={selected}>
   <button>{id}</button>
 </EdgeToolbar>
 

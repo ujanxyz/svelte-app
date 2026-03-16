@@ -20,10 +20,14 @@ export interface ClientRect {
   h: number;
 }
 
+export interface OverlayOpts {
+  movable: boolean;
+}
+
 export type LayerPayload = Record<string, any>;
 
 export interface CreatorUse {
-  openOverlayAsync<T>(payload: LayerPayload): Promise<StatusOr<T>>;
+  openOverlayAsync<T>(payload: LayerPayload, opts?: Partial<OverlayOpts>): Promise<StatusOr<T>>;
 }
 
 export interface DescendantUse {
@@ -33,7 +37,9 @@ export interface DescendantUse {
 
 export interface LayerUse extends DescendantUse {
   getLayerPayload(): LayerPayload;
-  setDebugName(name: string): void;
+  getLayerDiv(): HTMLDivElement;
+  getTranslate(): {dx: number, dy: number};
+  setTranslate(dx: number, dy: number);
 }
 
 export type LayerSnippetFn = Snippet<[]>;
@@ -41,15 +47,18 @@ export type LayerSnippetFn = Snippet<[]>;
 export interface LayerData {
   layerId: string;
   payload: LayerPayload;
+  opts: OverlayOpts;
   renderfn: LayerSnippetFn;
   descendantUse: DescendantUse;
 }
 
 export type ResolveFn<T> = (value: T) => void;
 
+// TODO: Derive other type from this.
 export interface OverlayEntry {
   layerId: string;
   payload: LayerPayload;
+  opts: OverlayOpts;
   renderfn: Snippet;
   resolve: ResolveFn<unknown>;
   reject: (reason: any) => void;

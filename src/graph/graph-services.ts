@@ -1,13 +1,10 @@
-import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
+import { type Edge, type Node, type Viewport, type XYPosition } from "@xyflow/svelte";
 
 import type { FuncSpec } from "@/modules/fngallery/types";
 
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
-import type { UjGraphStorage } from "./types";
-
-export type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
-export type PickFunction = () => Promise<StatusOr<string>>;
+import type { UjGraphStorage, UjOverrideData, UjSlotInfo } from "./types";
 
 interface RawStoreService {
   // List of nodes.
@@ -16,30 +13,41 @@ interface RawStoreService {
   // List of edges.
   get edges(): Edge[];
   set edges(value: Edge[]);
+  // Use provided store for center and zoom level.
+  get viewport(): Viewport;
+  set viewport(value: Viewport);
   // Pivot: last clicked XY position in the pane.
   get pivot(): XYPosition;
   set pivot(value: XYPosition);
+
+  currentViewport(): Viewport;
+}
+
+interface SlotService {
+  // TODO: Rename reactiveSlotInfo.
+  useSlotInfo(nodeId: string, paramName: string): UjSlotInfo | undefined;
+  setOverride(
+      nodeId: string,
+      slotName: string,
+      override: boolean,
+      data: UjOverrideData | null): void;
+  lookupOverride(
+    nodeId: string,
+    slotName: string,
+  ): UjOverrideData | null;
+  deleteElements(nodes: Node[], edges: Edge[]): void;
+  ensureSlots(nodes: Node[]): void;
+  ensureConnections(edges: Edge[]): void;
 }
 
 interface IoService {
   createNodeAt: (fnSpec: FuncSpec, position: XYPosition) => Node;
-  serializeObject: (nodes: Node[], edges: Edge[]) => UjGraphStorage;
+  serializeObject: (nodes: Node[], edges: Edge[], viewport: Viewport) => UjGraphStorage;
 }
 
-interface ContextMenuService {
-  menuInPane: MenuFunction;
-  menuInNode: MenuFunction;
-  menuInEdge: MenuFunction;
-  menuInSelection: MenuFunction;
-  menuInConnEnd: MenuFunction;
-}
-
-interface GalleryService {
-  pickFnFromGallery: PickFunction;
-}
 
 interface FlowGraphService {
-  screenToFlowXY: (event: MouseEvent) => XYPosition;
+  screenToFlowXY: (input: MouseEvent | ClientXY) => XYPosition;
   allNodes: () => Node[];
   allEdges: () => Edge[];
   deleteNode: (nodeId: string) => Promise<void>;
@@ -49,15 +57,32 @@ interface FlowGraphService {
   deleteAllEdges: () => Promise<void>;
   deleteGraph: () => Promise<void>;
   appendNode: (newNode: Node) => Promise<void>;
-  populateGraph: (newNodes: Node[], newEdges: Edge[]) => void;
+  assignGraph: (newNodes: Node[], newEdges: Edge[]) => void;
+}
+
+type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
+
+interface ContextMenuService {
+  menuInPane: MenuFunction;
+  menuInNode: MenuFunction;
+  menuInEdge: MenuFunction;
+  menuInSelection: MenuFunction;
+  menuInConnEnd: MenuFunction;
+}
+
+export type PickFunction = () => Promise<StatusOr<string>>;
+
+interface PopupService {
+  nodeFunctionGallery: PickFunction;
 }
 
 export interface GraphServices {
   rawStoreService?: RawStoreService;
+  slotService?: SlotService;
   ioService?: IoService;
-  menuService?: ContextMenuService;
-  galleryService?: GalleryService;
   flowGraphService?: FlowGraphService;
+  menuService?: ContextMenuService;
+  popupService?: PopupService;
 }
 
 const graphContext = createReactiveContext<GraphServices>(

@@ -1,4 +1,4 @@
-import { type Unsubscriber, type Writable, writable } from "svelte/store";
+import { get, type Unsubscriber, type Writable, writable } from "svelte/store";
 
 import { ReturnStatus } from "./constants";
 import type {
@@ -7,6 +7,7 @@ import type {
   LayerPayload,
   LayerSnippetFn,
   OverlayEntry,
+  OverlayOpts,
   ResolveFn,
   StatusOr,
 } from "./types";
@@ -169,11 +170,17 @@ const overlayStore = (function () {
     }
   }
 
+  function findLayerById(layerId: string): OverlayEntry | null {
+    const layer = get(stack).find((e: OverlayEntry) => e.layerId === layerId);
+    return layer ?? null;
+  }
+
   return {
     pushOverlay,
     subscribeStackChange,
     clearOverlays,
     clearLayersFrom,
+    findLayerById,
     overlayOps,
   };
 })();
@@ -182,6 +189,9 @@ const overlayStore = (function () {
 function useOverlayUi(renderfn: LayerSnippetFn): CreatorUse & DescendantUse {
   const { overlayOps } = overlayStore;
   let lastUse: DescendantUse | undefined = undefined;
+  const defaultOverlayOpts: OverlayOpts = {
+    movable: false,
+  };
 
   function _validErrorToStatus<T>(reason: any): StatusOr<T> {
     if (reason instanceof SelfAbortedError) {
@@ -198,7 +208,9 @@ function useOverlayUi(renderfn: LayerSnippetFn): CreatorUse & DescendantUse {
 
   async function openOverlayAsync<T>(
     payload: LayerPayload,
+    opts?: Partial<OverlayOpts>
   ): Promise<StatusOr<T>> {
+    const layerOpts: OverlayOpts = {...defaultOverlayOpts, ...(opts ?? {})};
     const promise = new Promise<T>((resolve: ResolveFn<T>, reject) => {
       const layerId = crypto.randomUUID();
       const descendantUse: DescendantUse = _makeConsumerUse(
@@ -209,6 +221,7 @@ function useOverlayUi(renderfn: LayerSnippetFn): CreatorUse & DescendantUse {
       const entry: OverlayEntry = {
         layerId,
         payload,
+        opts: layerOpts,
         renderfn,
         resolve: resolve as ResolveFn<unknown>,
         reject,

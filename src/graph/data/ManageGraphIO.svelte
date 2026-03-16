@@ -52,6 +52,16 @@ $effect(() => {
   }
 });
 
+function currentGraphSize(): number {
+  return (
+    flowGraphService.allNodes().length + flowGraphService.allEdges().length
+  );
+}
+
+function tryPopulateFromFixedData(): boolean {
+  flowGraphService.assignGraph(initialNodes, initialEdges);
+  return currentGraphSize() > 0;
+}
 
 /**
  * @requires import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE
@@ -60,18 +70,8 @@ function tryPopulateFromLocalStorage(): boolean {
   const loadedData = localDataOps.getLoadedData();
   if (loadedData === null) return false;
   const { nodes, edges } = loadedData;
-  flowGraphService.populateGraph(nodes, edges);
+  flowGraphService.assignGraph(nodes, edges);
   return currentGraphSize() > 0;
 }
 
-function tryPopulateFromFixedData(): boolean {
-  flowGraphService.populateGraph(initialNodes, initialEdges);
-  return currentGraphSize() > 0;
-}
-
-function currentGraphSize(): number {
-  return (
-    flowGraphService.allNodes().length + flowGraphService.allEdges().length
-  );
-}
 </script>

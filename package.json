@@ -56,6 +56,7 @@
   "dependencies": {
     "@xyflow/svelte": "^1.5.1",
     "bits-ui": "^2.16.1",
+    "debounce": "^3.0.0",
     "svelte-tweakpane-ui": "^1.5.14"
   }
 }

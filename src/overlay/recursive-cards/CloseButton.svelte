@@ -7,11 +7,13 @@ import useCurrentOverlay from "../useCurrentOverlay";
 
 const overlay = useCurrentOverlay();
 
-function closeOk() {
+function closeOk(ev: MouseEvent) {
+  ev.stopPropagation();
   overlay.settleOverlay("CLOSED_OK");
 }
 
-function closeErr() {
+function closeErr(ev: MouseEvent) {
+  ev.stopPropagation();
   overlay.abortOverlay();
 }
 </script>

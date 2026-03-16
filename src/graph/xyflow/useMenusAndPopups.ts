@@ -1,4 +1,5 @@
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
+import { type FinalConnectionState } from '@xyflow/system';
 
 import { lookupFnDetailsAsync } from "../../modules/fngallery/apiFunctionInfos";
 import { ReturnStatus } from "../../overlay/constants";
@@ -20,7 +21,7 @@ export default function useMenusAndPopups() {
   const ioService = useGraphService("ioService");
   const flowGraphService = useGraphService("flowGraphService");
   const menuService = useGraphService("menuService");
-  const galleryService = useGraphService("galleryService");
+  const popupService = useGraphService("popupService");
 
   // const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
   // const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
@@ -124,14 +125,26 @@ export default function useMenusAndPopups() {
 
   async function onconnectend(
     event: MouseEvent | TouchEvent,
-    connectionState: any,
+    connectionState: FinalConnectionState,
   ): Promise<void> {
-    const clientXY: ClientXY = getClientXY(event);
     event.preventDefault();
+    const { fromNode, fromHandle, toNode } = connectionState;
+    if (toNode !== null) {
+      // Connection ended on a handle. This leads to edge creation, handled by XY-Flow.
+      return;
+    }
+    console.log("connectionState @ end = ", connectionState, fromNode, fromHandle);
+
+    const clientXY: ClientXY = getClientXY(event);
+    const flowPosn: XYPosition = flowGraphService.screenToFlowXY(clientXY);
+
     const retval = await menuService.menuInConnEnd(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
     console.log(retval);
     switch (retval.value) {
+      default:
+        _internalOpenGallery(flowPosn);
+        // TODO: Continue to connect the edge.
     }
   }
 
@@ -145,7 +158,7 @@ export default function useMenusAndPopups() {
   }
 
   async function _internalOpenGallery(position: XYPosition): Promise<void> {
-    const retval = await galleryService.pickFnFromGallery();
+    const retval = await popupService.nodeFunctionGallery();
     if (retval.status !== ReturnStatus.OK) return;
     console.log(retval.value);
     const funcId = retval.value as string;
@@ -161,7 +174,8 @@ export default function useMenusAndPopups() {
   async function onsavelocalstorage(): Promise<void> {
     const nodes = flowGraphService.allNodes();
     const edges = flowGraphService.allEdges();
-    const graph = ioService.serializeObject(nodes, edges);
+    const viewport = rawStoreService.currentViewport();
+    const graph = ioService.serializeObject(nodes, edges, viewport);
     console.log("Save json .. ", graph);
   }
 

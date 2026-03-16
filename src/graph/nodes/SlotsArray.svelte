@@ -1,5 +1,5 @@
 <script lang="ts">
-import { slotStore } from "../data/slot-store";
+import { useGraphService } from "../graph-services";
 import type { UjNodeData, UjOverrideData } from "../types";
 import NodeSlot from "./NodeSlot.svelte";
 
@@ -17,13 +17,15 @@ interface Props {
 
 const { nodeId, ins, outs, inouts }: Props = $props();
 
+const slotService = useGraphService("slotService");
+
 function onDataEntry(slotName: string, data: UjOverrideData): void {
   console.log(slotName, data);
-  slotStore.setOverride(nodeId, slotName, true, data);
+  slotService.setOverride(nodeId, slotName, true, data);
 }
 
 function onDataLookup(slotName: string): UjOverrideData | null {
-  return slotStore.lookupOverride(nodeId, slotName);
+  return slotService.lookupOverride(nodeId, slotName);
 }
 </script>
 
@@ -40,18 +42,18 @@ function onDataLookup(slotName: string): UjOverrideData | null {
 </div>
 
 {#snippet inSlot(param: InParam)}
-  {@const slotInfoIn = slotStore.useSlotInfo(nodeId, param.name)}
+  {@const slotInfoIn = slotService.useSlotInfo(nodeId, param.name)}
   <NodeSlot access="in" {param} {slotInfoIn} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet outSlot(param: OutParam)}
-  {@const slotInfoOut = slotStore.useSlotInfo(nodeId, param.name)}
+  {@const slotInfoOut = slotService.useSlotInfo(nodeId, param.name)}
   <NodeSlot access="out" {param} {slotInfoOut} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet inoutSlot(param: InOutParam)}
-  {@const slotInfoIn = slotStore.useSlotInfo(nodeId, param.name + "/in")}
-  {@const slotInfoOut = slotStore.useSlotInfo(nodeId, param.name + "/out")}
+  {@const slotInfoIn = slotService.useSlotInfo(nodeId, param.name + "/in")}
+  {@const slotInfoOut = slotService.useSlotInfo(nodeId, param.name + "/out")}
   <NodeSlot
     access="inout"
     {param}

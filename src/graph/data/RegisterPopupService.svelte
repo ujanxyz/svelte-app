@@ -6,11 +6,11 @@ import { registerGraphService } from "../graph-services";
 
 const galleryPopup = useOverlayUi(renderFnGallery);
 
-registerGraphService("galleryService", {
-  pickFnFromGallery: pickFnFromGallery,
+registerGraphService("popupService", {
+  nodeFunctionGallery,
 });
 
-async function pickFnFromGallery(): Promise<StatusOr<string>> {
+async function nodeFunctionGallery(): Promise<StatusOr<string>> {
   return await galleryPopup.openOverlayAsync<string>({});
 }
 </script>

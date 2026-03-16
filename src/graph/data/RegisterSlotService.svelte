@@ -1,9 +1,13 @@
+<script lang="ts">
 import type { Edge, Node } from "@xyflow/svelte";
 import { SvelteMap } from "svelte/reactivity";
 
+import { registerGraphService } from "../graph-services";
 import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
 
-function createSlotStore() {
+registerGraphService("slotService", _createSlotStore());
+
+function _createSlotStore() {
   const slotsMap = new SvelteMap<string, UjSlotInfo>();
   // Override (node input) data keyed by slot id.
   // This is a non-reactive map with same keys, but the entries exist only if
@@ -172,4 +176,4 @@ function createSlotStore() {
   };
 }
 
-export const slotStore = createSlotStore();
+</script>

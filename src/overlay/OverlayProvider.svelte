@@ -12,16 +12,15 @@ interface Props {
 
 const { children }: Props = $props();
 
+let layers = $state.raw<LayerData[]>([]);
 let rootDiv: HTMLDivElement;
 
 function onStackChange(entries: OverlayEntry[]) {
   layers = entries.map((layer: OverlayEntry): LayerData => {
-    const { layerId, payload, renderfn, descendantUse } = layer;
-    return { layerId, payload, renderfn, descendantUse } as LayerData;
+    const { layerId, payload, opts, renderfn, descendantUse } = layer;
+    return { layerId, payload, opts, renderfn, descendantUse } as LayerData;
   });
 }
-
-let layers = $state<LayerData[]>([]);
 
 onMount(() => {
   const unsubscribe = overlayStore.subscribeStackChange(onStackChange);
@@ -37,7 +36,7 @@ function _clearOverlays(ev: CustomEvent) {
   const point = { clientX, clientY };
   let foundIndex = -1;
   for (let i = layerDivs.length - 1; i >= 0; --i) {
-    if (pointInAnyChild(layerDivs[i], point)) {
+    if (pointInLayer(point, layerDivs[i])) {
       foundIndex = i;
       break;
     }
@@ -53,13 +52,27 @@ function _clearOverlays(ev: CustomEvent) {
     if (!!layerId) {
       overlayStore.clearLayersFrom(layerId);
     }
-    console.log("Found hit: ", layerId);
   }
 }
 
+function pointInLayer(point: { clientX: number; clientY: number }, layerDiv: HTMLDivElement) {
+  const elementKind: string | undefined = layerDiv.dataset.kind;
+  if (!elementKind) {
+    // Nothing, throw at end.
+  } else if (elementKind === "layer") {
+    return pointInAnyChild(point, layerDiv);
+  } else if (elementKind === "layer-movable") {
+    const contentDiv = layerDiv.childNodes[0] ?? null;
+    if (contentDiv instanceof HTMLDivElement && contentDiv.dataset.kind === "layer-content") {
+      return pointInAnyChild(point, contentDiv);
+    }
+  }
+  throw new Error("Unexpected layer attrs");
+}
+
 function pointInAnyChild(
-  parent: HTMLDivElement,
   point: { clientX: number; clientY: number },
+  parent: HTMLDivElement
 ): boolean {
   const children = parent.children;
   const nchildren = children.length;

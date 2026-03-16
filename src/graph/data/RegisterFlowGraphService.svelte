@@ -34,14 +34,18 @@ registerGraphService("flowGraphService", {
   deleteAllEdges,
   deleteGraph,
   appendNode,
-  populateGraph,
+  assignGraph,
 });
 
-function screenToFlowXY(event: MouseEvent): XYPosition {
-  return _screenToFlowXY({
-    x: event.clientX,
-    y: event.clientY,
-  } as ClientXY);
+function screenToFlowXY(input: MouseEvent | ClientXY): XYPosition {
+  if (input instanceof MouseEvent) {
+    return _screenToFlowXY({
+      x: input.clientX,
+      y: input.clientY,
+    } as ClientXY);
+  } else {
+    return _screenToFlowXY(input as ClientXY);
+  }
 }
 
 function allNodes(): Node[] {
@@ -92,23 +96,18 @@ async function appendNode(newNode: Node): Promise<void> {
   });
 }
 
-function populateGraph(newNodes: Node[], newEdges: Edge[]): void {
-  console.log("populateGraph ---", newNodes.length, newEdges.length);
-  const newNodeIds: string[] = newNodes.map((n: Node) => n.id);
-  const newEdgeIds: string[] = newEdges.map((e: Edge) => e.id);
+function assignGraph(newNodes: Node[], newEdges: Edge[]): void {
+  _setEdges([]);
+  _setNodes(newNodes);
+  _setEdges(newEdges);
+}
 
-  const priorNodes = _getNodes(newNodeIds);
-  const priorEdges = _getEdges(newEdgeIds);
-  if (priorNodes.length > 0 || priorEdges.length > 0) {
-    // Graph not empty, do not populate.
-    console.warn("Node / edge id coflict, skip populating graph");
-    return;
+function _getClientXY(event: MouseEvent | TouchEvent): ClientXY {
+  if (event instanceof MouseEvent) {
+    return { x: event.clientX, y: event.clientY };
+  } else {
+    const touch = event.touches[0] ?? event.changedTouches[0];
+    return { x: touch.clientX, y: touch.clientY };
   }
-  _updateNodes((nodes: Node[]) => {
-    return [...nodes, ...newNodes];
-  });
-  _updateEdges((edges: Edge[]) => {
-    return [...edges, ...newEdges];
-  });
 }
 </script>
