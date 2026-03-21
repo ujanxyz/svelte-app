@@ -65,7 +65,11 @@ async function _loadWasmInternal(): Promise<WasmModuleType> {
     !!wasmModule,
     "WASM module should be loaded and available on globalThis.Module",
   );
-  // console.log("Build info:", wasmModule.getBuildInfo());
+  const buildInfo = wasmModule.getBuildInfo() as any;
+  if (buildInfo.timestamp) {
+    buildInfo["legibleTimestamp"] = new Date(buildInfo.timestamp as number * 1000).toLocaleString();
+  }
+  console.log("Build info:", buildInfo);
   return wasmModule;
 }
 

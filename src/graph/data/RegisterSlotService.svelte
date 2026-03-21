@@ -22,6 +22,10 @@ function _createSlotStore() {
     return slotsMap.get(slotId);
   }
 
+  function reactiveSlotEntries(): [string, UjSlotInfo][] {
+    return Array.from(slotsMap.entries());
+  }
+
   function ensureSlots(nodes: Node[]): void {
     for (const node of nodes) {
       const nodeId = node.id as string;
@@ -168,6 +172,7 @@ function _createSlotStore() {
 
   return {
     useSlotInfo,
+    reactiveSlotEntries,
     ensureSlots,
     ensureConnections,
     lookupOverride,

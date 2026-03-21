@@ -27,7 +27,6 @@ const [edgePath, labelX, labelY] = $derived(
     targetY,
   }),
 );
-console.log(edgePath);
 </script>
 
 <!-- <BaseEdge

@@ -157,6 +157,18 @@ export default function useMenusAndPopups() {
     await _internalOpenGallery(rawStoreService.pivot);
   }
 
+  async function ondatainspector(event: MouseEvent): Promise<void> {
+    await popupService.flowDataInspector();
+  }
+
+  async function onsavelocalstorage(): Promise<void> {
+    const nodes = flowGraphService.allNodes();
+    const edges = flowGraphService.allEdges();
+    const viewport = rawStoreService.currentViewport();
+    const graph = ioService.serializeObject(nodes, edges, viewport);
+    console.log("Save json .. ", graph);
+  }
+
   async function _internalOpenGallery(position: XYPosition): Promise<void> {
     const retval = await popupService.nodeFunctionGallery();
     if (retval.status !== ReturnStatus.OK) return;
@@ -171,13 +183,6 @@ export default function useMenusAndPopups() {
     await flowGraphService.appendNode(newNode);
   }
 
-  async function onsavelocalstorage(): Promise<void> {
-    const nodes = flowGraphService.allNodes();
-    const edges = flowGraphService.allEdges();
-    const viewport = rawStoreService.currentViewport();
-    const graph = ioService.serializeObject(nodes, edges, viewport);
-    console.log("Save json .. ", graph);
-  }
 
   return {
     onpaneclick,
@@ -187,7 +192,8 @@ export default function useMenusAndPopups() {
     onselectioncontextmenu,
     onconnectend,
     // Custom app-declared handlers.
-    onpopupgallery,
     onsavelocalstorage,
+    onpopupgallery,
+    ondatainspector,
   };
 }

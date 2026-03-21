@@ -26,6 +26,7 @@ interface RawStoreService {
 interface SlotService {
   // TODO: Rename reactiveSlotInfo.
   useSlotInfo(nodeId: string, paramName: string): UjSlotInfo | undefined;
+  reactiveSlotEntries(): [string, UjSlotInfo][];
   setOverride(
       nodeId: string,
       slotName: string,
@@ -70,10 +71,9 @@ interface ContextMenuService {
   menuInConnEnd: MenuFunction;
 }
 
-export type PickFunction = () => Promise<StatusOr<string>>;
-
 interface PopupService {
-  nodeFunctionGallery: PickFunction;
+  nodeFunctionGallery: () => Promise<StatusOr<string>>;
+  flowDataInspector: () => Promise<void>;
 }
 
 export interface GraphServices {

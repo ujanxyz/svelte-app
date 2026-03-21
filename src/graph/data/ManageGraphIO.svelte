@@ -30,7 +30,6 @@ const nodesStore = useNodes();
 const edgesStore = useEdges();
 
 onMount(() => {
-  console.log("effect.pre called on IoManager !!");
   if (currentGraphSize() > 0) {
     // Graph not empty, do not populate.
     return;

@@ -23,7 +23,7 @@ const modes = [
   { code: "memlog", label: "Mem-logging" },
 ];
 
-let selected = $state<string>("slots");
+let selected = $state<string>("graph");
 
 function handleSelect(code: string) {
   // Nothing.

@@ -7,13 +7,15 @@ import {
   BackgroundVariant,
   ControlButton,
   Controls,
+  Panel,
   SvelteFlow,
 } from "@xyflow/svelte";
-// Icons
+// <icons>
 import DownloadSimpleIcon from "phosphor-svelte/lib/DownloadSimpleIcon";
+import EyeIcon from "phosphor-svelte/lib/EyeIcon";
 import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
-//import PlayIcon from "phosphor-svelte/lib/PlayIcon";
 import UploadSimpleIcon from "phosphor-svelte/lib/UploadSimpleIcon";
+// </icons>
 import { type Component } from "svelte";
 
 import DefaultEdge from "../edges/DefaultEdge.svelte";
@@ -23,6 +25,8 @@ import InputNode from "../nodes/InputNode.svelte";
 import type { UjEdgeProps, UjNodeProps } from "../types";
 import useEditorInteractions from "./useEditorInteractions";
 import useMenusAndPopups from "./useMenusAndPopups";
+//import PlayIcon from "phosphor-svelte/lib/PlayIcon";
+
 
 const nodeTypes: Record<string, Component<UjNodeProps>> = {
   in: InputNode,
@@ -42,8 +46,9 @@ const {
   onedgecontextmenu,
   onselectioncontextmenu,
   onconnectend,
-  onpopupgallery,
   onsavelocalstorage,
+  onpopupgallery,
+  ondatainspector,
 } = useMenusAndPopups();
 
 const {
@@ -85,17 +90,17 @@ const {
     size={0.75}
   />
   <Controls position={"top-right"}>
-    <ControlButton onclick={onpopupgallery}>
-      <FunctionIcon />
-    </ControlButton>
     <ControlButton onclick={onsavelocalstorage}>
       <UploadSimpleIcon />
     </ControlButton>
     <ControlButton onclick={onsavelocalstorage}>
       <DownloadSimpleIcon />
     </ControlButton>
+    <ControlButton onclick={onpopupgallery}>
+      <FunctionIcon />
+    </ControlButton>
+    <ControlButton onclick={ondatainspector}>
+      <EyeIcon />
+    </ControlButton>
   </Controls>
 </SvelteFlow>
-
-<style>
-</style>

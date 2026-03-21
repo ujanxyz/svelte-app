@@ -17,7 +17,6 @@ interface Props {
 
 const { cardIndex, selfColor, childColors }: Props = $props();
 
-const current = useCurrentOverlay();
 const overlay = useOverlayUi(renderContent);
 const { debugLog, errorLog } = useMemlogging();
 

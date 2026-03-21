@@ -20,6 +20,7 @@ type EditAsyncFn = (
   anchor: HTMLDivElement,
   initial: string,
 ) => Promise<string | null>;
+
 const propsEditor = getContext("propseditor") as {
   editPropsAsync: EditAsyncFn;
 };

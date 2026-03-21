@@ -2048,6 +2048,92 @@ async function createWasm() {
     };
 
   
+  
+  
+  
+  
+  
+  
+  var validateThis = (this_, classType, humanName) => {
+      if (!(this_ instanceof Object)) {
+        throwBindingError(`${humanName} with invalid "this": ${this_}`);
+      }
+      if (!(this_ instanceof classType.registeredClass.constructor)) {
+        throwBindingError(`${humanName} incompatible with "this" of type ${this_.constructor.name}`);
+      }
+      if (!this_.$$.ptr) {
+        throwBindingError(`cannot call emscripten binding method ${humanName} on deleted object`);
+      }
+  
+      // todo: kill this
+      return upcastPointer(this_.$$.ptr,
+                           this_.$$.ptrType.registeredClass,
+                           classType.registeredClass);
+    };
+  var __embind_register_class_property = (classType,
+                                      fieldName,
+                                      getterReturnType,
+                                      getterSignature,
+                                      getter,
+                                      getterContext,
+                                      setterArgumentType,
+                                      setterSignature,
+                                      setter,
+                                      setterContext) => {
+      fieldName = AsciiToString(fieldName);
+      getter = embind__requireFunction(getterSignature, getter);
+  
+      whenDependentTypesAreResolved([], [classType], (classType) => {
+        classType = classType[0];
+        var humanName = `${classType.name}.${fieldName}`;
+        var desc = {
+          get() {
+            throwUnboundTypeError(`Cannot access ${humanName} due to unbound types`, [getterReturnType, setterArgumentType]);
+          },
+          enumerable: true,
+          configurable: true
+        };
+        if (setter) {
+          desc.set = () => throwUnboundTypeError(`Cannot access ${humanName} due to unbound types`, [getterReturnType, setterArgumentType]);
+        } else {
+          desc.set = (v) => throwBindingError(humanName + ' is a read-only property');
+        }
+  
+        Object.defineProperty(classType.registeredClass.instancePrototype, fieldName, desc);
+  
+        whenDependentTypesAreResolved(
+          [],
+          (setter ? [getterReturnType, setterArgumentType] : [getterReturnType]),
+        (types) => {
+          var getterReturnType = types[0];
+          var desc = {
+            get() {
+              var ptr = validateThis(this, classType, humanName + ' getter');
+              return getterReturnType.fromWireType(getter(getterContext, ptr));
+            },
+            enumerable: true
+          };
+  
+          if (setter) {
+            setter = embind__requireFunction(setterSignature, setter);
+            var setterArgumentType = types[1];
+            desc.set = function(v) {
+              var ptr = validateThis(this, classType, humanName + ' setter');
+              var destructors = [];
+              setter(setterContext, ptr, setterArgumentType.toWireType(destructors, v));
+              runDestructors(destructors);
+            };
+          }
+  
+          Object.defineProperty(classType.registeredClass.instancePrototype, fieldName, desc);
+          return [];
+        });
+  
+        return [];
+      });
+    };
+
+  
   var emval_freelist = [];
   
   var emval_handles = [0,1,,1,null,1,true,1,false,1];
@@ -2713,11 +2799,19 @@ async function createWasm() {
     };
 
 
+  var __emval_incref = (handle) => {
+      if (handle > 9) {
+        emval_handles[handle + 1] += 1;
+      }
+    };
+
   
   
   var __emval_invoke = (caller, handle, methodName, destructorsRef, args) => {
       return emval_methodCallers[caller](handle, methodName, destructorsRef, args);
     };
+
+  var __emval_new_array = () => Emval.toHandle([]);
 
   
   var __emval_new_cstring = (v) => Emval.toHandle(getStringOrSymbol(v));
@@ -2737,6 +2831,83 @@ async function createWasm() {
       key = Emval.toValue(key);
       value = Emval.toValue(value);
       handle[key] = value;
+    };
+
+  var _emscripten_get_now = () => performance.now();
+  
+  var _emscripten_date_now = () => Date.now();
+  
+  var nowIsMonotonic = 1;
+  
+  var checkWasiClock = (clock_id) => clock_id >= 0 && clock_id <= 3;
+  
+  var INT53_MAX = 9007199254740992;
+  
+  var INT53_MIN = -9007199254740992;
+  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
+  function _clock_time_get(clk_id, ignored_precision, ptime) {
+    ignored_precision = bigintToI53Checked(ignored_precision);
+  
+  
+      if (!checkWasiClock(clk_id)) {
+        return 28;
+      }
+      var now;
+      // all wasi clocks but realtime are monotonic
+      if (clk_id === 0) {
+        now = _emscripten_date_now();
+      } else if (nowIsMonotonic) {
+        now = _emscripten_get_now();
+      } else {
+        return 52;
+      }
+      // "now" is in ms, and wasi times are in ns.
+      var nsec = Math.round(now * 1000 * 1000);
+      HEAP64[((ptime)>>3)] = BigInt(nsec);
+      return 0;
+    ;
+  }
+
+  var readEmAsmArgsArray = [];
+  var readEmAsmArgs = (sigPtr, buf) => {
+      // Nobody should have mutated _readEmAsmArgsArray underneath us to be something else than an array.
+      assert(Array.isArray(readEmAsmArgsArray));
+      // The input buffer is allocated on the stack, so it must be stack-aligned.
+      assert(buf % 16 == 0);
+      readEmAsmArgsArray.length = 0;
+      var ch;
+      // Most arguments are i32s, so shift the buffer pointer so it is a plain
+      // index into HEAP32.
+      while (ch = HEAPU8[sigPtr++]) {
+        var chr = String.fromCharCode(ch);
+        var validChars = ['d', 'f', 'i', 'p'];
+        // In WASM_BIGINT mode we support passing i64 values as bigint.
+        validChars.push('j');
+        assert(validChars.includes(chr), `Invalid character ${ch}("${chr}") in readEmAsmArgs! Use only [${validChars}], and do not specify "v" for void return argument.`);
+        // Floats are always passed as doubles, so all types except for 'i'
+        // are 8 bytes and require alignment.
+        var wide = (ch != 105);
+        wide &= (ch != 112);
+        buf += wide && (buf % 8) ? 4 : 0;
+        readEmAsmArgsArray.push(
+          // Special case for pointers under wasm64 or CAN_ADDRESS_2GB mode.
+          ch == 112 ? HEAPU32[((buf)>>2)] :
+          ch == 106 ? HEAP64[((buf)>>3)] :
+          ch == 105 ?
+            HEAP32[((buf)>>2)] :
+            HEAPF64[((buf)>>3)]
+        );
+        buf += wide ? 8 : 4;
+      }
+      return readEmAsmArgsArray;
+    };
+  var runEmAsmFunction = (code, sigPtr, argbuf) => {
+      var args = readEmAsmArgs(sigPtr, argbuf);
+      assert(ASM_CONSTS.hasOwnProperty(code), `No EM_ASM constant found at address ${code}.  The loaded WebAssembly file is likely out of sync with the generated JavaScript.`);
+      return ASM_CONSTS[code](...args);
+    };
+  var _emscripten_asm_const_int = (code, sigPtr, argbuf) => {
+      return runEmAsmFunction(code, sigPtr, argbuf);
     };
 
   var ENV = {
@@ -5504,10 +5675,6 @@ async function createWasm() {
   }
 
   
-  var INT53_MAX = 9007199254740992;
-  
-  var INT53_MIN = -9007199254740992;
-  var bigintToI53Checked = (num) => (num < INT53_MIN || num > INT53_MAX) ? NaN : Number(num);
   function _fd_seek(fd, offset, whence, newOffset) {
     offset = bigintToI53Checked(offset);
   
@@ -5572,6 +5739,7 @@ async function createWasm() {
       }
       quit_(code, new ExitStatus(code));
     };
+
   
   
   /** @param {boolean|number=} implicit */
@@ -5686,7 +5854,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'inetNtop6',
   'readSockaddr',
   'writeSockaddr',
-  'readEmAsmArgs',
+  'runMainThreadEmAsm',
   'jstoi_q',
   'autoResumeAudioContext',
   'getDynCaller',
@@ -5762,7 +5930,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'jsStackTrace',
   'getCallstack',
   'convertPCtoSourceLocation',
-  'checkWasiClock',
   'wasiRightsToMuslOFlags',
   'wasiOFlagsToMuslOFlags',
   'safeSetTimeout',
@@ -5823,7 +5990,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'getLiveInheritedInstances',
   'enumReadValueFromPointer',
   'setDelayFunction',
-  'validateThis',
   'count_emval_handles',
 ];
 missingLibrarySymbols.forEach(missingLibrarySymbol)
@@ -5864,6 +6030,8 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'timers',
   'warnOnce',
   'readEmAsmArgsArray',
+  'readEmAsmArgs',
+  'runEmAsmFunction',
   'getExecutableName',
   'handleException',
   'keepRuntimeAlive',
@@ -5906,6 +6074,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'UNWIND_CACHE',
   'ExitStatus',
   'getEnvStrings',
+  'checkWasiClock',
   'doReadv',
   'doWritev',
   'initRandomFill',
@@ -6130,6 +6299,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'shallowCopyInternalPointer',
   'downcastPointer',
   'upcastPointer',
+  'validateThis',
   'char_0',
   'char_9',
   'makeLegalFunctionName',
@@ -6154,15 +6324,19 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
+var ASM_CONSTS = {
+  109276: () => { return (typeof wasmOffsetConverter !== 'undefined'); }
+};
+function HaveOffsetConverter() { return typeof wasmOffsetConverter !== 'undefined'; }
 
 // Imports from the Wasm binary.
 var _malloc = makeInvalidEarlyAccess('_malloc');
 var ___getTypeName = makeInvalidEarlyAccess('___getTypeName');
 var __initialize = Module['__initialize'] = makeInvalidEarlyAccess('__initialize');
+var _free = makeInvalidEarlyAccess('_free');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
 var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
 var _strerror = makeInvalidEarlyAccess('_strerror');
-var _free = makeInvalidEarlyAccess('_free');
 var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
 var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
 var __emscripten_stack_restore = makeInvalidEarlyAccess('__emscripten_stack_restore');
@@ -6179,14 +6353,14 @@ function assignWasmExports(wasmExports) {
   ___getTypeName = createExportWrapper('__getTypeName', 1);
   assert(wasmExports['_initialize'], 'missing Wasm export: _initialize');
   __initialize = Module['__initialize'] = createExportWrapper('_initialize', 0);
+  assert(wasmExports['free'], 'missing Wasm export: free');
+  _free = createExportWrapper('free', 1);
   assert(wasmExports['emscripten_stack_get_end'], 'missing Wasm export: emscripten_stack_get_end');
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
   assert(wasmExports['emscripten_stack_get_base'], 'missing Wasm export: emscripten_stack_get_base');
   _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];
   assert(wasmExports['strerror'], 'missing Wasm export: strerror');
   _strerror = createExportWrapper('strerror', 1);
-  assert(wasmExports['free'], 'missing Wasm export: free');
-  _free = createExportWrapper('free', 1);
   assert(wasmExports['emscripten_stack_init'], 'missing Wasm export: emscripten_stack_init');
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   assert(wasmExports['emscripten_stack_get_free'], 'missing Wasm export: emscripten_stack_get_free');
@@ -6203,6 +6377,8 @@ function assignWasmExports(wasmExports) {
 
 var wasmImports = {
   /** @export */
+  HaveOffsetConverter,
+  /** @export */
   _embind_register_bigint: __embind_register_bigint,
   /** @export */
   _embind_register_bool: __embind_register_bool,
@@ -6212,6 +6388,8 @@ var wasmImports = {
   _embind_register_class_constructor: __embind_register_class_constructor,
   /** @export */
   _embind_register_class_function: __embind_register_class_function,
+  /** @export */
+  _embind_register_class_property: __embind_register_class_property,
   /** @export */
   _embind_register_emval: __embind_register_emval,
   /** @export */
@@ -6233,7 +6411,11 @@ var wasmImports = {
   /** @export */
   _emval_decref: __emval_decref,
   /** @export */
+  _emval_incref: __emval_incref,
+  /** @export */
   _emval_invoke: __emval_invoke,
+  /** @export */
+  _emval_new_array: __emval_new_array,
   /** @export */
   _emval_new_cstring: __emval_new_cstring,
   /** @export */
@@ -6242,6 +6424,10 @@ var wasmImports = {
   _emval_run_destructors: __emval_run_destructors,
   /** @export */
   _emval_set_property: __emval_set_property,
+  /** @export */
+  clock_time_get: _clock_time_get,
+  /** @export */
+  emscripten_asm_const_int: _emscripten_asm_const_int,
   /** @export */
   environ_get: _environ_get,
   /** @export */
@@ -6253,7 +6439,9 @@ var wasmImports = {
   /** @export */
   fd_seek: _fd_seek,
   /** @export */
-  fd_write: _fd_write
+  fd_write: _fd_write,
+  /** @export */
+  proc_exit: _proc_exit
 };
 
 

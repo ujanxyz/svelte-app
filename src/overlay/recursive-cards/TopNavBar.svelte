@@ -1,17 +1,30 @@
 <script lang="ts">
+import MoveButton from "../MoveButton.svelte";
 import CloseButton from "./CloseButton.svelte";
-import MoveButton from "./MoveButton.svelte";
 
 interface Props {
   title: string;
 }
 
 const { title }: Props = $props();
+const width = 160;
+const height = 30;
+
 </script>
 
 <div class="container">
   <span class="title">{title}</span>
-  <MoveButton width={160} height={30} debugTitle={title} />
+  <MoveButton {width} {height} >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">
+      <defs>
+        <!-- Define a cross-hatch pattern -->
+        <pattern id="crossHatch" class="hatch" patternUnits="userSpaceOnUse" width="10" height="10">
+          <circle cx="5" cy="5" r="2" />
+        </pattern>
+      </defs>
+    <rect x="0" y="0" width="{width}" height="{height}" fill="url(#crossHatch)" stroke="none" />
+    </svg>
+  </MoveButton>
   <CloseButton />
 </div>
 
@@ -29,5 +42,10 @@ const { title }: Props = $props();
   font-weight: 600;
   line-height: 0.6rem;
   flex-grow: 1;
+}
+.hatch {
+  stroke: var(--line-color);
+  stroke-width: 0.5;
+  fill: none;
 }
 </style>

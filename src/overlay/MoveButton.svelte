@@ -1,15 +1,15 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onMount, type Snippet } from "svelte";
 
-import useCurrentOverlay from "../useCurrentOverlay";
+import useCurrentOverlay from "./useCurrentOverlay";
 
 interface Props {
+  children: Snippet;
   width: number;
   height: number;
-  debugTitle: string;
 }
 
-const { width, height, debugTitle }: Props = $props();
+const { children, width, height }: Props = $props();
 
 const overlay = useCurrentOverlay();
 let containerBtn: HTMLButtonElement;
@@ -63,15 +63,7 @@ onMount(() => {
     onclick={onClick}
     data-kind="move-handle"
     >
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">
-    <defs>
-      <!-- Define a cross-hatch pattern -->
-      <pattern id="crossHatch" class="hatch" patternUnits="userSpaceOnUse" width="10" height="10">
-        <circle cx="5" cy="5" r="2" />
-      </pattern>
-    </defs>
-  <rect x="0" y="0" width="{width}" height="{height}" fill="url(#crossHatch)" stroke="none" />
-  </svg>
+  {@render children()}
 </button>
 
 <style>
@@ -81,10 +73,5 @@ onMount(() => {
   margin: 0 8px;
   cursor: grab;
   user-select: none;
-}
-.hatch {
-  stroke: var(--line-color);
-  stroke-width: 0.5;
-  fill: none;
 }
 </style>
