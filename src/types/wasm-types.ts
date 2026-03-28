@@ -7,29 +7,54 @@ interface GraphEngineApiConstructor {
   new (): GraphEngineApiInstance;
 }
 
+interface WasmApiResponse<K extends keyof EngineApiTypes> {
+  data: EngineApiResponse<K>;
+  ok: boolean;
+  status: string;
+};
+
 export interface GraphEngineApiInstance {
   apis: Record<string, any>[];
 
-  getGraph: (args: VoidType) => ApiResponse<"getGraph">;
+  getGraph: (args: EngineApiRequest<"getGraph">) => WasmApiResponse<"getGraph">;
+  createNode: (args: EngineApiRequest<"createNode">) => WasmApiResponse<"createNode">;
+  addEdges: (args: EngineApiRequest<"addEdges">) => WasmApiResponse<"addEdges">;
 }
 
-interface ApiResponse<K extends keyof ResponseTypes> {
-  data: ResponseTypes[K];
-  ok: boolean;
-  status: string;
-}
+interface VoidType {}
 
-type ResponseTypes = {
+export interface EngineApiTypes {
   getGraph: {
-    nodes: any[];
-    edges: any[];
-    slots: any[];
+    request: VoidType;
+    response: {
+      nodes: any[];
+      edges: any[];
+      slots: any[];
+    };
   };
 
-  // TODO: Add remaining apis matching the C++ backend.
-  addNode: {
-    newid: string;
+  createNode: {
+    request: string;
+    response: {
+      node: any;
+      edges: any[];
+    };
+  };
+
+  addEdges: {
+    request: {
+      entries: {
+        node0: string;
+        slot0: string;
+        node1: string;
+        slot1: string;
+      }[];
+    };
+    response: {
+      edges: any[];
+    }
   };
 };
 
-interface VoidType {}
+export type EngineApiRequest<K extends keyof EngineApiTypes> = EngineApiTypes[K]["request"];
+export type EngineApiResponse<K extends keyof EngineApiTypes> = EngineApiTypes[K]["response"];

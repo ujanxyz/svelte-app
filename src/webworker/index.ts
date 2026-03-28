@@ -111,6 +111,7 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
         const response = await graphBuilder!.process(code, payload);
         if (response instanceof Error) {
           const errmsg = (response as Error).message;
+          console.warn(seq, code, SysCodes.APP_ERROR, errmsg);
           postman.postError(seq, code, SysCodes.APP_ERROR, errmsg);
         } else {
           postman.postResponse(seq, code, response!);

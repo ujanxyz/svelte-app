@@ -6,8 +6,10 @@ import {
 // main.ts
 
 interface ResponseData {
+  ok: boolean
   code: string;
-  payload: Record<string, any>;
+  payload?: Record<string, any>;
+  error?: string;
 }
 
 interface MapEntry {
@@ -44,14 +46,7 @@ class WebWorkerClient {
     this.worker.addEventListener(
       "message",
       (event: MessageEvent<WorkerResponse>) => {
-        const {
-          ack,
-          ok: responseOk,
-          code,
-          reqcode,
-          payload,
-          error,
-        } = event.data as WorkerResponse;
+        const {ack, ok: responseOk, code, reqcode, payload, error } = event.data as WorkerResponse;
         if (
           ack === undefined ||
           responseOk === undefined ||
@@ -70,9 +65,9 @@ class WebWorkerClient {
           clearTimeout(pending.timer); // Stop the timeout clock
           if (responseOk !== true) {
             // Reject is not used in non-fatal client errors.
-            pending.resolve({ code: "_CLIENT_ERR", payload: {} });
+            pending.resolve({ ok: false, code, error });
           } else {
-            pending.resolve({ code, payload: payload! });
+            pending.resolve({ ok: true, code, payload: payload! });
           }
           this.pendingRequests.delete(ack);
         } else {
@@ -106,11 +101,7 @@ class WebWorkerClient {
     };
   }
 
-  public async send(
-    code: string,
-    payload: Record<string, any>,
-    timeoutMs: number = 5000,
-  ): Promise<ResponseData> {
+  public async send(code: string, request: any, timeoutMs: number = 5000): Promise<ResponseData> {
     // 1. Ensure worker is initialized
     await this.readyPromise;
 
@@ -127,7 +118,7 @@ class WebWorkerClient {
       }, timeoutMs);
 
       this.pendingRequests.set(seq, { resolve, reject, timer });
-      const secureMsg: SecureMessage = { seq, code, payload };
+      const secureMsg: SecureMessage = { seq, code, payload: request };
       this.worker.postMessage(secureMsg);
     });
   }

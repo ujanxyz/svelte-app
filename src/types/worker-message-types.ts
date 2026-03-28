@@ -1,7 +1,7 @@
 export interface SecureMessage {
   seq: bigint;
   code: string;
-  payload: Record<string, any>;
+  payload: any;
 }
 
 export interface WorkerResponse {
