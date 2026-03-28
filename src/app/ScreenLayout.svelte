@@ -1,7 +1,7 @@
 <script lang="ts">
 import logo from "../assets/svelte.svg";
 import PropsPanelMain from "../graph/propspanel/PropsPanelMain.svelte";
-import WasmTester from "../modules/engine/WasmTester.svelte";
+import WasmTester from "../webworkerclient/WasmTester.svelte";
 import ContentSelector from "./ContentSelector.svelte";
 </script>
 

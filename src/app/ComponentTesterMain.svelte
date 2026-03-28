@@ -1,5 +1,6 @@
 <script lang="ts">
 import SlotEditorTester from "@/modules/sloteditor/SlotEditorTester.svelte";
+import WebWorkerTestMain from "@/webworkerclient/WebWorkerTestMain.svelte";
 
 import ButtonGroup from "../components/ButtonGroup.svelte";
 import GraphEditorWithRealOps from "../graph/GraphEditorWithRealOps.svelte";
@@ -21,9 +22,10 @@ const modes = [
   // { code: "screen", label: "Screen" },
   { code: "toast", label: "Toast" },
   { code: "memlog", label: "Mem-logging" },
+  { code: "worker", label: "WebWorker" },
 ];
 
-let selected = $state<string>("graph");
+let selected = $state<string>("worker");
 
 function handleSelect(code: string) {
   // Nothing.
@@ -55,6 +57,8 @@ function handleSelect(code: string) {
     <ToastTesterMain />
   {:else if selected === "memlog"}
     <MemLogTesterMain />
+  {:else if selected === "worker"}
+    <WebWorkerTestMain />
   {:else}
     No component to show.
   {/if}

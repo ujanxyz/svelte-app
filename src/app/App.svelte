@@ -1,8 +1,6 @@
 <script lang="ts">
 import "./app.css";
 
-import WorkerClientUse from "@/modules/workerclient/WorkerClientUse.svelte";
-
 import MemLogger from "../modules/memlogging/MemLogger.svelte";
 import Toaster from "../modules/toast/Toaster.svelte";
 import OverlayProvider from "../overlay/OverlayProvider.svelte";
@@ -19,7 +17,6 @@ useNewEventTarget();
 </OverlayProvider>
 <MemLogger />
 <Toaster />
-<WorkerClientUse />
 
 <style>
 main {

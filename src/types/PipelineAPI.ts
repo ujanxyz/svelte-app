@@ -1,3 +1,23 @@
+
+
+interface CmdGetGraph {
+  cmd: "getgraph";
+  getSlots?: boolean;
+}
+
+interface CmdAddNode {
+  cmd: "addnode";
+  fn: string;
+}
+
+interface CmdAddEdge {
+  cmd: "addedge";
+  entries: string[];
+}
+
+type PipelineCmd = CmdGetGraph | CmdAddNode | CmdAddEdge;
+
+
 export interface PipelineAPI {
   /** Initialize WASM module (called once globally) */
   initialize(): Promise<void>;

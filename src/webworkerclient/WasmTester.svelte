@@ -1,28 +1,16 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 
-import MultiWordsInput from "../../components/MultiWordsInput.svelte";
-import TextButton from "../../components/TextButton.svelte";
-import OutlinedSvgIcon from "../../icons/OutlinedSvgIcon.svelte";
-import type { HelloClassInstance } from "../../types/WasmModule";
-import { graphStore } from "./graphStore";
-import wasmService from "./wasmService";
-
-let graphApi: HelloClassInstance | null = null;
-
-const unsubscribe = graphStore.subscribe((graph) => {
-  console.log("Graph state updated:", graph);
-});
+import MultiWordsInput from "../components/MultiWordsInput.svelte";
+import TextButton from "../components/TextButton.svelte";
+import OutlinedSvgIcon from "../icons/OutlinedSvgIcon.svelte";
 
 onMount(async () => {
-  graphApi = await wasmService.getGraphModule();
-  console.log("Graph API from WASM:", graphApi);
-  graphApi.sayHello();
+  console.log("Graph API from WASM");
 });
 
 onDestroy(() => {
-  console.log("Cleanup Graph API from WASM:", graphApi);
-  unsubscribe();
+  // console.log("Cleanup Graph API from WASM");
 });
 
 let entriesAddNode = $state<Map<string, string>>(new Map([["Function#:", ""]]));
