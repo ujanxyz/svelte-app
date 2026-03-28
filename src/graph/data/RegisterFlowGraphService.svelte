@@ -12,7 +12,11 @@ import type { ClientXY } from "@/overlay/types";
 
 import { registerGraphService } from "../graph-services";
 
-const { current: _currentNodes, update: _updateNodes, set: _setNodes } = useNodes();
+const {
+  current: _currentNodes,
+  update: _updateNodes,
+  set: _setNodes,
+} = useNodes();
 
 const { update: _updateEdges, set: _setEdges } = useEdges();
 
@@ -88,9 +92,9 @@ async function deleteGraph(): Promise<void> {
 
 async function appendNode(newNode: Node): Promise<void> {
   const existingIds = new Set<string>(_getNodes().map((n: Node) => n.id));
-    if (existingIds.has(newNode.id)) {
-      throw new Error("Node id conflict at append");
-    }
+  if (existingIds.has(newNode.id)) {
+    throw new Error("Node id conflict at append");
+  }
   _updateNodes((nodes: Node[]) => {
     return [...nodes, newNode];
   });

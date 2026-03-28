@@ -1,5 +1,5 @@
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
-import { type FinalConnectionState } from '@xyflow/system';
+import { type FinalConnectionState } from "@xyflow/system";
 
 import { lookupFnDetailsAsync } from "../../modules/fngallery/apiFunctionInfos";
 import { ReturnStatus } from "../../overlay/constants";
@@ -133,7 +133,12 @@ export default function useMenusAndPopups() {
       // Connection ended on a handle. This leads to edge creation, handled by XY-Flow.
       return;
     }
-    console.log("connectionState @ end = ", connectionState, fromNode, fromHandle);
+    console.log(
+      "connectionState @ end = ",
+      connectionState,
+      fromNode,
+      fromHandle,
+    );
 
     const clientXY: ClientXY = getClientXY(event);
     const flowPosn: XYPosition = flowGraphService.screenToFlowXY(clientXY);
@@ -144,7 +149,7 @@ export default function useMenusAndPopups() {
     switch (retval.value) {
       default:
         _internalOpenGallery(flowPosn);
-        // TODO: Continue to connect the edge.
+      // TODO: Continue to connect the edge.
     }
   }
 
@@ -182,7 +187,6 @@ export default function useMenusAndPopups() {
     const newNode = ioService.createNodeAt(funcspec, position);
     await flowGraphService.appendNode(newNode);
   }
-
 
   return {
     onpaneclick,

@@ -2,7 +2,6 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
-import wasm from "vite-plugin-wasm";
 
 // https://vite.dev/config/
 import path from "node:path";
@@ -16,8 +15,7 @@ const dirname =
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [wasm(), tailwindcss(), svelte()],
-  // assetsInclude: ['**/*.wasm'],
+  plugins: [tailwindcss(), svelte()],
   // This ensures assets are linked relatively
   base: "./",
   envDir: "./env",

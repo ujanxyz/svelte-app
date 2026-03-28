@@ -9,20 +9,32 @@ interface Props {
 const { title }: Props = $props();
 const width = 160;
 const height = 30;
-
 </script>
 
 <div class="container">
   <span class="title">{title}</span>
-  <MoveButton {width} {height} >
+  <MoveButton {width} {height}>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">
       <defs>
         <!-- Define a cross-hatch pattern -->
-        <pattern id="crossHatch" class="hatch" patternUnits="userSpaceOnUse" width="10" height="10">
+        <pattern
+          id="crossHatch"
+          class="hatch"
+          patternUnits="userSpaceOnUse"
+          width="10"
+          height="10"
+        >
           <circle cx="5" cy="5" r="2" />
         </pattern>
       </defs>
-    <rect x="0" y="0" width="{width}" height="{height}" fill="url(#crossHatch)" stroke="none" />
+      <rect
+        x="0"
+        y="0"
+        {width}
+        {height}
+        fill="url(#crossHatch)"
+        stroke="none"
+      />
     </svg>
   </MoveButton>
   <CloseButton />

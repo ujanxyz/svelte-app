@@ -72,5 +72,4 @@ function tryPopulateFromLocalStorage(): boolean {
   flowGraphService.assignGraph(nodes, edges);
   return currentGraphSize() > 0;
 }
-
 </script>

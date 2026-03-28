@@ -1,10 +1,8 @@
+import type { Edge } from "@xyflow/svelte";
 import { SvelteMap } from "svelte/reactivity";
 
 import { type UjExecdataTypes } from "./execdata-types";
 import { type UjSavedTypes } from "./saved-types";
-import type { Edge } from "@xyflow/svelte";
-
-
 
 type UjOverrideData = any;
 
@@ -15,7 +13,6 @@ type XYNodeDataReactive = UjExecdataTypes<"nodeReactive">;
 type XYNodeDataStatic = UjExecdataTypes<"nodeStatic">;
 
 type UjSavedNodeSpec = UjSavedTypes<"node">;
-
 
 /**
  * Create all slots (handles) for a given node spec.
@@ -49,8 +46,21 @@ type UjSavedNodeSpec = UjSavedTypes<"node">;
  */
 function createSlots(nodeData: UjSavedTypes<"node">): XYSlotDataStatic[] {
   const slots: XYSlotDataStatic[] = [];
-  const appendSlot = (id: string, nodeid: string, dtype: string, isoutput: boolean): void => {
-    const slot = {id, nodeid, dtype, isoutput, payload: null, edges: [], modified: 0 } as XYSlotDataStatic;
+  const appendSlot = (
+    id: string,
+    nodeid: string,
+    dtype: string,
+    isoutput: boolean,
+  ): void => {
+    const slot = {
+      id,
+      nodeid,
+      dtype,
+      isoutput,
+      payload: null,
+      edges: [],
+      modified: 0,
+    } as XYSlotDataStatic;
     slots.push(slot);
   };
 
@@ -113,18 +123,12 @@ function createSlots(nodeData: UjSavedTypes<"node">): XYSlotDataStatic[] {
   return slots;
 }
 
-
-
-
-
-
 function _createSlotStore() {
   const slotsReactive = new SvelteMap<string, XYSlotDataReactive>();
   const slotsStatic = new Map<string, XYSlotDataStatic>();
 
   const nodesReactive = new SvelteMap<string, XYNodeDataReactive>();
   const nodesStatic = new Map<string, XYNodeDataStatic>();
-
 
   function useReactiveSlot(slotId: string): XYSlotDataReactive | undefined {
     return slotsReactive.get(slotId);
@@ -133,7 +137,6 @@ function _createSlotStore() {
   function reactiveSlotEntries(): [string, XYSlotDataReactive][] {
     return Array.from(slotsReactive.entries());
   }
-
 
   function ensureSlots(nodeSpecs: UjSavedNodeSpec[]): void {
     for (const nodeSpec of nodeSpecs) {
@@ -153,7 +156,8 @@ function _createSlotStore() {
         slotsReactive.set(slot.id, reactive);
       }
       const nodeStatic: XYNodeDataStatic = {
-        spec: nodeSpec, slotids,
+        spec: nodeSpec,
+        slotids,
       };
       const nodeReac: XYNodeDataReactive = {
         status: "waiting",

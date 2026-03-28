@@ -76,4 +76,3 @@ function makePersistenceStore() {
 }
 
 export { makePersistenceStore };
-

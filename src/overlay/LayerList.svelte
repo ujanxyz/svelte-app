@@ -10,5 +10,11 @@ const { layers }: Props = $props();
 </script>
 
 {#each layers as { layerId, payload, opts: overlayOpts, renderfn, descendantUse: clientuse }}
-  <Layer {layerId} layerPayload={payload} {overlayOpts} {renderfn} {clientuse} />
+  <Layer
+    {layerId}
+    layerPayload={payload}
+    {overlayOpts}
+    {renderfn}
+    {clientuse}
+  />
 {/each}

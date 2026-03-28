@@ -13,7 +13,7 @@ interface XYSlotDataStatic {
   dtype: string; // The data type.
   isoutput: boolean; // is output slot, else input.
   payload: any | null;
-  edges: string[];  // Look up in edges store.
+  edges: string[]; // Look up in edges store.
   modified: number;
 }
 
@@ -27,10 +27,9 @@ interface XYSlotDataReactive {
 type XYSlotDataStaticMap = Map<string /* slot id */, XYSlotDataStatic>;
 type XYSlotDataReactiveMap = Map<string /* slot id */, XYSlotDataReactive>;
 
-
 interface XYNodeDataStatic {
   spec: UjSavedTypes<"node">;
-  slotids: string[];   // Lookup in the slots store.
+  slotids: string[]; // Lookup in the slots store.
 }
 
 interface XYNodeDataReactive {
@@ -39,7 +38,6 @@ interface XYNodeDataReactive {
 
 type XYNodeDataStaticMap = Map<string /* node id */, XYNodeDataStatic>;
 type XYNodeDataReactiveMap = Map<string /* node id */, XYNodeDataReactive>;
-
 
 interface XYEdgeDataStatic {
   spec: UjSavedTypes<"edge">;
@@ -65,10 +63,7 @@ type _PublicTypeMap = {
 
   edgeReactive: XYEdgeDataReactive;
   edgeStatic: XYEdgeDataStatic;
-}
+};
 
 export type UjExecdataTypes<K extends keyof _PublicTypeMap> =
-  K extends keyof _PublicTypeMap
-    ? _PublicTypeMap[K]
-    : never;
-
+  K extends keyof _PublicTypeMap ? _PublicTypeMap[K] : never;

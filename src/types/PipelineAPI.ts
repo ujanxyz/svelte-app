@@ -1,5 +1,3 @@
-
-
 interface CmdGetGraph {
   cmd: "getgraph";
   getSlots?: boolean;
@@ -16,7 +14,6 @@ interface CmdAddEdge {
 }
 
 type PipelineCmd = CmdGetGraph | CmdAddNode | CmdAddEdge;
-
 
 export interface PipelineAPI {
   /** Initialize WASM module (called once globally) */

@@ -1,5 +1,10 @@
 <script lang="ts">
-import { type Edge, type Node, type Viewport, type XYPosition } from "@xyflow/svelte";
+import {
+  type Edge,
+  type Node,
+  type Viewport,
+  type XYPosition,
+} from "@xyflow/svelte";
 
 import type { FuncParam, FuncSpec } from "@/modules/fngallery/types";
 import { createIdGenerator } from "@/utils/idGenerator";
@@ -36,7 +41,11 @@ function createNodeAt(fnSpec: FuncSpec, position: XYPosition): Node {
   } as Node;
 }
 
-function serializeObject(nodes: Node[], edges: Edge[], viewport: Viewport): UjGraphStorage {
+function serializeObject(
+  nodes: Node[],
+  edges: Edge[],
+  viewport: Viewport,
+): UjGraphStorage {
   const ujnodes: UjNode[] = nodes.map((n: Node): UjNode => {
     return {
       id: n.id,

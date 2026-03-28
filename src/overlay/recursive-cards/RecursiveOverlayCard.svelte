@@ -24,11 +24,15 @@ onMount(() => {
   // Launch another child card after N msecs, unless it is the last card.
   if (childColors.length > 0) {
     const timeoutId = window.setTimeout(async () => {
-      const retVal = await overlay.openOverlayAsync({}, {movable: true});
+      const retVal = await overlay.openOverlayAsync({}, { movable: true });
       if (ReturnStatus.OK === retVal.status) {
-        debugLog(`Card# ${cardIndex} received OK. value: ${JSON.stringify(retVal.value)}`);
+        debugLog(
+          `Card# ${cardIndex} received OK. value: ${JSON.stringify(retVal.value)}`,
+        );
       } else {
-        errorLog(`Card# ${cardIndex} received status: ${retVal.status}. Reason: ${JSON.stringify(retVal.reason)}`);
+        errorLog(
+          `Card# ${cardIndex} received status: ${retVal.status}. Reason: ${JSON.stringify(retVal.reason)}`,
+        );
       }
       console.log(retVal);
     }, 30);

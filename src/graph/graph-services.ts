@@ -1,4 +1,9 @@
-import { type Edge, type Node, type Viewport, type XYPosition } from "@xyflow/svelte";
+import {
+  type Edge,
+  type Node,
+  type Viewport,
+  type XYPosition,
+} from "@xyflow/svelte";
 
 import type { FuncSpec } from "@/modules/fngallery/types";
 
@@ -28,14 +33,12 @@ interface SlotService {
   useSlotInfo(nodeId: string, paramName: string): UjSlotInfo | undefined;
   reactiveSlotEntries(): [string, UjSlotInfo][];
   setOverride(
-      nodeId: string,
-      slotName: string,
-      override: boolean,
-      data: UjOverrideData | null): void;
-  lookupOverride(
     nodeId: string,
     slotName: string,
-  ): UjOverrideData | null;
+    override: boolean,
+    data: UjOverrideData | null,
+  ): void;
+  lookupOverride(nodeId: string, slotName: string): UjOverrideData | null;
   deleteElements(nodes: Node[], edges: Edge[]): void;
   ensureSlots(nodes: Node[]): void;
   ensureConnections(edges: Edge[]): void;
@@ -43,9 +46,12 @@ interface SlotService {
 
 interface IoService {
   createNodeAt: (fnSpec: FuncSpec, position: XYPosition) => Node;
-  serializeObject: (nodes: Node[], edges: Edge[], viewport: Viewport) => UjGraphStorage;
+  serializeObject: (
+    nodes: Node[],
+    edges: Edge[],
+    viewport: Viewport,
+  ) => UjGraphStorage;
 }
-
 
 interface FlowGraphService {
   screenToFlowXY: (input: MouseEvent | ClientXY) => XYPosition;

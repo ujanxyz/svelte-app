@@ -180,5 +180,4 @@ function _createSlotStore() {
     deleteElements,
   };
 }
-
 </script>

@@ -15,7 +15,6 @@ function handleAddNode() {
   console.log("Add node ....");
   remoteBuilder.sendTestMessage();
 }
-
 </script>
 
 <div>

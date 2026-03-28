@@ -1,4 +1,7 @@
-import { type GraphEngineApiInstance, type WasmModuleType } from "@/types/wasm-types.js";
+import {
+  type GraphEngineApiInstance,
+  type WasmModuleType,
+} from "@/types/wasm-types.js";
 
 import CreateUjWasmModule from "./wasm/entrypoint.js";
 
@@ -55,10 +58,12 @@ class WasmService {
     const mod = this.wasmModule!;
     const now = Date.now();
     const buildInfo = mod.getBuildInfo() as Record<string, any>;
-    const infoObj = {...buildInfo};
+    const infoObj = { ...buildInfo };
     infoObj["legibleLoadingTime"] = `${now - loadStartTime} ms`;
     if (buildInfo.timestamp) {
-      infoObj["legibleBuildInstant"] = new Date(buildInfo.timestamp as number * 1000).toLocaleString();
+      infoObj["legibleBuildInstant"] = new Date(
+        (buildInfo.timestamp as number) * 1000,
+      ).toLocaleString();
     }
     console.log(infoObj);
   }

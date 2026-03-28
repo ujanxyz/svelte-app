@@ -31,11 +31,9 @@ const modes = [
 
 let selected = $state<string>("slots");
 
-
 function onClickClose() {
   overlay.abortOverlay();
 }
-
 </script>
 
 <div class="container" style={containerStyle}>

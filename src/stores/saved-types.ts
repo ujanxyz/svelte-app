@@ -1,4 +1,3 @@
-
 // An external input to the graph. This could be manually entered data (like list of numbers,
 // colors, coordinate lists etc). Or it could be uploaded files, like PNG, MP4 video, CSV,
 // or ZIP file. There will be various unwrap functions available which can be used in the
@@ -6,8 +5,8 @@
 interface UjGraphInputSpec {
   kind: "in";
   id: string;
-  uri: string;   // Identifies the registered unwrap function, like "/in/csv-to-points", "/in/mp4-to-bitmap-per-frame"
-  name: string;  // Defaults like "Input 1".
+  uri: string; // Identifies the registered unwrap function, like "/in/csv-to-points", "/in/mp4-to-bitmap-per-frame"
+  name: string; // Defaults like "Input 1".
   accepts: string[]; // mp4, jpeg, csv etc
   dtype: string; // drawable, bitmap, geometric data
 
@@ -19,8 +18,8 @@ interface UjGraphInputSpec {
 interface UjGraphOutputSpec {
   kind: "out";
   id: string;
-  uri: string;  // Identifies the registered unwrap function. like "/out/canvas-to-png"
-  name: string;  // Defaults like "Output 1".
+  uri: string; // Identifies the registered unwrap function. like "/out/canvas-to-png"
+  name: string; // Defaults like "Output 1".
   dtype: string; // drawable, bitmap, geometric data
   emits: string;
 
@@ -32,10 +31,10 @@ interface UjGraphOutputSpec {
 interface UjFunctionNodeSpec {
   kind: "fn";
   id: string;
-  uri: string;  // Identifies the registered transform function. like "/fn/points-on-curve"
+  uri: string; // Identifies the registered transform function. like "/fn/points-on-curve"
   name: string;
-  ins: { name: string, dtype: string }[];   // The input params
-  outs: { name: string, dtype: string }[];  // The output params, must have at least one
+  ins: { name: string; dtype: string }[]; // The input params
+  outs: { name: string; dtype: string }[]; // The output params, must have at least one
 
   // Slot (input) id format: "<id>$in:<param-name>"
   // Slot (output) id format: "<id>$out:<param-name>"
@@ -50,7 +49,7 @@ interface UjOperatorNodeSpec {
   uri: string;
   name: string;
   dtype: string;
-  ins: { name: string, dtype: string }[];
+  ins: { name: string; dtype: string }[];
 
   // Slot id (inputs) format: "<id>$in:<param-name>"
   // Slot id (implicit operable) format: "<id>$in", "<id>$out"
@@ -71,13 +70,18 @@ interface UjLambdaNodeSpec {
   mode: "generator" | "iterator" | "field";
   returns: string; // Returned data type.
   argtypes: string[];
-  ins: { name: string, datatype: string }[];
+  ins: { name: string; datatype: string }[];
 
   // Slot id (inputs) format: "<id>$in:<param-name>"
   // Slot id (fn output) format: "<id>$out"
 }
 
-type UjSavedNodeSpec = UjGraphInputSpec | UjGraphOutputSpec | UjFunctionNodeSpec | UjOperatorNodeSpec | UjLambdaNodeSpec;
+type UjSavedNodeSpec =
+  | UjGraphInputSpec
+  | UjGraphOutputSpec
+  | UjFunctionNodeSpec
+  | UjOperatorNodeSpec
+  | UjLambdaNodeSpec;
 
 /**
  * Describes an edge connection between two stages.
@@ -91,8 +95,8 @@ interface UjSavedEdge {
 }
 
 interface UjSavedSlotData {
-  id: string;  // The slot id.
-  dtype: string;  // The data type
+  id: string; // The slot id.
+  dtype: string; // The data type
   payload: any;
 }
 
@@ -129,7 +133,7 @@ type _PublicTypesMap = {
   slotdata: UjSavedSlotData;
   meta: UjSavedGraphMeta;
   pipeline: UjSavedPipeline;
-}
+};
 
 export type UjSavedTypes<K extends keyof _PublicTypesMap> =
   K extends keyof _PublicTypesMap ? _PublicTypesMap[K] : never;

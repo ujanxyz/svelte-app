@@ -1,4 +1,7 @@
-import { type SecureMessage, type WorkerResponse } from "@/types/worker-message-types";
+import {
+  type SecureMessage,
+  type WorkerResponse,
+} from "@/types/worker-message-types";
 
 import { CppGraphBuilder } from "./CppGraphBuilder";
 import wasmService from "./wasmService.js";
@@ -30,7 +33,11 @@ const postman = (function createPostman() {
   }
 
   // Notify the main thread with a computed response.
-  function postResponse(ack: bigint, reqcode: string, payload: Record<string, any>): void {
+  function postResponse(
+    ack: bigint,
+    reqcode: string,
+    payload: Record<string, any>,
+  ): void {
     const response: WorkerResponse = {
       ack,
       ok: true,
@@ -42,7 +49,12 @@ const postman = (function createPostman() {
   }
 
   // Notify the main thread about an error.
-  function postError(ack: bigint, reqcode: string, errcode: string, errmsg: string): void {
+  function postError(
+    ack: bigint,
+    reqcode: string,
+    errcode: string,
+    errmsg: string,
+  ): void {
     const response: WorkerResponse = {
       ack,
       ok: false,
@@ -53,11 +65,11 @@ const postman = (function createPostman() {
     globalThis.postMessage(response);
   }
 
-  return {postImReady, postResponse, postError};
+  return { postImReady, postResponse, postError };
 })();
 
 //-----------------------------------------------------------------------------
-const {markHandlerReady, handlePostEvent} = (function createPostHandler() {
+const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
   let isThisWorkerReady = false;
   let expectedSeq: bigint = 0n;
 
@@ -68,11 +80,18 @@ const {markHandlerReady, handlePostEvent} = (function createPostHandler() {
     postman.postImReady();
   }
 
-  async function handlePostEvent(event: MessageEvent<SecureMessage>): Promise<void> {
+  async function handlePostEvent(
+    event: MessageEvent<SecureMessage>,
+  ): Promise<void> {
     const { seq, code, payload } = event.data;
 
     if (!isThisWorkerReady) {
-      postman.postError(seq, code, SysCodes.NOT_READY, "WASM module is still loading.");
+      postman.postError(
+        seq,
+        code,
+        SysCodes.NOT_READY,
+        "WASM module is still loading.",
+      );
       return;
     }
 
@@ -112,7 +131,7 @@ const {markHandlerReady, handlePostEvent} = (function createPostHandler() {
     ++expectedSeq; // Increment for the next expected message
   }
 
-  return {markHandlerReady, handlePostEvent};
+  return { markHandlerReady, handlePostEvent };
 })();
 
 //-----------------------------------------------------------------------------

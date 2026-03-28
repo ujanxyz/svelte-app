@@ -7,8 +7,8 @@ export interface SecureMessage {
 export interface WorkerResponse {
   ack: bigint;
   ok: boolean;
-  code: string;  // Always "OK" on success.
+  code: string; // Always "OK" on success.
   reqcode?: string;
-  payload?: Record<string, any>;  // If ok
-  error?: string;  // If !ok
+  payload?: Record<string, any>; // If ok
+  error?: string; // If !ok
 }

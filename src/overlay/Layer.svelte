@@ -18,8 +18,9 @@ interface Props {
   clientuse: DescendantUse;
 }
 
-const { layerId, layerPayload, overlayOpts, renderfn, clientuse }: Props = $props();
-const translate: {dx: number, dy: number} = {dx: 0, dy: 0};
+const { layerId, layerPayload, overlayOpts, renderfn, clientuse }: Props =
+  $props();
+const translate: { dx: number; dy: number } = { dx: 0, dy: 0 };
 let layerDiv: HTMLDivElement;
 let movableDiv: HTMLDivElement;
 
@@ -42,8 +43,8 @@ function getLayerDiv(): HTMLDivElement {
   return layerDiv!;
 }
 
-function getTranslate(): {dx: number, dy: number} {
-  return {dx: translate.dx, dy: translate.dy};
+function getTranslate(): { dx: number; dy: number } {
+  return { dx: translate.dx, dy: translate.dy };
 }
 
 function setTranslate(dx: number, dy: number) {
@@ -56,18 +57,28 @@ function setTranslate(dx: number, dy: number) {
 }
 </script>
 
-{#if overlayOpts.movable }
-  <div class="layer" bind:this={layerDiv} data-layer-id={layerId} data-kind="layer-movable" style:pointer-events="none">
+{#if overlayOpts.movable}
+  <div
+    class="layer"
+    bind:this={layerDiv}
+    data-layer-id={layerId}
+    data-kind="layer-movable"
+    style:pointer-events="none"
+  >
     <div class="movable" bind:this={movableDiv} data-kind="layer-content">
       {@render renderfn()}
     </div>
   </div>
 {:else}
-  <div class="layer" bind:this={layerDiv} data-layer-id={layerId} data-kind="layer">
+  <div
+    class="layer"
+    bind:this={layerDiv}
+    data-layer-id={layerId}
+    data-kind="layer"
+  >
     {@render renderfn()}
   </div>
 {/if}
-
 
 <style>
 .layer {

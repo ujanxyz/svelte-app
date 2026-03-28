@@ -55,7 +55,10 @@ function _clearOverlays(ev: CustomEvent) {
   }
 }
 
-function pointInLayer(point: { clientX: number; clientY: number }, layerDiv: HTMLDivElement) {
+function pointInLayer(
+  point: { clientX: number; clientY: number },
+  layerDiv: HTMLDivElement,
+) {
   const elementKind: string | undefined = layerDiv.dataset.kind;
   if (!elementKind) {
     // Nothing, throw at end.
@@ -63,7 +66,10 @@ function pointInLayer(point: { clientX: number; clientY: number }, layerDiv: HTM
     return pointInAnyChild(point, layerDiv);
   } else if (elementKind === "layer-movable") {
     const contentDiv = layerDiv.childNodes[0] ?? null;
-    if (contentDiv instanceof HTMLDivElement && contentDiv.dataset.kind === "layer-content") {
+    if (
+      contentDiv instanceof HTMLDivElement &&
+      contentDiv.dataset.kind === "layer-content"
+    ) {
       return pointInAnyChild(point, contentDiv);
     }
   }
@@ -72,7 +78,7 @@ function pointInLayer(point: { clientX: number; clientY: number }, layerDiv: HTM
 
 function pointInAnyChild(
   point: { clientX: number; clientY: number },
-  parent: HTMLDivElement
+  parent: HTMLDivElement,
 ): boolean {
   const children = parent.children;
   const nchildren = children.length;

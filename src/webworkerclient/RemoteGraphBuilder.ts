@@ -11,7 +11,6 @@ class RemoteGraphBuilder {
     const resp = await this.client.send("GRAPH:getgraph", {});
     console.log(resp);
   }
-
 }
 
 export { RemoteGraphBuilder };

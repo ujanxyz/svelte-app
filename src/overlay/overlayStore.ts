@@ -208,9 +208,9 @@ function useOverlayUi(renderfn: LayerSnippetFn): CreatorUse & DescendantUse {
 
   async function openOverlayAsync<T>(
     payload: LayerPayload,
-    opts?: Partial<OverlayOpts>
+    opts?: Partial<OverlayOpts>,
   ): Promise<StatusOr<T>> {
-    const layerOpts: OverlayOpts = {...defaultOverlayOpts, ...(opts ?? {})};
+    const layerOpts: OverlayOpts = { ...defaultOverlayOpts, ...(opts ?? {}) };
     const promise = new Promise<T>((resolve: ResolveFn<T>, reject) => {
       const layerId = crypto.randomUUID();
       const descendantUse: DescendantUse = _makeConsumerUse(

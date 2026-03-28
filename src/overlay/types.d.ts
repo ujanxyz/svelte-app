@@ -27,7 +27,10 @@ export interface OverlayOpts {
 export type LayerPayload = Record<string, any>;
 
 export interface CreatorUse {
-  openOverlayAsync<T>(payload: LayerPayload, opts?: Partial<OverlayOpts>): Promise<StatusOr<T>>;
+  openOverlayAsync<T>(
+    payload: LayerPayload,
+    opts?: Partial<OverlayOpts>,
+  ): Promise<StatusOr<T>>;
 }
 
 export interface DescendantUse {
@@ -38,7 +41,7 @@ export interface DescendantUse {
 export interface LayerUse extends DescendantUse {
   getLayerPayload(): LayerPayload;
   getLayerDiv(): HTMLDivElement;
-  getTranslate(): {dx: number, dy: number};
+  getTranslate(): { dx: number; dy: number };
   setTranslate(dx: number, dy: number);
 }
 

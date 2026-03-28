@@ -27,7 +27,6 @@ import useEditorInteractions from "./useEditorInteractions";
 import useMenusAndPopups from "./useMenusAndPopups";
 //import PlayIcon from "phosphor-svelte/lib/PlayIcon";
 
-
 const nodeTypes: Record<string, Component<UjNodeProps>> = {
   in: InputNode,
   default: DefaultNode,

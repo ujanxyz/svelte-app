@@ -26,11 +26,18 @@ const overlayCards = useOverlayUi(renderRecursiveCards);
 const { debugLog, errorLog } = useMemlogging();
 
 async function openOverlayCards() {
-  const retVal = await overlayCards.openOverlayAsync<number>({}, {movable: true});
+  const retVal = await overlayCards.openOverlayAsync<number>(
+    {},
+    { movable: true },
+  );
   if (ReturnStatus.OK === retVal.status) {
-    debugLog(`Original card received OK. value: ${JSON.stringify(retVal.value)}`);
+    debugLog(
+      `Original card received OK. value: ${JSON.stringify(retVal.value)}`,
+    );
   } else {
-    errorLog(`Original card received status: ${retVal.status}. Reason: ${JSON.stringify(retVal.reason)}`);
+    errorLog(
+      `Original card received status: ${retVal.status}. Reason: ${JSON.stringify(retVal.reason)}`,
+    );
   }
   console.log(retVal);
 }
@@ -38,7 +45,6 @@ async function openOverlayCards() {
 onDestroy(() => {
   overlayCards.abortOverlay("UNMOUNTED");
 });
-
 </script>
 
 {#snippet renderRecursiveCards()}

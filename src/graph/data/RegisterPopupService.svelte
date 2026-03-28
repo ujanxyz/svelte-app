@@ -26,7 +26,6 @@ async function flowDataInspector(): Promise<void> {
   showDataInspector = true;
   console.log("showDataInspector = true");
 }
-
 </script>
 
 {#snippet renderFnGallery()}
@@ -37,8 +36,6 @@ async function flowDataInspector(): Promise<void> {
   <FlowDataInspector />
 {/snippet} -->
 
-{#if showDataInspector }
-  <Panel position="bottom-left">
-    Hello in pane
-  </Panel>
+{#if showDataInspector}
+  <Panel position="bottom-left">Hello in pane</Panel>
 {/if}

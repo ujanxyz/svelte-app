@@ -45,7 +45,13 @@ export default function useEditorInteractions() {
     console.log("onconnectend ... ", connectionState);
   }
 
-  function onedgeclick({ edge, event }: { edge: Edge; event: MouseEvent; }): void {
+  function onedgeclick({
+    edge,
+    event,
+  }: {
+    edge: Edge;
+    event: MouseEvent;
+  }): void {
     console.log("@ Edge click ... ", edge);
   }
 

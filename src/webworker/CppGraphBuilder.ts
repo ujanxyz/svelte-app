@@ -8,7 +8,10 @@ class CppGraphBuilder {
     console.log("Available C++ apis:", this.graph.apis);
   }
 
-  public async process(code: string, request: Record<string, any>): Promise<Error | Record<string, any>> {
+  public async process(
+    code: string,
+    request: Record<string, any>,
+  ): Promise<Error | Record<string, any>> {
     switch (code) {
       case "GRAPH:getgraph":
         const { data, ok, status } = this.graph.getGraph({});

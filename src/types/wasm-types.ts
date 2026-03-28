@@ -21,15 +21,15 @@ interface ApiResponse<K extends keyof ResponseTypes> {
 
 type ResponseTypes = {
   getGraph: {
-    nodes: any[],
-    edges: any[],
-    slots: any[],
-  },
+    nodes: any[];
+    edges: any[];
+    slots: any[];
+  };
 
   // TODO: Add remaining apis matching the C++ backend.
   addNode: {
     newid: string;
-  },
-}
+  };
+};
 
 interface VoidType {}

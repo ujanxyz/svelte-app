@@ -1,5 +1,10 @@
 <script lang="ts">
-import { type Edge, type Node, type Viewport, type XYPosition } from "@xyflow/svelte";
+import {
+  type Edge,
+  type Node,
+  type Viewport,
+  type XYPosition,
+} from "@xyflow/svelte";
 
 import { registerGraphService } from "../graph-services";
 
@@ -34,7 +39,6 @@ registerGraphService("rawStoreService", {
     _viewport = value;
   },
 
-
   get pivot(): XYPosition {
     return _pivot;
   },
@@ -46,6 +50,5 @@ registerGraphService("rawStoreService", {
   currentViewport(): Viewport {
     return $state.snapshot(_viewport);
   },
-
 });
 </script>

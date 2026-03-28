@@ -10,7 +10,14 @@ import {
 
 let { id, sourceX, sourceY, targetX, targetY, ...props }: EdgeProps = $props();
 /* svelte-ignore state_referenced_locally */
-const { markerStart, markerEnd, interactionWidth, label, labelStyle, selected } = props;
+const {
+  markerStart,
+  markerEnd,
+  interactionWidth,
+  label,
+  labelStyle,
+  selected,
+} = props;
 
 // const [edgePath] = $derived(getBezierPath({
 //     sourceX,
