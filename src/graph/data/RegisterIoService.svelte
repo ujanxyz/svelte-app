@@ -5,8 +5,10 @@ import {
   type Viewport,
   type XYPosition,
 } from "@xyflow/svelte";
+import { getContext } from "svelte";
 
 import type { FuncParam, FuncSpec } from "@/modules/fngallery/types";
+import type { PipelineBuilder } from "@/types/pipeline-builder";
 import { createIdGenerator } from "@/utils/idGenerator";
 
 import { registerGraphService } from "../graph-services";
@@ -14,6 +16,9 @@ import { type UjGraphStorage, type UjNodeData } from "../types";
 
 type UjNode = UjGraphStorage["nodes"][number];
 type UjEdge = UjGraphStorage["edges"][number];
+
+
+const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 
 const nodeIdGen = createIdGenerator(12);
 
@@ -23,6 +28,7 @@ registerGraphService("ioService", {
 });
 
 function createNodeAt(fnSpec: FuncSpec, position: XYPosition): Node {
+  console.log(fnSpec);
   const nodeId: string = nodeIdGen();
   const { ins, outs, inouts } = _makeParams(fnSpec.params);
   const details: UjNodeData = {

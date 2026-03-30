@@ -38,11 +38,11 @@ class WebWorkerClient {
       this.worker.addEventListener("message", initHandler, { once: true });
     });
 
-    this.setupErrorHandlers();
-    this.setupListener();
+    this.#setupErrorHandlers();
+    this.#setupListener();
   }
 
-  private setupListener(): void {
+  #setupListener(): void {
     this.worker.addEventListener(
       "message",
       (event: MessageEvent<WorkerResponse>) => {
@@ -77,7 +77,7 @@ class WebWorkerClient {
     );
   }
 
-  private setupErrorHandlers() {
+  #setupErrorHandlers(): void {
     // Script/Logic Errors
     this.worker.onerror = (event: ErrorEvent) => {
       console.log(event);
@@ -86,11 +86,7 @@ class WebWorkerClient {
       );
 
       // Critical failure: Reject all pending requests
-      for (const [seq, pending] of this.pendingRequests) {
-        clearTimeout(pending.timer);
-        pending.reject(new Error(`Worker Crashed: ${event.message}`));
-      }
-      this.pendingRequests.clear();
+      this.#rejectAllPendingReqs(`Worker Crashed: ${event.message}`);
     };
 
     // Deserialization Errors
@@ -121,6 +117,19 @@ class WebWorkerClient {
       const secureMsg: SecureMessage = { seq, code, payload: request };
       this.worker.postMessage(secureMsg);
     });
+  }
+
+  public destroy(): void {
+    this.#rejectAllPendingReqs("Worker shutting down");
+    this.worker.terminate();
+  }
+
+  #rejectAllPendingReqs(message: string): void {
+    for (const [seq, pending] of this.pendingRequests) {
+      clearTimeout(pending.timer);
+      pending.reject(new Error(message));
+    }
+    this.pendingRequests.clear();
   }
 }
 

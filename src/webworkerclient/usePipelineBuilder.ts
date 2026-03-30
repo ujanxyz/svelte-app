@@ -1,12 +1,11 @@
 import MyWorker from "../webworker?worker";
-import { RemoteGraphBuilder } from "./RemoteGraphBuilder";
 import { WebWorkerClient } from "./WebWorkerClient";
+import { WorkerPipelineBuilder } from "./WorkerPipelineBuilder";
 
-function useWebWorker() {
+function usePipelineBuilder(): WorkerPipelineBuilder {
   const rawWorker = new MyWorker({ name: "GraphWorker" });
   const client = new WebWorkerClient(rawWorker);
-  const remoteBuilder = new RemoteGraphBuilder(client);
-  return { remoteBuilder };
+  return new WorkerPipelineBuilder(client);
 }
 
-export { useWebWorker };
+export { usePipelineBuilder };

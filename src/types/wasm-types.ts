@@ -1,3 +1,5 @@
+import type { data } from "./pipeline-types";
+
 export interface WasmModuleType {
   getBuildInfo: () => object;
   GraphEngineApi: GraphEngineApiConstructor;
@@ -34,7 +36,9 @@ export interface EngineApiTypes {
   };
 
   createNode: {
-    request: string;
+    request: {
+      func: data.FunctionInfo;
+    };
     response: {
       node: any;
       edges: any[];

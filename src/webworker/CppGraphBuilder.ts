@@ -22,8 +22,6 @@ class CppGraphBuilder {
         const { data, ok, status } = this.graph.addEdges(request);
         return ok ? data : new Error(status);
       }
-
-
     }
 
     return new Error(`Invalid message code: ${code}`);

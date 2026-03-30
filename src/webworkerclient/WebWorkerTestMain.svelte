@@ -1,36 +1,36 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { getContext, onMount } from "svelte";
 
 import TextButton from "@/components/TextButton.svelte";
+import type { PipelineBuilder } from "@/types/pipeline-builder";
+import type { data } from "@/types/pipeline-types";
 
-import { useWebWorker } from "./useWebWorker";
-
-const { remoteBuilder } = useWebWorker();
-
-onMount(() => {
-  console.log(remoteBuilder);
-});
+const pipelineBuilder = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 
 async function onGetGraph() {
-  const res = await remoteBuilder.getGraph({});
+  const res = await pipelineBuilder.getGraph({});
   console.log(res);
 }
 
 async function onCreateNode() {
-  const specs = {
-        "spec": {
-            "kind": "lam",
-            "label": "Noise",
-            "description": "Generates noise",
-            "data_type": "float",
-            "arg_types": ["vec2"],
-            "inputs": [
-                { "name": "seed", "data_type": "int" }
-            ]
-        }
-    };
-  const jsonspec = JSON.stringify(specs);
-  const res = await remoteBuilder.createNode(jsonspec);
+  const func: data.FunctionInfo = {
+    uri: "/fn/geom/translate-x",
+    label: "Translate Point X",
+    desc: "Translate a 2D point along X-axis by a given delta",
+    ext: {
+      kind: "PURE_FN",
+      purefn: {
+        ins: [
+          { name: "p", dtype: "point2d" },
+          { name: "dx", dtype: "float" },
+        ],
+        outs: [
+          { name: "fp", dtype: "point2d" },
+        ]
+      },
+    }
+  };
+  const res = await pipelineBuilder.createNode({func});
   console.log(res);
 }
 
@@ -38,17 +38,14 @@ async function onAddEdges() {
   const entries = [
     {
       node0: "s2GhcWpBLP",
-      slot0: "$out",
+      slot0: "$out:fp",
       node1: "ZBqg1rBrgq",
-      slot1: "$in:seed",
+      slot1: "$in:p",
     },
   ];
-  const res = await remoteBuilder.addEdges({entries});
+  const res = await pipelineBuilder.addEdges({entries});
   console.log(res);
 }
-
-
-
 
 </script>
 
