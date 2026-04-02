@@ -1,5 +1,6 @@
+import { type fn } from "@/types/function";
+
 import getFunctionSpecs from "./functionSpecs";
-import type { FuncSpec } from "./types";
 
 // Invalid during dev stage.
 const FETCH_URL = "http://example.com/func-defs";
@@ -7,7 +8,6 @@ const FETCH_URL = "http://example.com/func-defs";
 const USE_DUMMY_DATA = true;
 const DUMMY_DATA_DELAY_MS = 250;
 
-// TODO: Move this to some reusable utility method.
 async function delayedDummyData<T>(
   dataFn: () => T,
   delay: number,
@@ -35,13 +35,13 @@ async function delayedDummyData<T>(
 export function fetchFnInfos() {
   let controller: AbortController | null = null;
 
-  async function fetchItemsAsync(): Promise<FuncSpec[]> {
+  async function fetchItemsAsync(): Promise<fn.FunctionInfo[]> {
     if (controller) {
       controller.abort();
     }
     controller = new AbortController();
     if (USE_DUMMY_DATA) {
-      return delayedDummyData<FuncSpec[]>(
+      return delayedDummyData<fn.FunctionInfo[]>(
         getFunctionSpecs,
         DUMMY_DATA_DELAY_MS,
         controller.signal,
@@ -49,7 +49,7 @@ export function fetchFnInfos() {
     } else {
       return fetch(FETCH_URL, { signal: controller.signal }).then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<FuncSpec[]>;
+        return res.json() as Promise<fn.FunctionInfo[]>;
       });
     }
   }
@@ -62,11 +62,11 @@ export function fetchFnInfos() {
 }
 
 export async function lookupFnDetailsAsync(
-  funcId: string,
-): Promise<FuncSpec | undefined> {
+  funcUri: string,
+): Promise<fn.FunctionInfo | undefined> {
   if (!USE_DUMMY_DATA) {
     throw new Error("Real api lookup not implemented");
   }
   const specs = getFunctionSpecs();
-  return specs.find((fn: FuncSpec) => fn.id === funcId);
+  return specs.find((fnInfo: fn.FunctionInfo) => fnInfo.uri === funcUri);
 }

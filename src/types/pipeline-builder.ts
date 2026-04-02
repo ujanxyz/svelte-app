@@ -7,5 +7,5 @@ export interface PipelineBuilder {
 
   getGraph(request: EngineApiRequest<"getGraph">): Promise<EngineApiResponse<"getGraph">>;
   createNode(request: EngineApiRequest<"createNode">): Promise<EngineApiResponse<"createNode">>;
-  addEdges(request: EngineApiRequest<"addEdges">): Promise<EngineApiResponse<"addEdges">>;
+  addEdge(request: EngineApiRequest<"addEdge">): Promise<EngineApiResponse<"addEdge">>;
 }

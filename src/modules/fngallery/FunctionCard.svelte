@@ -1,21 +1,22 @@
 <script lang="ts">
-import type { FuncParam, FuncSpec } from "./types";
+import { type fn } from "@/types/function";
+
 interface Props {
-  spec: FuncSpec;
-  onSelect: (spec: FuncSpec) => void;
+  spec: fn.FunctionInfo;
+  onSelect: (spec: fn.FunctionInfo) => void;
 }
 
 const { spec, onSelect }: Props = $props();
 
 /* svelte-ignore state_referenced_locally */
-const { id, label, desc, params } = spec;
+const { uri, label, desc, params } = spec;
 
 function onclick(ev: MouseEvent) {
   onSelect(spec);
 }
 </script>
 
-<button class="gridcell" data-uj-fn-id={id} {onclick}>
+<button class="gridcell" data-uj-fn-id={uri} {onclick}>
   <p class="celltypo">{label}</p>
   <p class="celldesc">{desc}</p>
   <p>
@@ -76,13 +77,13 @@ function onclick(ev: MouseEvent) {
   white-space: nowrap; /* Prevents text from wrapping */
 }
 
-.param-i {
+.param-I {
   background-color: #3047a5;
 }
-.param-o {
+.param-O {
   background-color: #217446;
 }
-.param-m {
+.param-M {
   background-color: #736c21;
 }
 .cellparam:first-child {

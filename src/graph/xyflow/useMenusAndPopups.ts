@@ -179,12 +179,12 @@ export default function useMenusAndPopups() {
     if (retval.status !== ReturnStatus.OK) return;
     console.log(retval.value);
     const funcId = retval.value as string;
-    const funcspec = await lookupFnDetailsAsync(funcId);
-    if (!funcspec) {
+    const funcInfo = await lookupFnDetailsAsync(funcId);
+    if (!funcInfo) {
       // TODO: Make error toast.
       throw new Error("Function not found: " + funcId);
     }
-    const newNode = ioService.createNodeAt(funcspec, position);
+    const newNode = await ioService.createNodeAt(funcInfo, position);
     await flowGraphService.appendNode(newNode);
   }
 

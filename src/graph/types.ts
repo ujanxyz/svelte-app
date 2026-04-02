@@ -7,9 +7,6 @@ import type {
   XYPosition,
 } from "@xyflow/svelte";
 
-import type { FuncSpec } from "../modules/fngallery/types";
-import type { ClientXY, StatusOr } from "../overlay/types";
-
 type ParamBase = {
   name: string;
   type: string;
@@ -32,7 +29,6 @@ type InOutParam = ParamBase & InConnection & OutConnection;
 export interface UjNodeData extends Record<string, unknown> {
   label: string;
   funcid: string;
-  _funspec: FuncSpec; // Debug only.
   ins: InParam[];
   outs: OutParam[];
   inouts: InOutParam[];

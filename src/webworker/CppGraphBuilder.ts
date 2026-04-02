@@ -18,6 +18,10 @@ class CppGraphBuilder {
         const { data, ok, status } = this.graph.createNode(request);
         return ok ? data : new Error(status);
       }
+      case "GRAPH:addEdge": {
+        const { data, ok, status } = this.graph.addEdge(request);
+        return ok ? data : new Error(status);
+      }
       case "GRAPH:addEdges": {
         const { data, ok, status } = this.graph.addEdges(request);
         return ok ? data : new Error(status);

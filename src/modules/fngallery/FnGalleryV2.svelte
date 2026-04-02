@@ -1,10 +1,11 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
+import { type fn } from "@/types/function";
+
 import useCurrentOverlay from "../../overlay/useCurrentOverlay";
 import { fetchFnInfos } from "./apiFunctionInfos";
 import FunctionCard from "./FunctionCard.svelte";
-import type { FuncSpec } from "./types";
 
 const overlay = useCurrentOverlay();
 const { fetchItemsAsync, abortFetch } = fetchFnInfos();
@@ -19,8 +20,8 @@ function closeGallery() {
   overlay.abortOverlay();
 }
 
-function onSelect(spec: FuncSpec) {
-  overlay.settleOverlay(spec.id);
+function onSelect(spec: fn.FunctionInfo) {
+  overlay.settleOverlay(spec.uri);
 }
 </script>
 

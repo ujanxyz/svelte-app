@@ -1,9 +1,9 @@
 <script lang="ts">
-import { getContext, onMount } from "svelte";
+import { getContext } from "svelte";
 
 import TextButton from "@/components/TextButton.svelte";
+import type { fn } from "@/types/function";
 import type { PipelineBuilder } from "@/types/pipeline-builder";
-import type { data } from "@/types/pipeline-types";
 
 const pipelineBuilder = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 
@@ -13,37 +13,27 @@ async function onGetGraph() {
 }
 
 async function onCreateNode() {
-  const func: data.FunctionInfo = {
+  const func: fn.FunctionInfo = {
     uri: "/fn/geom/translate-x",
     label: "Translate Point X",
     desc: "Translate a 2D point along X-axis by a given delta",
-    ext: {
-      kind: "PURE_FN",
-      purefn: {
-        ins: [
-          { name: "p", dtype: "point2d" },
-          { name: "dx", dtype: "float" },
-        ],
-        outs: [
-          { name: "fp", dtype: "point2d" },
-        ]
-      },
-    }
+    params: [
+      { name: "p", dtype: "point2d", access: "I" },
+      { name: "dx", dtype: "float", access: "I" },
+      { name: "fp", dtype: "point2d", access: "O" },
+    ],
   };
   const res = await pipelineBuilder.createNode({func});
   console.log(res);
 }
 
 async function onAddEdges() {
-  const entries = [
-    {
-      node0: "s2GhcWpBLP",
-      slot0: "$out:fp",
-      node1: "ZBqg1rBrgq",
-      slot1: "$in:p",
-    },
-  ];
-  const res = await pipelineBuilder.addEdges({entries});
+  const res = await pipelineBuilder.addEdge({
+    sourceNode: "s2GhcWpBLP",
+    sourceSlot: "fp",
+    targetNode: "ZBqg1rBrgq",
+    targetSlot: "p",
+  });
   console.log(res);
 }
 

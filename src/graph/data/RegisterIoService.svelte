@@ -7,7 +7,7 @@ import {
 } from "@xyflow/svelte";
 import { getContext } from "svelte";
 
-import type { FuncParam, FuncSpec } from "@/modules/fngallery/types";
+import { type fn } from "@/types/function";
 import type { PipelineBuilder } from "@/types/pipeline-builder";
 import { createIdGenerator } from "@/utils/idGenerator";
 
@@ -16,7 +16,6 @@ import { type UjGraphStorage, type UjNodeData } from "../types";
 
 type UjNode = UjGraphStorage["nodes"][number];
 type UjEdge = UjGraphStorage["edges"][number];
-
 
 const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 
@@ -27,14 +26,19 @@ registerGraphService("ioService", {
   serializeObject,
 });
 
-function createNodeAt(fnSpec: FuncSpec, position: XYPosition): Node {
-  console.log(fnSpec);
+async function createNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<Node> {
+  const { node, edges } = await pipeline.createNode({
+    func: fnSpec,
+  });
+  if (!node) {
+    throw new Error("Node not created");
+  }
+  console.log(fnSpec, node);
   const nodeId: string = nodeIdGen();
   const { ins, outs, inouts } = _makeParams(fnSpec.params);
   const details: UjNodeData = {
     label: fnSpec.label,
-    funcid: fnSpec.id,
-    _funspec: fnSpec,
+    funcid: fnSpec.uri,
     ins,
     outs,
     inouts,
@@ -76,20 +80,20 @@ function serializeObject(
   return graph;
 }
 
-function _makeParams(params: FuncParam[]) {
+function _makeParams(params: fn.ParamInfo[]) {
   const ins: UjNodeData["ins"] = [];
   const outs: UjNodeData["outs"] = [];
   const inouts: UjNodeData["inouts"] = [];
   for (const p of params) {
-    const { name, type } = p;
+    const { name, dtype: type } = p;
     switch (p.access) {
-      case "i":
+      case "I":
         ins.push({ name, type });
         break;
-      case "o":
+      case "O":
         outs.push({ name, type });
         break;
-      case "m":
+      case "M":
         inouts.push({ name, type });
         break;
     }

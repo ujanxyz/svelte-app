@@ -1,4 +1,4 @@
-import type { data } from "./pipeline-types";
+import type { fn } from "./function";
 
 export interface WasmModuleType {
   getBuildInfo: () => object;
@@ -20,6 +20,7 @@ export interface GraphEngineApiInstance {
 
   getGraph: (args: EngineApiRequest<"getGraph">) => WasmApiResponse<"getGraph">;
   createNode: (args: EngineApiRequest<"createNode">) => WasmApiResponse<"createNode">;
+  addEdge: (args: EngineApiRequest<"addEdge">) => WasmApiResponse<"addEdge">;
   addEdges: (args: EngineApiRequest<"addEdges">) => WasmApiResponse<"addEdges">;
 }
 
@@ -29,20 +30,32 @@ export interface EngineApiTypes {
   getGraph: {
     request: VoidType;
     response: {
-      nodes: any[];
-      edges: any[];
-      slots: any[];
+      nodeInfos: any[];
+      edgeInfos: any[];
+      slotInfos: any[];
     };
   };
 
   createNode: {
     request: {
-      func: data.FunctionInfo;
+      func: fn.FunctionInfo,
     };
     response: {
       node: any;
       edges: any[];
     };
+  };
+
+  addEdge: {
+    request: {
+      sourceNode: string;
+      sourceSlot: string;
+      targetNode: string;
+      targetSlot: string;
+    };
+    response: {
+      edgeInfo: any;
+    }
   };
 
   addEdges: {

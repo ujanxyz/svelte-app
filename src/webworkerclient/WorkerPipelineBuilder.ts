@@ -34,7 +34,18 @@ class WorkerPipelineBuilder implements PipelineBuilder {
     }
     return payload! as EngineApiResponse<"createNode">;
   }
-  
+
+  public async addEdge(request: EngineApiRequest<"addEdge">): Promise<EngineApiResponse<"addEdge">> {
+    console.log("request of addEdge ~~~~~ ", request);
+    const { ok, code, payload, error } = await this.#client.send("GRAPH:addEdge", request);
+    console.log(ok, code, payload, error);
+    this.#ensureNotDeleted();
+    if (!ok) {
+      throw new Error(`${code}: ${error}`);
+    }
+    return payload! as EngineApiResponse<"addEdge">;
+  }
+
   public async addEdges(request: EngineApiRequest<"addEdges">): Promise<EngineApiResponse<"addEdges">> {
     console.log("request of addEdges ~~~~~ ", request);
     const { ok, code, payload, error } = await this.#client.send("GRAPH:addEdges", request);

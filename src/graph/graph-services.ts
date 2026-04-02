@@ -5,7 +5,7 @@ import {
   type XYPosition,
 } from "@xyflow/svelte";
 
-import type { FuncSpec } from "@/modules/fngallery/types";
+import type { fn } from "@/types/function";
 
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
@@ -45,7 +45,7 @@ interface SlotService {
 }
 
 interface IoService {
-  createNodeAt: (fnSpec: FuncSpec, position: XYPosition) => Node;
+  createNodeAt: (fnSpec: fn.FunctionInfo, position: XYPosition) => Promise<Node>;
   serializeObject: (
     nodes: Node[],
     edges: Edge[],
