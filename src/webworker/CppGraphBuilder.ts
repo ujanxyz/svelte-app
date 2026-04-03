@@ -1,34 +1,30 @@
-import { type GraphEngineApiInstance } from "@/types/wasm-types";
+import type { wa } from "@/types/wa";
 
 class CppGraphBuilder {
-  private readonly graph: GraphEngineApiInstance;
+  private readonly graph: wa.ApiInstance;
+  private readonly cmdPrefix: string
+  private readonly availableApis: string[] = [];
 
-  public constructor(graph: GraphEngineApiInstance) {
+  public constructor(graph: wa.ApiInstance, cmdPrefix: string) {
     this.graph = graph;
-    console.log("Available C++ apis:", this.graph.apis);
+    this.cmdPrefix = cmdPrefix;
+    for (const api of this.graph.apis) {
+      this.availableApis.push(api.name);
+    }
+    console.log("Available C++ apis:", this.availableApis);
   }
 
   public async process(code: string, request: any): Promise<Error | Record<string, any>> {
-    switch (code) {
-      case "GRAPH:getGraph": {
-        const { data, ok, status } = this.graph.getGraph(request);
-        return ok ? data : new Error(status);
-      }
-      case "GRAPH:createNode": {
-        const { data, ok, status } = this.graph.createNode(request);
-        return ok ? data : new Error(status);
-      }
-      case "GRAPH:addEdge": {
-        const { data, ok, status } = this.graph.addEdge(request);
-        return ok ? data : new Error(status);
-      }
-      case "GRAPH:addEdges": {
-        const { data, ok, status } = this.graph.addEdges(request);
-        return ok ? data : new Error(status);
-      }
+    if (!code.startsWith(this.cmdPrefix)) {
+      throw new Error("Invalid code: " + code);
     }
-
-    return new Error(`Invalid message code: ${code}`);
+    const apiName: string = code.substring(this.cmdPrefix.length);
+    const apiFn = this.graph[apiName]!;
+    if (!apiFn) {
+      throw new Error("Api not found: " + apiName);
+    }
+    const { data, ok, status } = apiFn.bind(this.graph)(request) as wa.ApiResponse;
+    return ok ? data : new Error(status);
   }
 }
 

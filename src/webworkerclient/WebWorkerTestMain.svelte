@@ -3,7 +3,8 @@ import { getContext } from "svelte";
 
 import TextButton from "@/components/TextButton.svelte";
 import type { fn } from "@/types/function";
-import type { PipelineBuilder } from "@/types/pipeline-builder";
+
+import type { PipelineBuilder } from "./PipelineBuilder";
 
 const pipelineBuilder = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 
@@ -37,12 +38,20 @@ async function onAddEdges() {
   console.log(res);
 }
 
+async function onDeleteElements() {
+  const res = await pipelineBuilder.deleteElements({
+    nodeIds: ["s2GhcWpBLP"],
+    edgeIds: [],
+  });
+  console.log(res);
+}
+
 </script>
 
 <div>
   <TextButton text="getGraph" onclick={onGetGraph} />
   <TextButton text="createNode" onclick={onCreateNode} />
   <TextButton text="addEdges" onclick={onAddEdges} />
-  <TextButton text="deleteElements" onclick={onAddEdges} />
+  <TextButton text="deleteElements" onclick={onDeleteElements} />
   <TextButton text="clearGraph" onclick={onAddEdges} />
 </div>

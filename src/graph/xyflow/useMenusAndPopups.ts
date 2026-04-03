@@ -77,7 +77,8 @@ export default function useMenusAndPopups() {
     const nodeId = node.id as string;
     switch (retval.value) {
       case MenuCodes.RM_NODE:
-        await flowGraphService.deleteNode(nodeId);
+        await flowGraphService.deleteElements([nodeId], []);
+        // await flowGraphService.deleteNode(nodeId);
     }
   }
 
@@ -184,8 +185,7 @@ export default function useMenusAndPopups() {
       // TODO: Make error toast.
       throw new Error("Function not found: " + funcId);
     }
-    const newNode = await ioService.createNodeAt(funcInfo, position);
-    await flowGraphService.appendNode(newNode);
+    flowGraphService.newNodeAt(funcInfo, position);
   }
 
   return {

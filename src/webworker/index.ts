@@ -75,7 +75,7 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
 
   function markHandlerReady() {
     const graph = wasmService.newGraphEngineApi();
-    graphBuilder = new CppGraphBuilder(graph);
+    graphBuilder = new CppGraphBuilder(graph, "GRAPH:");
     isThisWorkerReady = true;
     postman.postImReady();
   }

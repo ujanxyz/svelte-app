@@ -9,19 +9,16 @@ import SquareLogoIcon from "phosphor-svelte/lib/SquareLogoIcon";
 import DataPicker from "@/modules/sloteditor/DataPicker.svelte";
 import { ReturnStatus } from "@/overlay/constants";
 import { useOverlayUi } from "@/overlay/overlayStore";
+import type { plinfo } from "@/types/plinfo";
 
-import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
+import type { UjOverrideData, UjSlotInfo } from "../types";
 import MyHandle from "./MyHandle.svelte";
 
 // Derive the param types without explicitly importing.
-type InParam = UjNodeData["ins"][number];
-type OutParam = UjNodeData["outs"][number];
-type InOutParam = UjNodeData["inouts"][number];
 type SlotState = UjSlotInfo["state"];
 
 interface Props {
-  access: "in" | "out" | "inout";
-  param: InParam | OutParam | InOutParam;
+  slotInfo: plinfo.SlotInfo;
   /**
    * slotInfoIn is used in "in" and "inout" slots. This is reactive optional (SvelteMap value)
    */
@@ -45,8 +42,7 @@ interface Props {
 }
 
 const {
-  access,
-  param,
+  slotInfo: slot,
   slotInfoIn,
   slotInfoOut,
   onDataEntry,
@@ -64,8 +60,8 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
   if (!onDataEntry) {
     return;
   }
-  if (access === "out") {
-    alert("On click out param not implemented");
+  if (slot.access === "O") {
+    window.alert("On click out param not implemented");
     return;
   }
   if (slotInfoIn?.state === "edge") {
@@ -74,43 +70,43 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
     );
     return;
   }
-  const slotName = access === "in" ? param.name : param.name + "/in";
+  const slotName = (slot.access === "I") ? slot.name : slot.name + "/in";
   const prior = onDataLookup?.(slotName) ?? null;
 
   const anchor = ev.currentTarget as HTMLButtonElement;
-  const datatype = param.type;
+  const datatype = "float2";
   const editedData = await editorPopup.openOverlayAsync<UjOverrideData>({
     anchor,
     datatype,
     prior,
   });
   if (editedData.status !== ReturnStatus.OK) return;
-  console.log(access, "slotName -> ", slotName, slotInfoIn);
+  console.log(slot.access, "slotName -> ", slotName, slotInfoIn);
   onDataEntry(slotName, editedData.value!);
 }
 </script>
 
 <div class="slotrow rounded-sm flex-centered-cells">
-  {#if access === "in"}
+  {#if slot.access === "I"}
     <button
       class="panebtn flex-centered-cells rounded-sm"
       onclick={onClickPane}
       data-debug-name="slot-pane-btn"
     >
       <div class="grow">
-        {param.name}
+        {slot.name}
       </div>
       {@render stateIcon(inState, false)}
       {@render blankIcon()}
     </button>
-  {:else if access === "out"}
+  {:else if slot.access === "O"}
     <button
       class="panebtn flex-centered-cells rounded-sm"
       disabled={true}
       data-debug-name="slot-pane-btn"
     >
       <div class="grow">
-        {param.name}
+        {slot.name}
       </div>
       {@render blankIcon()}
       {@render stateIcon(outState, true)}
@@ -122,23 +118,23 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
       data-debug-name="slot-pane-btn"
     >
       <div class="grow">
-        {param.name}
+        {slot.name}
       </div>
       {@render stateIcon(inState, false)}
       {@render stateIcon(outState, true)}
     </button>
   {/if}
 
-  {#if access === "in"}
-    <MyHandle kind="in" id={param.name} />
+  {#if slot.access === "I"}
+    <MyHandle kind="in" id={slot.name} />
     <MyHandle kind="out-x" />
-  {:else if access === "out"}
+  {:else if slot.access === "O"}
     <MyHandle kind="in-x" />
-    <MyHandle kind="out" id={param.name} />
+    <MyHandle kind="out" id={slot.name} />
   {:else}
     {@const [paramNameIn, paramNameOut] = [
-      `${param.name}/in`,
-      `${param.name}/out`,
+      `${slot.name}/in`,
+      `${slot.name}/out`,
     ]}
     <MyHandle kind="in" id={paramNameIn} />
     <MyHandle kind="out" id={paramNameOut} />

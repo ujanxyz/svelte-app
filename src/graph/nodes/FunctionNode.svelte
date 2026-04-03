@@ -1,36 +1,33 @@
 <script lang="ts">
-import { type Node, type NodeProps } from "@xyflow/svelte";
+
+import type { plinfo } from "@/types/plinfo";
+import type { xy } from "@/types/xy";
 
 import { EventKinds } from "../../utils/constants";
 import useEventDispatch from "../../utils/useEventDispatch";
-import type { UjNodeData } from "../types";
 import SlotsArray from "./SlotsArray.svelte";
 import useNodeOpsContext from "./useNodeOpsContext";
 import XYNodeTopBar from "./XYNodeTopBar.svelte";
 
 const {
-  data: nodeDetails,
+  data: xyNodeData,
   id: nodeId,
   ...restProps
-}: NodeProps<Node<UjNodeData>> = $props();
+}: xy.xyNodeProps = $props();
 
 const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
 
 useNodeOpsContext().setNodeOps({
   deleteSelf: () => dispatchRmNode({ nodeId }),
 });
+
+
 </script>
 
 <div class="noderoot">
-  <h3 class="card-title">{nodeDetails.label}</h3>
+  <h3 class="card-title">{xyNodeData.label}</h3>
   <span class="nodeid">{nodeId}</span>
-
-  <SlotsArray
-    {nodeId}
-    ins={nodeDetails.ins}
-    outs={nodeDetails.outs}
-    inouts={nodeDetails.inouts}
-  />
+  <SlotsArray {nodeId} ins={xyNodeData.ins} outs={xyNodeData.outs} inouts={xyNodeData.inouts} />
 </div>
 <XYNodeTopBar />
 

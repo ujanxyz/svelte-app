@@ -18,21 +18,23 @@ import UploadSimpleIcon from "phosphor-svelte/lib/UploadSimpleIcon";
 // </icons>
 import { type Component } from "svelte";
 
+import type { xy } from "@/types/xy";
+
 import DefaultEdge from "../edges/DefaultEdge.svelte";
 import { useGraphService } from "../graph-services";
-import DefaultNode from "../nodes/DefaultNode.svelte";
+import FunctionNode from "../nodes/FunctionNode.svelte";
 import InputNode from "../nodes/InputNode.svelte";
-import type { UjEdgeProps, UjNodeProps } from "../types";
 import useEditorInteractions from "./useEditorInteractions";
 import useMenusAndPopups from "./useMenusAndPopups";
 //import PlayIcon from "phosphor-svelte/lib/PlayIcon";
 
-const nodeTypes: Record<string, Component<UjNodeProps>> = {
+const nodeTypes: Record<string, Component<xy.xyNodeProps>> = {
+  default: FunctionNode,
+  function: FunctionNode,
   in: InputNode,
-  default: DefaultNode,
 };
 
-const edgeTypes: Record<string, Component<UjEdgeProps>> = {
+const edgeTypes: Record<string, Component<xy.xyEdgeProps>> = {
   default: DefaultEdge,
 };
 
@@ -52,6 +54,7 @@ const {
 
 const {
   isValidConnection,
+  onbeforedelete,
   onbeforeconnect,
   onconnect,
   onconnectstart,
@@ -75,6 +78,7 @@ const {
   colorMode={"dark"}
   // Debug actions:
   {isValidConnection}
+  {onbeforedelete}
   {onbeforeconnect}
   {onconnect}
   {onconnectstart}

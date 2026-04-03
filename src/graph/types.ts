@@ -67,10 +67,3 @@ export interface UjOverrideData {
   timestamp: number;
   payload: object;
 }
-
-export interface UjEdgeData extends Record<string, unknown> {}
-
-export type UjNode = Node<UjNodeData>;
-export type UjNodeProps = NodeProps<UjNode>;
-export type UjEdge = Edge<UjEdgeData>;
-export type UjEdgeProps = EdgeProps<UjEdge>;

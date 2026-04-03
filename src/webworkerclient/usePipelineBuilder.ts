@@ -1,11 +1,11 @@
 import MyWorker from "../webworker?worker";
+import { PipelineBuilder } from "./PipelineBuilder";
 import { WebWorkerClient } from "./WebWorkerClient";
-import { WorkerPipelineBuilder } from "./WorkerPipelineBuilder";
 
-function usePipelineBuilder(): WorkerPipelineBuilder {
+function usePipelineBuilder(): PipelineBuilder {
   const rawWorker = new MyWorker({ name: "GraphWorker" });
   const client = new WebWorkerClient(rawWorker);
-  return new WorkerPipelineBuilder(client);
+  return new PipelineBuilder(client);
 }
 
 export { usePipelineBuilder };

@@ -1,14 +1,11 @@
-import {
-  type GraphEngineApiInstance,
-  type WasmModuleType,
-} from "@/types/wasm-types.js";
+import type { wa } from "@/types/wa.js";
 
 import CreateUjWasmModule from "./wasm/entrypoint.js";
 
 class WasmService {
   private static instance: WasmService | null = null;
   private initPromise: Promise<void> | null = null;
-  private wasmModule?: WasmModuleType;
+  private wasmModule?: wa.WasmModuleType;
 
   private constructor() {}
 
@@ -20,7 +17,7 @@ class WasmService {
   }
 
   // Pre-requisite: Loading is complete.
-  public newGraphEngineApi(): GraphEngineApiInstance {
+  public newGraphEngineApi(): wa.ApiInstance {
     if (!this.wasmModule) {
       throw new Error("wasmModule not loaded");
     }
@@ -69,8 +66,8 @@ class WasmService {
   }
 }
 
-async function _loadWasmInternal(): Promise<WasmModuleType> {
-  const wasmModulePromise = CreateUjWasmModule() as Promise<WasmModuleType>;
+async function _loadWasmInternal(): Promise<wa.WasmModuleType> {
+  const wasmModulePromise = CreateUjWasmModule() as Promise<wa.WasmModuleType>;
   const wasmModule = await wasmModulePromise;
   console.assert(
     !!wasmModule,

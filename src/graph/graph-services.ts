@@ -1,4 +1,5 @@
 import {
+  type Connection,
   type Edge,
   type Node,
   type Viewport,
@@ -10,6 +11,7 @@ import type { fn } from "@/types/function";
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
 import type { UjGraphStorage, UjOverrideData, UjSlotInfo } from "./types";
+import type { xy } from "@/types/xy";
 
 interface RawStoreService {
   // List of nodes.
@@ -45,7 +47,6 @@ interface SlotService {
 }
 
 interface IoService {
-  createNodeAt: (fnSpec: fn.FunctionInfo, position: XYPosition) => Promise<Node>;
   serializeObject: (
     nodes: Node[],
     edges: Edge[],
@@ -54,6 +55,15 @@ interface IoService {
 }
 
 interface FlowGraphService {
+  // Status: Done, Tested.
+  newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<void>;
+
+  // Status: Done, Tested.
+  addEdge(connection: Connection): Promise<void>;
+
+  // Status: Blocked on addEdge
+  deleteElements(nodeIds: string[], edgeIds: string[]): Promise<void>;
+
   screenToFlowXY: (input: MouseEvent | ClientXY) => XYPosition;
   allNodes: () => Node[];
   allEdges: () => Edge[];
@@ -63,7 +73,6 @@ interface FlowGraphService {
   deleteEdges: (edgeIds: string[]) => Promise<void>;
   deleteAllEdges: () => Promise<void>;
   deleteGraph: () => Promise<void>;
-  appendNode: (newNode: Node) => Promise<void>;
   assignGraph: (newNodes: Node[], newEdges: Edge[]) => void;
 }
 

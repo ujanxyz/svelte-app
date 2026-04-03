@@ -1,18 +1,15 @@
 <script lang="ts">
-import { useGraphService } from "../graph-services";
-import type { UjNodeData, UjOverrideData } from "../types";
-import NodeSlot from "./NodeSlot.svelte";
+import type { plinfo } from "@/types/plinfo";
 
-// Derive the param types without explicitly importing.
-type InParam = UjNodeData["ins"][number];
-type OutParam = UjNodeData["outs"][number];
-type InOutParam = UjNodeData["inouts"][number];
+import { useGraphService } from "../graph-services";
+import type { UjOverrideData } from "../types";
+import NodeSlot from "./NodeSlot.svelte";
 
 interface Props {
   nodeId: string;
-  ins: InParam[];
-  outs: OutParam[];
-  inouts: InOutParam[];
+  ins: plinfo.SlotInfo[];
+  outs: plinfo.SlotInfo[];
+  inouts: plinfo.SlotInfo[];
 }
 
 const { nodeId, ins, outs, inouts }: Props = $props();
@@ -30,33 +27,32 @@ function onDataLookup(slotName: string): UjOverrideData | null {
 </script>
 
 <div class="flex-fitted-rows">
-  {#each ins as param (param.name)}
-    {@render inSlot(param)}
+  {#each ins as slot (slot.name)}
+    {@render inSlot(slot)}
   {/each}
-  {#each outs as param (param.name)}
-    {@render outSlot(param)}
+  {#each outs as slot (slot.name)}
+    {@render outSlot(slot)}
   {/each}
-  {#each inouts as param (param.name)}
-    {@render inoutSlot(param)}
+  {#each inouts as slot (slot.name)}
+    {@render inoutSlot(slot)}
   {/each}
 </div>
 
-{#snippet inSlot(param: InParam)}
-  {@const slotInfoIn = slotService.useSlotInfo(nodeId, param.name)}
-  <NodeSlot access="in" {param} {slotInfoIn} {onDataEntry} {onDataLookup} />
+{#snippet inSlot(slotInfo: plinfo.SlotInfo)}
+  {@const slotInfoIn = slotService.useSlotInfo(nodeId, slotInfo.name)}
+  <NodeSlot {slotInfo} {slotInfoIn} {onDataEntry} {onDataLookup} />
 {/snippet}
 
-{#snippet outSlot(param: OutParam)}
-  {@const slotInfoOut = slotService.useSlotInfo(nodeId, param.name)}
-  <NodeSlot access="out" {param} {slotInfoOut} {onDataEntry} {onDataLookup} />
+{#snippet outSlot(slotInfo: plinfo.SlotInfo)}
+  {@const slotInfoOut = slotService.useSlotInfo(nodeId, slotInfo.name)}
+  <NodeSlot {slotInfo} {slotInfoOut} {onDataEntry} {onDataLookup} />
 {/snippet}
 
-{#snippet inoutSlot(param: InOutParam)}
-  {@const slotInfoIn = slotService.useSlotInfo(nodeId, param.name + "/in")}
-  {@const slotInfoOut = slotService.useSlotInfo(nodeId, param.name + "/out")}
+{#snippet inoutSlot(slotInfo: plinfo.SlotInfo)}
+  {@const slotInfoIn = slotService.useSlotInfo(nodeId, slotInfo.name + "/in")}
+  {@const slotInfoOut = slotService.useSlotInfo(nodeId, slotInfo.name + "/out")}
   <NodeSlot
-    access="inout"
-    {param}
+    {slotInfo}
     {slotInfoIn}
     {slotInfoOut}
     {onDataEntry}

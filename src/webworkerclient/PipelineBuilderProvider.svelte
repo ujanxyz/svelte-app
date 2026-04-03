@@ -1,7 +1,5 @@
 <script lang="ts">
-import { onMount, setContext, type Snippet } from "svelte";
-
-import { type PipelineBuilder } from "@/types/pipeline-builder";
+import { onDestroy, setContext, type Snippet } from "svelte";
 
 import { usePipelineBuilder } from "./usePipelineBuilder";
 
@@ -14,11 +12,8 @@ const { children }: Props = $props();
 const pipelineBuilder = usePipelineBuilder();
 setContext(Symbol.for("PipelineBuilder"), pipelineBuilder);
 
-onMount(() => {
-  console.log(pipelineBuilder);
-  return () => {
-    pipelineBuilder.destroy();
-  };
+onDestroy(() => {
+  pipelineBuilder.destroy();
 });
 </script>
 

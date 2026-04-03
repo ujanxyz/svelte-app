@@ -1,9 +1,19 @@
 import type { Edge, Node } from "@xyflow/svelte";
 
-export const initialNodes: Node[] = [
+import type { xy } from "@/types/xy";
+
+export const initialNodes: Node<xy.xyNodeData>[] = [
   {
-    id: "lwnfPJ0",
+    id: "a1234",
     data: {
+      info: {
+        id: 1,
+        alnumid: "a1234",
+        fnuri: "/dummy/in-pt",
+        ins: [],
+        outs: ["t"],
+        inouts: [],
+      },
       label: "Input Text",
       funcid: "/dummy/in-pt",
       ins: [],
@@ -14,8 +24,16 @@ export const initialNodes: Node[] = [
     position: { x: -200, y: 0 },
   },
   {
-    id: "gMn6deH",
+    id: "b1234",
     data: {
+      info: {
+        id: 2,
+        alnumid: "b1234",
+        fnuri: "/dummy/fn-b",
+        ins: ["p1"],
+        outs: ["fx"],
+        inouts: [],
+      },
       label: "Coord Function",
       funcid: "/dummy/fn-b",
       ins: [{ name: "x", type: "coord2d" }],
@@ -26,8 +44,16 @@ export const initialNodes: Node[] = [
     position: { x: 0, y: -100 },
   },
   {
-    id: "an52dSd9",
+    id: "c1234",
     data: {
+      info: {
+        id: 3,
+        alnumid: "c1234",
+        fnuri: "/dummy/trans-pt",
+        ins: ["in1", "in2", "in3"],
+        outs: [],
+        inouts: ["x"],
+      },
       label: "Transform Color",
       funcid: "/dummy/trans-pt",
       ins: [
@@ -42,8 +68,16 @@ export const initialNodes: Node[] = [
     position: { x: 0, y: 100 },
   },
   {
-    id: "kL34e1dex",
+    id: "d1234",
     data: {
+      info: {
+        id: 4,
+        alnumid: "d1234",
+        fnuri: "/sink/simple-res",
+        ins: ["f"],
+        outs: [],
+        inouts: [],
+      },
       label: "Result",
       funcid: "/sink/simple-res",
       ins: [{ name: "f", type: "float" }],
@@ -58,10 +92,10 @@ export const initialNodes: Node[] = [
 export const initialEdges: Edge[] = [
   {
     id: "a/x-b/x",
-    source: "lwnfPJ0",
-    target: "gMn6deH",
-    sourceHandle: "x",
-    targetHandle: "x",
+    source: "a1234",
+    target: "b1234",
+    sourceHandle: "t",
+    targetHandle: "p1",
     type: "bezier",
     data: {
       label: "Dummy A to Point func",
@@ -70,10 +104,10 @@ export const initialEdges: Edge[] = [
   },
   {
     id: "a/x-p/x",
-    source: "lwnfPJ0",
-    target: "an52dSd9",
-    sourceHandle: "x",
-    targetHandle: "x/in",
+    source: "a1234",
+    target: "c1234",
+    sourceHandle: "t",
+    targetHandle: "in2",
     type: "default",
     data: {
       label: "Dummy A to Transform",
@@ -82,8 +116,8 @@ export const initialEdges: Edge[] = [
   },
   {
     id: "b/fx-r",
-    source: "gMn6deH",
-    target: "kL34e1dex",
+    source: "b1234",
+    target: "d1234",
     sourceHandle: "fx",
     targetHandle: "f",
     type: "default",
@@ -94,9 +128,9 @@ export const initialEdges: Edge[] = [
   },
   {
     id: "t/x-r/f",
-    source: "an52dSd9",
-    target: "kL34e1dex",
-    sourceHandle: "x/out",
+    source: "c1234",
+    target: "d1234",
+    sourceHandle: "x",
     targetHandle: "f",
     type: "default",
     data: {

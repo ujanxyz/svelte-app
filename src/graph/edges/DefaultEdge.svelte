@@ -1,14 +1,14 @@
 <script lang="ts">
 import {
   BaseEdge,
-  BezierEdge,
-  type EdgeProps,
   EdgeToolbar,
   getBezierPath,
   getSmoothStepPath,
 } from "@xyflow/svelte";
 
-let { id, sourceX, sourceY, targetX, targetY, ...props }: EdgeProps = $props();
+import type { xy } from "@/types/xy";
+
+let { id, sourceX, sourceY, targetX, targetY, ...props }: xy.xyEdgeProps = $props();
 /* svelte-ignore state_referenced_locally */
 const {
   markerStart,

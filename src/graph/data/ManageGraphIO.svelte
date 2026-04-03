@@ -58,7 +58,7 @@ function currentGraphSize(): number {
 }
 
 function tryPopulateFromFixedData(): boolean {
-  flowGraphService.assignGraph(initialNodes, initialEdges);
+  //flowGraphService.assignGraph(initialNodes, initialEdges);
   return currentGraphSize() > 0;
 }
 
