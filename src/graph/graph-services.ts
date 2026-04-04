@@ -7,11 +7,13 @@ import {
 } from "@xyflow/svelte";
 
 import type { fn } from "@/types/function";
+import type { plstate } from "@/types/plstate";
+import type { xy } from "@/types/xy";
 
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
 import type { UjGraphStorage, UjOverrideData, UjSlotInfo } from "./types";
-import type { xy } from "@/types/xy";
+import type { plinfo } from "@/types/plinfo";
 
 interface RawStoreService {
   // List of nodes.
@@ -31,6 +33,14 @@ interface RawStoreService {
 }
 
 interface SlotService {
+  setNodeState(rawNodeId: number, state: plstate.NodeState): void;
+  useNodeState(rawNodeId: number): plstate.NodeState;
+  setSlotState(slotId: plinfo.SlotId, state: plstate.SlotState): void;
+  useSlotState(slotId: plinfo.SlotId): plstate.SlotState;
+  deleteSlots(slotIds: plinfo.SlotId[]): void;
+
+  testUpdate(): void;
+
   // TODO: Rename reactiveSlotInfo.
   useSlotInfo(nodeId: string, paramName: string): UjSlotInfo | undefined;
   reactiveSlotEntries(): [string, UjSlotInfo][];
@@ -61,15 +71,13 @@ interface FlowGraphService {
   // Status: Done, Tested.
   addEdge(connection: Connection): Promise<void>;
 
-  // Status: Blocked on addEdge
-  deleteElements(nodeIds: string[], edgeIds: string[]): Promise<void>;
+  // Status: Done, Tested.
+  deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void>;
 
   screenToFlowXY: (input: MouseEvent | ClientXY) => XYPosition;
   allNodes: () => Node[];
   allEdges: () => Edge[];
-  deleteNode: (nodeId: string) => Promise<void>;
   deleteNodes: (nodeIds: string[]) => Promise<void>;
-  deleteEdge: (edgeId: string) => Promise<void>;
   deleteEdges: (edgeIds: string[]) => Promise<void>;
   deleteAllEdges: () => Promise<void>;
   deleteGraph: () => Promise<void>;
@@ -123,5 +131,7 @@ function useGraphService<K extends keyof GraphServices>(
   // TODO: Throw if not found.
   return graphServices[key] as NonNullable<GraphServices[K]>;
 }
+
+export type GraphServiceType<K extends keyof GraphServices> = NonNullable<GraphServices[K]>;
 
 export { provideGraphContext, registerGraphService, useGraphService };

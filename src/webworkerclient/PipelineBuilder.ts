@@ -32,11 +32,15 @@ class PipelineBuilder {
     return await this.invokeAsync<"deleteElements">("deleteElements", request);
   }
 
+  public async getSlotStates(request: apis.Request<"getSlotStates">): Promise<apis.Response<"getSlotStates">> {
+    return await this.invokeAsync<"getSlotStates">("getSlotStates", request);
+  }
+
   // </ C++ apis> --------------------------------------------------------------
 
   private async invokeAsync<K extends apis.Names>(name: apis.Names, request: apis.Request<K>): Promise<apis.Response<K>> {
     const { ok, code, payload, error } = await this.#client.send(`GRAPH:${name}`, request);
-    console.log(ok, code, payload, error);
+    // console.log(ok, code, payload, error);
     if (this.#deleted) throw new Error('builder deleted');
     if (!ok) {
       throw new Error(`${code}: ${error}`);

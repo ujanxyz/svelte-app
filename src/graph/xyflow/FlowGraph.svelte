@@ -54,7 +54,7 @@ const {
 
 const {
   isValidConnection,
-  onbeforedelete,
+  ondelete,
   onbeforeconnect,
   onconnect,
   onconnectstart,
@@ -78,7 +78,7 @@ const {
   colorMode={"dark"}
   // Debug actions:
   {isValidConnection}
-  {onbeforedelete}
+  {ondelete}
   {onbeforeconnect}
   {onconnect}
   {onconnectstart}

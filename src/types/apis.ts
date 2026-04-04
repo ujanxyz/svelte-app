@@ -1,5 +1,6 @@
 import type { fn } from "./function";
 import type { plinfo } from "./plinfo";
+import type { plstate } from "./plstate";
 
 export namespace apis {
 
@@ -21,36 +22,51 @@ export namespace apis {
       };
       response: {
         nodeInfo: plinfo.NodeInfo;
-        ins: plinfo.SlotInfo[];
-        outs: plinfo.SlotInfo[];
-        inouts: plinfo.SlotInfo[];
-        edges: any[];
+        inInfos: plinfo.SlotInfo[];
+        outInfos: plinfo.SlotInfo[];
+        inoutInfos: plinfo.SlotInfo[];
+        inStates: plstate.SlotState[];
+        outStates: plstate.SlotState[];
+        inoutStates: plstate.SlotState[];
       };
     };
   
     addEdge: {
       request: {
-        sourceNode: string;
+        sourceNode: number;
+        targetNode: number;
         sourceSlot: string;
-        targetNode: string;
         targetSlot: string;
       };
       response: {
         edgeInfo: plinfo.EdgeInfo;
+        sourceState: plstate.SlotState;
+        targetState: plstate.SlotState;
       }
     };
   
     deleteElements: {
       request: {
-        nodeIds: string[];
-        edgeIds: string[];
+        nodeIds: number[];
+        edgeIds: number[];
       };
       response: {
-        nodeIds: string[];
-        edgeIds: string[];
+        nodeIds: number[];
+        edgeIds: number[];
+        deletedSlotIds: plinfo.SlotId[];
+        affectedSlotIds: plinfo.SlotId[];
         topoOrder?: string[];
       }
     };
+
+    getSlotStates: {
+      request: {
+        slotIds: plinfo.SlotId[];
+      };
+      response: {
+        slotStates: [plinfo.SlotId, plstate.SlotState][];
+      };
+    }
   };
 
   export type Names = keyof ApiDict;

@@ -1,6 +1,6 @@
 <script lang="ts">
 import {
-  addEdge as flowAddEdge,
+  addEdge as _addEdge,
   type Connection,
   type Edge,
   type Node,
@@ -17,6 +17,8 @@ import type { xy } from "@/types/xy";
 import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
 import { registerGraphService, useGraphService } from "../graph-services";
+import type { plstate } from "@/types/plstate";
+import type { plinfo } from "@/types/plinfo";
 
 const {
   current: _currentNodes,
@@ -28,6 +30,7 @@ const { update: _updateEdges, set: _setEdges } = useEdges();
 
 const {
   deleteElements: _deleteElements,
+  getNode: _getNode,
   getNodes: _getNodes,
   getEdges: _getEdges,
   screenToFlowPosition: _screenToFlowXY,
@@ -36,16 +39,16 @@ const {
 const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 
 const rawStoreService = useGraphService("rawStoreService");
+const slotService = useGraphService("slotService");
+
 registerGraphService("flowGraphService", {
   newNodeAt,
   addEdge,
-  deleteElements,
+  deletionHandle,
   screenToFlowXY,
   allNodes,
   allEdges,
-  deleteNode,
   deleteNodes,
-  deleteEdge,
   deleteEdges,
   deleteAllEdges,
   deleteGraph,
@@ -53,20 +56,38 @@ registerGraphService("flowGraphService", {
 });
 
 async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<void> {
-  const { nodeInfo, ins, outs, inouts } = await pipeline.createNode({
+  const { nodeInfo, inInfos, outInfos, inoutInfos, inStates, outStates, inoutStates } = await pipeline.createNode({
     func: fnSpec,
   });
   if (!nodeInfo) {
     throw new Error("Node not created");
   }
-  console.log(fnSpec, nodeInfo, {ins, outs, inouts});
-  const data: xy.xyNodeData = { info: nodeInfo, ins, outs, inouts};
+  const data: xy.xyNodeData = { info: nodeInfo, inInfos, outInfos, inoutInfos};
   const newNode: xy.xyNode = {
     id: nodeInfo.alnumid,
     data,
     type: "function",
     position,
   };
+
+  const nodeState: plstate.NodeState = {
+    label: nodeInfo.fnuri,
+    connected: "WAIT",
+    genId: -1,
+  };
+  slotService.setNodeState(nodeInfo.rawId, nodeState);
+
+  const allSlotInfos = [...inInfos, ...outInfos, ...inoutInfos];
+  const allSlotStates = [...inStates, ...outStates, ...inoutStates];
+  if (allSlotInfos.length !== allSlotStates.length) {
+    throw new Error("Slot infos and states length mismatch");
+  }
+  for (let i = 0; i < allSlotInfos.length; i++) {
+    const slotInfo = allSlotInfos[i];
+    const slotId: plinfo.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
+    slotService.setSlotState(slotId, allSlotStates[i]);
+  }
+
   _updateNodes((nodes: Node[]) => {
     return [...nodes, newNode];
   });
@@ -78,9 +99,15 @@ async function addEdge(connection: Connection): Promise<void> {
   const sourceSlot = _removeSuffix(sourceHandle, "/out");
   const targetSlot = _removeSuffix(targetHandle, "/in");
 
-  const { edgeInfo } = await pipeline.addEdge({
-    sourceNode: connection.source,
-    targetNode: connection.target,
+  const nodeData0 = _getNode(connection.source)?.data as xy.xyNodeData;
+  const nodeData1 = _getNode(connection.target)?.data as xy.xyNodeData;
+  if (!nodeData0 || !nodeData1) {
+    throw new Error("Source or target node data not found");
+  }
+
+  const { edgeInfo, sourceState, targetState } = await pipeline.addEdge({
+    sourceNode: nodeData0.info.rawId,
+    targetNode: nodeData1.info.rawId,
     sourceSlot,
     targetSlot,
   });
@@ -94,18 +121,28 @@ async function addEdge(connection: Connection): Promise<void> {
     type: "default",
     data,
   };
-  rawStoreService.edges = flowAddEdge(edge, rawStoreService.edges);
+  rawStoreService.edges = _addEdge(edge, rawStoreService.edges);
+  slotService.testUpdate();
+  const slotId0: plinfo.SlotId = {parent: edgeInfo.node0, name: edgeInfo.slot0};
+  const slotId1: plinfo.SlotId = {parent: edgeInfo.node1, name: edgeInfo.slot1};  
+  slotService.setSlotState(slotId0, sourceState);
+  slotService.setSlotState(slotId1, targetState);
 }
 
-async function deleteElements(nodeIds: string[], edgeIds: string[]): Promise<void> {
-  const { nodeIds: deletedNodeIds, edgeIds: deletedEdgeIds } = await pipeline.deleteElements({
+async function deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void> {
+  const nodeIds: number[] = nodes.map((n: xy.xyNode) => (n.data as xy.xyNodeData).info.rawId);
+  const edgeIds: number[] = edges.map((e: xy.xyEdge) => (e.data as xy.xyEdgeData).info.id);
+  const { deletedSlotIds, affectedSlotIds } = await pipeline.deleteElements({
     nodeIds,
     edgeIds,
   });
-  console.log("pineline deleteElements response: ", deletedNodeIds, deletedEdgeIds);
-  // const nodes = deletedNodeIds.map((id: string) => ({ id }));
-  // const edges = deletedEdgeIds.map((id: string) => ({ id }));
-  // await _deleteElements({ nodes, edges });
+  slotService.deleteSlots(deletedSlotIds);
+  const { slotStates } = await pipeline.getSlotStates({
+    slotIds: affectedSlotIds,
+  });
+  for (const [slotId, slotState] of slotStates) {
+    slotService.setSlotState(slotId, slotState);
+  }
 }
 
 function screenToFlowXY(input: MouseEvent | ClientXY): XYPosition {
@@ -127,19 +164,9 @@ function allEdges(): Edge[] {
   return _getEdges();
 }
 
-async function deleteNode(nodeId: string): Promise<void> {
-  const node = { id: nodeId };
-  await _deleteElements({ nodes: [node], edges: [] });
-}
-
 async function deleteNodes(nodeIds: string[]): Promise<void> {
   const nodes = nodeIds.map((id: string) => ({ id }));
   await _deleteElements({ nodes, edges: [] });
-}
-
-async function deleteEdge(edgeId: string): Promise<void> {
-  const edge = { id: edgeId };
-  await _deleteElements({ nodes: [], edges: [edge] });
 }
 
 async function deleteEdges(edgeIds: string[]): Promise<void> {
@@ -152,7 +179,6 @@ async function deleteAllEdges(): Promise<void> {
 }
 
 async function deleteGraph(): Promise<void> {
-  console.log("deleteGraph ...");
   _setEdges([]);
   _setNodes([]);
 }

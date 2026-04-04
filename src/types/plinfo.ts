@@ -4,6 +4,14 @@
  */
 export namespace plinfo {
   /**
+   * See C++ repo -> ujcore::plinfo::SlotId
+   */
+  export interface SlotId {
+    parent: number;
+    name: string;
+  };
+
+  /**
    * See C++ repo -> ujcore::plinfo::SlotInfo
    */
   export interface SlotInfo {
@@ -17,7 +25,7 @@ export namespace plinfo {
    * See C++ repo -> ujcore::plinfo::NodeInfo
    */
   export interface NodeInfo {
-    id: number;
+    rawId: number;
     alnumid: string;
     fnuri: string;
     // Slot names.
@@ -37,6 +45,4 @@ export namespace plinfo {
     slot0: string;
     slot1: string;
   };
-
-  export type SlotId = [number /* parent node id */, string /* slot name */];
 }

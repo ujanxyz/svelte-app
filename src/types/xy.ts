@@ -13,9 +13,9 @@ import type { plinfo } from "./plinfo";
 export namespace xy {
   export interface xyNodeData extends Record<string, unknown>  {
     info: plinfo.NodeInfo;
-    ins: plinfo.SlotInfo[];
-    outs: plinfo.SlotInfo[];
-    inouts: plinfo.SlotInfo[];
+    inInfos: plinfo.SlotInfo[];
+    outInfos: plinfo.SlotInfo[];
+    inoutInfos: plinfo.SlotInfo[];
   };
 
   export interface xyEdgeData extends Record<string, unknown>  {

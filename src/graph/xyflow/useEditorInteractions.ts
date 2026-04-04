@@ -1,7 +1,6 @@
 import {
   type Connection,
   type Edge,
-  type Node,
   type OnConnectStartParams,
 } from "@xyflow/svelte";
 
@@ -9,11 +8,6 @@ import type { xy } from "@/types/xy";
 
 import useMemlogging from "../../modules/memlogging/useMemlogging";
 import { useGraphService } from "../graph-services";
-
-interface NodesAndEdges {
-  nodes: xy.xyNode[];
-  edges: xy.xyEdge[];
-};
 
 export default function useEditorInteractions() {
   const flowGraphService = useGraphService("flowGraphService");
@@ -25,10 +19,10 @@ export default function useEditorInteractions() {
     return true;
   }
 
-  async function onbeforedelete({nodes, edges}: {nodes: xy.xyNode[], edges: xy.xyEdge[]}): Promise<boolean | NodesAndEdges> {
-    flowGraphService.deleteElements(nodes.map(n => n.id as string), edges.map(e => e.id as string));
-    // TODO: Check the return and filter nodes and edges.
-    return {nodes, edges};
+  function ondelete({ nodes, edges }: { nodes: xy.xyNode[]; edges: xy.xyEdge[] }): void {
+    flowGraphService.deletionHandle(nodes, edges).then(() => {
+      debugLog("Deletion handled successfully.");
+    });
   }
 
   function onbeforeconnect(connection: Connection): false | xy.xyEdge {
@@ -40,7 +34,7 @@ export default function useEditorInteractions() {
   }
 
   function onconnect(connection: Connection): void {
-    console.log("onconnect ... ", connection);
+    //console.log("onconnect ... ", connection);
     debugLog("Triggered: onconnect");
   }
 
@@ -48,14 +42,14 @@ export default function useEditorInteractions() {
     event: MouseEvent | TouchEvent,
     params: OnConnectStartParams,
   ): void {
-    console.log("onconnectstart ... ", params);
+    //console.log("onconnectstart ... ", params);
   }
 
   function onconnectend(
     event: MouseEvent | TouchEvent,
     connectionState: any,
   ): void {
-    console.log("onconnectend ... ", connectionState);
+    //console.log("onconnectend ... ", connectionState);
   }
 
   function onedgeclick({
@@ -70,7 +64,7 @@ export default function useEditorInteractions() {
 
   return {
     isValidConnection,
-    onbeforedelete,
+    ondelete,
     onbeforeconnect,
     onconnect,
     onconnectstart,

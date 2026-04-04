@@ -46,7 +46,6 @@ export default function useMenusAndPopups() {
     const flowPosn = flowGraphService.screenToFlowXY(event);
     const retval = await menuService.menuInPane(clientXY);
     if (retval.status !== ReturnStatus.OK) return;
-    console.log(retval.value);
     switch (retval.value) {
       case MenuCodes.NEW_NODE:
         await _internalOpenGallery(flowPosn);
@@ -77,8 +76,7 @@ export default function useMenusAndPopups() {
     const nodeId = node.id as string;
     switch (retval.value) {
       case MenuCodes.RM_NODE:
-        await flowGraphService.deleteElements([nodeId], []);
-        // await flowGraphService.deleteNode(nodeId);
+        await flowGraphService.deleteNodes([nodeId]);
     }
   }
 
@@ -99,7 +97,7 @@ export default function useMenusAndPopups() {
     const edgeId = edge.id as string;
     switch (retval.value) {
       case MenuCodes.RM_EDGE:
-        await flowGraphService.deleteEdge(edgeId);
+        await flowGraphService.deleteEdges([edgeId]);
     }
   }
 
@@ -178,7 +176,6 @@ export default function useMenusAndPopups() {
   async function _internalOpenGallery(position: XYPosition): Promise<void> {
     const retval = await popupService.nodeFunctionGallery();
     if (retval.status !== ReturnStatus.OK) return;
-    console.log(retval.value);
     const funcId = retval.value as string;
     const funcInfo = await lookupFnDetailsAsync(funcId);
     if (!funcInfo) {

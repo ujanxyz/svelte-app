@@ -1,33 +1,42 @@
 <script lang="ts">
 
-import type { plinfo } from "@/types/plinfo";
+import { getContext } from "svelte";
+
 import type { xy } from "@/types/xy";
+import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
 import { EventKinds } from "../../utils/constants";
 import useEventDispatch from "../../utils/useEventDispatch";
+import { useGraphService } from "../graph-services";
 import SlotsArray from "./SlotsArray.svelte";
 import useNodeOpsContext from "./useNodeOpsContext";
 import XYNodeTopBar from "./XYNodeTopBar.svelte";
 
 const {
-  data: xyNodeData,
+  data: nodeData,
   id: nodeId,
   ...restProps
 }: xy.xyNodeProps = $props();
 
+/* svelte-ignore state_referenced_locally */
+const rawNodeId: number = nodeData.info.rawId;
+
+const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
+const slotService = useGraphService("slotService");
 const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
 
 useNodeOpsContext().setNodeOps({
   deleteSelf: () => dispatchRmNode({ nodeId }),
 });
 
+const nodeState = slotService.useNodeState(rawNodeId);
 
 </script>
 
 <div class="noderoot">
-  <h3 class="card-title">{xyNodeData.label}</h3>
+  <h3 class="card-title">{nodeState.label}</h3>
   <span class="nodeid">{nodeId}</span>
-  <SlotsArray {nodeId} ins={xyNodeData.ins} outs={xyNodeData.outs} inouts={xyNodeData.inouts} />
+  <SlotsArray {nodeId} {rawNodeId} ins={nodeData.inInfos} outs={nodeData.outInfos} inouts={nodeData.inoutInfos} {slotService} />
 </div>
 <XYNodeTopBar />
 
@@ -61,7 +70,7 @@ useNodeOpsContext().setNodeOps({
   margin: 0;
 }
 .nodeid {
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   color: var(--color-text-md-con);
 }
 </style>

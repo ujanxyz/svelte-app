@@ -7,7 +7,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
     id: "a1234",
     data: {
       info: {
-        id: 1,
+        rawId: 1,
         alnumid: "a1234",
         fnuri: "/dummy/in-pt",
         ins: [],
@@ -17,7 +17,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
       label: "Input Text",
       funcid: "/dummy/in-pt",
       ins: [],
-      outs: [{ name: "x", type: "text" }],
+      outs: [],
       inouts: [],
     },
     type: "default",
@@ -27,7 +27,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
     id: "b1234",
     data: {
       info: {
-        id: 2,
+        rawId: 2,
         alnumid: "b1234",
         fnuri: "/dummy/fn-b",
         ins: ["p1"],
@@ -47,7 +47,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
     id: "c1234",
     data: {
       info: {
-        id: 3,
+        rawId: 3,
         alnumid: "c1234",
         fnuri: "/dummy/trans-pt",
         ins: ["in1", "in2", "in3"],
@@ -71,7 +71,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
     id: "d1234",
     data: {
       info: {
-        id: 4,
+        rawId: 4,
         alnumid: "d1234",
         fnuri: "/sink/simple-res",
         ins: ["f"],

@@ -102,9 +102,9 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
       postman.postError(seq, code, SysCodes.SYNC_GAP, errorMsg);
       return;
     }
-    console.log(`[Worker] Received (Seq: ${seq}, Code: ${code}): `, payload);
 
     // Process and Respond
+    // console.log(`[Worker] Received (Seq: ${seq}, Code: ${code}): `, payload);
 
     try {
       if (code.startsWith("GRAPH:")) {
@@ -114,6 +114,7 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
           console.warn(seq, code, SysCodes.APP_ERROR, errmsg);
           postman.postError(seq, code, SysCodes.APP_ERROR, errmsg);
         } else {
+          console.log(`[Worker] Rooundtrip (Seq: ${seq}, Code: ${code}): `, payload, response);
           postman.postResponse(seq, code, response!);
         }
       } else {

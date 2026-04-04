@@ -1,20 +1,24 @@
 <script lang="ts">
 import type { plinfo } from "@/types/plinfo";
+import type { plstate } from "@/types/plstate";
 
-import { useGraphService } from "../graph-services";
+import { type GraphServiceType,useGraphService } from "../graph-services";
 import type { UjOverrideData } from "../types";
 import NodeSlot from "./NodeSlot.svelte";
 
 interface Props {
   nodeId: string;
+  rawNodeId: number;
   ins: plinfo.SlotInfo[];
   outs: plinfo.SlotInfo[];
   inouts: plinfo.SlotInfo[];
+  slotService: GraphServiceType<"slotService">;
 }
 
-const { nodeId, ins, outs, inouts }: Props = $props();
+const { nodeId, rawNodeId, ins, outs, inouts, slotService }: Props = $props();
 
-const slotService = useGraphService("slotService");
+/* svelte-ignore state_referenced_locally */
+// const nodeState = slotService.useNodeState(rawNodeId); // Ensure nodeGenId exists for this node.
 
 function onDataEntry(slotName: string, data: UjOverrideData): void {
   console.log(slotName, data);
@@ -24,6 +28,7 @@ function onDataEntry(slotName: string, data: UjOverrideData): void {
 function onDataLookup(slotName: string): UjOverrideData | null {
   return slotService.lookupOverride(nodeId, slotName);
 }
+
 </script>
 
 <div class="flex-fitted-rows">
@@ -39,22 +44,20 @@ function onDataLookup(slotName: string): UjOverrideData | null {
 </div>
 
 {#snippet inSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotInfoIn = slotService.useSlotInfo(nodeId, slotInfo.name)}
-  <NodeSlot {slotInfo} {slotInfoIn} {onDataEntry} {onDataLookup} />
+  {@const slotState = slotService.useSlotState({parent: rawNodeId, name: slotInfo.name})}
+  <NodeSlot {slotInfo} {slotState} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet outSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotInfoOut = slotService.useSlotInfo(nodeId, slotInfo.name)}
-  <NodeSlot {slotInfo} {slotInfoOut} {onDataEntry} {onDataLookup} />
+  {@const slotState = slotService.useSlotState({parent: rawNodeId, name: slotInfo.name})}
+  <NodeSlot {slotInfo} {slotState} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet inoutSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotInfoIn = slotService.useSlotInfo(nodeId, slotInfo.name + "/in")}
-  {@const slotInfoOut = slotService.useSlotInfo(nodeId, slotInfo.name + "/out")}
+  {@const slotState = slotService.useSlotState({parent: rawNodeId, name: slotInfo.name})}
   <NodeSlot
     {slotInfo}
-    {slotInfoIn}
-    {slotInfoOut}
+    {slotState}
     {onDataEntry}
     {onDataLookup}
   />
