@@ -7,13 +7,13 @@ import {
 } from "@xyflow/svelte";
 
 import type { fn } from "@/types/function";
+import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 import type { xy } from "@/types/xy";
 
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
 import type { UjGraphStorage, UjOverrideData, UjSlotInfo } from "./types";
-import type { plinfo } from "@/types/plinfo";
 
 interface RawStoreService {
   // List of nodes.
@@ -41,9 +41,6 @@ interface SlotService {
 
   testUpdate(): void;
 
-  // TODO: Rename reactiveSlotInfo.
-  useSlotInfo(nodeId: string, paramName: string): UjSlotInfo | undefined;
-  reactiveSlotEntries(): [string, UjSlotInfo][];
   setOverride(
     nodeId: string,
     slotName: string,
@@ -51,9 +48,6 @@ interface SlotService {
     data: UjOverrideData | null,
   ): void;
   lookupOverride(nodeId: string, slotName: string): UjOverrideData | null;
-  deleteElements(nodes: Node[], edges: Edge[]): void;
-  ensureSlots(nodes: Node[]): void;
-  ensureConnections(edges: Edge[]): void;
 }
 
 interface IoService {
@@ -67,6 +61,7 @@ interface IoService {
 interface FlowGraphService {
   // Status: Done, Tested.
   newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<void>;
+  newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition): Promise<void>;
 
   // Status: Done, Tested.
   addEdge(connection: Connection): Promise<void>;
@@ -82,6 +77,8 @@ interface FlowGraphService {
   deleteAllEdges: () => Promise<void>;
   deleteGraph: () => Promise<void>;
   assignGraph: (newNodes: Node[], newEdges: Edge[]) => void;
+  setGraphInput: (rawNodeId: number, encoded: string) => Promise<void>;
+  playPipeline: () => Promise<void>;
 }
 
 type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
@@ -95,7 +92,7 @@ interface ContextMenuService {
 }
 
 interface PopupService {
-  nodeFunctionGallery: () => Promise<StatusOr<string>>;
+  nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
   flowDataInspector: () => Promise<void>;
 }
 

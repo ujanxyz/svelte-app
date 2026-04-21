@@ -14,6 +14,7 @@ import {
 import DownloadSimpleIcon from "phosphor-svelte/lib/DownloadSimpleIcon";
 import EyeIcon from "phosphor-svelte/lib/EyeIcon";
 import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
+import PlayIcon from "phosphor-svelte/lib/PlayIcon";
 import UploadSimpleIcon from "phosphor-svelte/lib/UploadSimpleIcon";
 // </icons>
 import { type Component } from "svelte";
@@ -23,7 +24,7 @@ import type { xy } from "@/types/xy";
 import DefaultEdge from "../edges/DefaultEdge.svelte";
 import { useGraphService } from "../graph-services";
 import FunctionNode from "../nodes/FunctionNode.svelte";
-import InputNode from "../nodes/InputNode.svelte";
+import GraphIONode from "../nodes/GraphIONode.svelte";
 import useEditorInteractions from "./useEditorInteractions";
 import useMenusAndPopups from "./useMenusAndPopups";
 //import PlayIcon from "phosphor-svelte/lib/PlayIcon";
@@ -31,7 +32,7 @@ import useMenusAndPopups from "./useMenusAndPopups";
 const nodeTypes: Record<string, Component<xy.xyNodeProps>> = {
   default: FunctionNode,
   function: FunctionNode,
-  in: InputNode,
+  graphio: GraphIONode,
 };
 
 const edgeTypes: Record<string, Component<xy.xyEdgeProps>> = {
@@ -47,9 +48,10 @@ const {
   onedgecontextmenu,
   onselectioncontextmenu,
   onconnectend,
-  onsavelocalstorage,
   onpopupgallery,
   ondatainspector,
+  onsavelocalstorage,
+  onplaypipeline,
 } = useMenusAndPopups();
 
 const {
@@ -104,6 +106,9 @@ const {
     </ControlButton>
     <ControlButton onclick={ondatainspector}>
       <EyeIcon />
+    </ControlButton>
+    <ControlButton onclick={onplaypipeline}>
+      <PlayIcon />
     </ControlButton>
   </Controls>
 </SvelteFlow>

@@ -1,12 +1,11 @@
 <script lang="ts">
-import type { Edge, Node } from "@xyflow/svelte";
 import { SvelteMap } from "svelte/reactivity";
 
+import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 
 import { registerGraphService } from "../graph-services";
-import type { UjNodeData, UjOverrideData, UjSlotInfo } from "../types";
-import type { plinfo } from "@/types/plinfo";
+import type { UjOverrideData, UjSlotInfo } from "../types";
 
 registerGraphService("slotService", _createSlotStore());
 
@@ -56,92 +55,6 @@ function _createSlotStore() {
   }
 
   //----------------------------------------------------------------
-  function useSlotInfo(
-    nodeId: string,
-    paramName: string,
-  ): UjSlotInfo | undefined {
-    const slotId = `${nodeId}-${paramName}`;
-    return slotsMap.get(slotId);
-  }
-
-  function reactiveSlotEntries(): [string, UjSlotInfo][] {
-    return Array.from(slotsMap.entries());
-  }
-
-  function ensureSlots(nodes: Node[]): void {
-    for (const node of nodes) {
-      const nodeId = node.id as string;
-      const nodeData = node.data as UjNodeData;
-      for (const { name: paramname, type: datatype } of nodeData.ins) {
-        const slotId = `${node.id}-${paramname}`;
-        if (!slotsMap.has(slotId)) {
-          slotsMap.set(slotId, {
-            parentNode: nodeId,
-            paramname,
-            datatype,
-            state: "blank",
-          });
-        }
-      }
-      for (const { name: paramname, type: datatype } of nodeData.outs) {
-        const slotId = `${node.id}-${paramname}`;
-        if (!slotsMap.has(slotId)) {
-          slotsMap.set(slotId, {
-            parentNode: nodeId,
-            paramname,
-            datatype,
-            state: "blank",
-          });
-        }
-      }
-      for (const { name: paramname, type: datatype } of nodeData.inouts) {
-        const slotIdIn = `${node.id}-${paramname}/in`;
-        if (!slotsMap.has(slotIdIn)) {
-          slotsMap.set(slotIdIn, {
-            parentNode: nodeId,
-            paramname,
-            datatype,
-            state: "blank",
-          });
-        }
-        const slotIdOut = `${node.id}-${paramname}/out`;
-        if (!slotsMap.has(slotIdOut)) {
-          slotsMap.set(slotIdOut, {
-            parentNode: nodeId,
-            paramname,
-            datatype,
-            state: "blank",
-          });
-        }
-      }
-    }
-  }
-
-  function ensureConnections(edges: Edge[]): void {
-    const matchedSlotIds = new Set<string>();
-    for (const edge of edges) {
-      const { source, sourceHandle, target, targetHandle } = edge;
-      const sourceSlot = `${source}-${sourceHandle}`;
-      matchedSlotIds.add(sourceSlot);
-      const targetSlot = `${target}-${targetHandle}`;
-      matchedSlotIds.add(targetSlot);
-    }
-    for (const slotId of slotsMap.keys()) {
-      const slotInfo = slotsMap.get(slotId)!;
-      if (matchedSlotIds.has(slotId) === (slotInfo.state === "edge")) {
-        // No change in matched / unmatched.
-        // If not matched it remains as blank or overridden.
-        continue;
-      }
-      slotInfo.state = matchedSlotIds.has(slotId) ? "edge" : "blank";
-      if (slotInfo.state === "edge") {
-        // If this has transitioned into "edge" state, it is possible that the last state was "data".
-        // In that case we need to clear any stored data.
-        dataMap.delete(slotId);
-      }
-      slotsMap.set(slotId, { ...slotInfo });
-    }
-  }
 
   function lookupOverride(
     nodeId: string,
@@ -183,35 +96,6 @@ function _createSlotStore() {
     }
   }
 
-  function deleteElements(nodes: Node[], edges: Edge[]): void {
-    // Delete the slots of the deleted nodes.
-    const delNodeIds = new Set<string>();
-    for (const { id: nodeId } of nodes) {
-      delNodeIds.add(nodeId);
-    }
-    const delSlotIds = new Set<string>();
-    for (const slotId of slotsMap.keys()) {
-      const nodeId = slotsMap.get(slotId)?.parentNode as string;
-      if (delNodeIds.has(nodeId)) {
-        delSlotIds.add(slotId);
-      }
-    }
-    delSlotIds.forEach((slotId: string) => {
-      if (slotsMap.has(slotId)) {
-        slotsMap.delete(slotId);
-        dataMap.delete(slotId);
-      }
-    });
-
-    // Mark (as "clear") the input slots at the targets of the deleted edges.
-    // for (const {target, targetHandle} of edges) {
-    //   const targetSlot = `${target}-${targetHandle}`;
-    //   const slotInfo = slotsMap.get(targetSlot);
-    //   if (!slotInfo) continue;
-    //   slotInfo.state = "blank";
-    // }
-  }
-
   return {
     setNodeState,
     useNodeState,
@@ -220,13 +104,9 @@ function _createSlotStore() {
     deleteSlots,
     testUpdate,
 
-    useSlotInfo,
-    reactiveSlotEntries,
-    ensureSlots,
-    ensureConnections,
+    
     lookupOverride,
     setOverride,
-    deleteElements,
   };
 }
 </script>

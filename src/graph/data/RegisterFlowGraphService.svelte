@@ -13,12 +13,12 @@ import { getContext } from "svelte";
 
 import type { ClientXY } from "@/overlay/types";
 import type { fn } from "@/types/function";
+import type { plinfo } from "@/types/plinfo";
+import type { plstate } from "@/types/plstate";
 import type { xy } from "@/types/xy";
 import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
 import { registerGraphService, useGraphService } from "../graph-services";
-import type { plstate } from "@/types/plstate";
-import type { plinfo } from "@/types/plinfo";
 
 const {
   current: _currentNodes,
@@ -43,6 +43,7 @@ const slotService = useGraphService("slotService");
 
 registerGraphService("flowGraphService", {
   newNodeAt,
+  newGraphIOAt,
   addEdge,
   deletionHandle,
   screenToFlowXY,
@@ -53,16 +54,18 @@ registerGraphService("flowGraphService", {
   deleteAllEdges,
   deleteGraph,
   assignGraph,
+  setGraphInput,
+  playPipeline,
 });
 
 async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<void> {
-  const { nodeInfo, inInfos, outInfos, inoutInfos, inStates, outStates, inoutStates } = await pipeline.createNode({
+  const { nodeInfo, nodeState, inInfos, outInfos, inoutInfos, inStates, outStates, inoutStates } = await pipeline.createNode({
     func: fnSpec,
   });
   if (!nodeInfo) {
     throw new Error("Node not created");
   }
-  const data: xy.xyNodeData = { info: nodeInfo, inInfos, outInfos, inoutInfos};
+  const data: xy.xyFuncNodeData = { info: nodeInfo, inInfos, outInfos, inoutInfos};
   const newNode: xy.xyNode = {
     id: nodeInfo.alnumid,
     data,
@@ -70,12 +73,7 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise
     position,
   };
 
-  const nodeState: plstate.NodeState = {
-    label: nodeInfo.fnuri,
-    connected: "WAIT",
-    genId: -1,
-  };
-  slotService.setNodeState(nodeInfo.rawId, nodeState);
+  slotService.setNodeState(nodeInfo.rawId, nodeState!);
 
   const allSlotInfos = [...inInfos, ...outInfos, ...inoutInfos];
   const allSlotStates = [...inStates, ...outStates, ...inoutStates];
@@ -93,14 +91,39 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise
   });
 }
 
+async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition): Promise<void> {
+  const { nodeInfo, nodeState, slotInfo, slotState } = await pipeline.createIONode({
+    dtype,
+    isOutput,
+  });
+  if (!nodeInfo || !slotInfo) {
+    throw new Error("Graph IO not created");
+  }
+  const data: xy.xyGraphIoNodeData = { info: nodeInfo, slotInfo };
+  const newNode: xy.xyNode = {
+    id: nodeInfo.alnumid,
+    data,
+    type: "graphio",
+    position,
+  };
+
+  slotService.setNodeState(nodeInfo.rawId, nodeState!);
+  const slotId: plinfo.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
+  slotService.setSlotState(slotId, slotState!);
+
+  _updateNodes((nodes: Node[]) => {
+    return [...nodes, newNode];
+  });
+}
+
 async function addEdge(connection: Connection): Promise<void> {
   const sourceHandle = connection.sourceHandle!;
   const targetHandle = connection.targetHandle!;
   const sourceSlot = _removeSuffix(sourceHandle, "/out");
   const targetSlot = _removeSuffix(targetHandle, "/in");
 
-  const nodeData0 = _getNode(connection.source)?.data as xy.xyNodeData;
-  const nodeData1 = _getNode(connection.target)?.data as xy.xyNodeData;
+  const nodeData0 = _getNode(connection.source)?.data as xy.xyBaseNodeData;
+  const nodeData1 = _getNode(connection.target)?.data as xy.xyBaseNodeData;
   if (!nodeData0 || !nodeData1) {
     throw new Error("Source or target node data not found");
   }
@@ -130,7 +153,7 @@ async function addEdge(connection: Connection): Promise<void> {
 }
 
 async function deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void> {
-  const nodeIds: number[] = nodes.map((n: xy.xyNode) => (n.data as xy.xyNodeData).info.rawId);
+  const nodeIds: number[] = nodes.map((n: xy.xyNode) => (n.data as xy.xyBaseNodeData).info.rawId);
   const edgeIds: number[] = edges.map((e: xy.xyEdge) => (e.data as xy.xyEdgeData).info.id);
   const { deletedSlotIds, affectedSlotIds } = await pipeline.deleteElements({
     nodeIds,
@@ -187,6 +210,18 @@ function assignGraph(newNodes: Node[], newEdges: Edge[]): void {
   _setEdges([]);
   _setNodes(newNodes);
   _setEdges(newEdges);
+}
+
+async function setGraphInput(rawNodeId: number, encoded: string): Promise<void> {
+  await pipeline.syncGraphInputs({
+    updateData: [[rawNodeId, encoded]],
+    deleteIds: [],
+  });
+}
+
+async function playPipeline(): Promise<void> {
+  console.log("Playing pipeline ...");
+  await pipeline.runPipeline({});
 }
 
 function _getClientXY(event: MouseEvent | TouchEvent): ClientXY {

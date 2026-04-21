@@ -4,7 +4,6 @@ import BracketsSquareIcon from "phosphor-svelte/lib/BracketsSquareIcon";
 import DotOutlineIcon from "phosphor-svelte/lib/DotOutlineIcon";
 import LinkSimpleBreakIcon from "phosphor-svelte/lib/LinkSimpleBreakIcon";
 import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
-import SquareLogoIcon from "phosphor-svelte/lib/SquareLogoIcon";
 
 import DataPicker from "@/modules/sloteditor/DataPicker.svelte";
 import { ReturnStatus } from "@/overlay/constants";

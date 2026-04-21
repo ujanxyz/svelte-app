@@ -2,14 +2,14 @@ import type { Edge, Node } from "@xyflow/svelte";
 
 import type { xy } from "@/types/xy";
 
-export const initialNodes: Node<xy.xyNodeData>[] = [
+export const initialNodes: Node<xy.xyBaseNodeData>[] = [
   {
     id: "a1234",
     data: {
       info: {
         rawId: 1,
         alnumid: "a1234",
-        fnuri: "/dummy/in-pt",
+        uri: "/dummy/in-pt",
         ins: [],
         outs: ["t"],
         inouts: [],
@@ -29,7 +29,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
       info: {
         rawId: 2,
         alnumid: "b1234",
-        fnuri: "/dummy/fn-b",
+        uri: "/dummy/fn-b",
         ins: ["p1"],
         outs: ["fx"],
         inouts: [],
@@ -49,7 +49,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
       info: {
         rawId: 3,
         alnumid: "c1234",
-        fnuri: "/dummy/trans-pt",
+        uri: "/dummy/trans-pt",
         ins: ["in1", "in2", "in3"],
         outs: [],
         inouts: ["x"],
@@ -73,7 +73,7 @@ export const initialNodes: Node<xy.xyNodeData>[] = [
       info: {
         rawId: 4,
         alnumid: "d1234",
-        fnuri: "/sink/simple-res",
+        uri: "/sink/simple-res",
         ins: ["f"],
         outs: [],
         inouts: [],

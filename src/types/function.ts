@@ -17,4 +17,10 @@ export namespace fn {
     desc: string;
     params: ParamInfo[];
   }
+
+  export interface GraphIoInfo {
+    uri: string;
+    dtype: string;
+  }
+
 }

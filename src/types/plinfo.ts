@@ -27,7 +27,8 @@ export namespace plinfo {
   export interface NodeInfo {
     rawId: number;
     alnumid: string;
-    fnuri: string;
+    ntype: "FN" | "IN" | "OUT";  // Function, GraphIO (input/output)
+    uri: string;
     // Slot names.
     ins: string[];
     outs: string[];

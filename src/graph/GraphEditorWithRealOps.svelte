@@ -3,7 +3,6 @@ import ExternalEventHandlers from "./data/ExternalEventHandlers.svelte";
 import ManageConnection from "./data/ManageConnection.svelte";
 import ManageGraphIO from "./data/ManageGraphIO.svelte";
 import ManageGraphUpdates from "./data/ManageGraphUpdates.svelte";
-import ObserveEdges from "./data/ObserveEdges.svelte";
 import RegisterContextMenuService from "./data/RegisterContextMenuService.svelte";
 import RegisterFlowGraphService from "./data/RegisterFlowGraphService.svelte";
 import RegisterIoService from "./data/RegisterIoService.svelte";
@@ -25,8 +24,6 @@ import FlowGraphWrapper from "./xyflow/FlowGraphWrapper.svelte";
   <RegisterFlowGraphService />
   <RegisterContextMenuService />
   <RegisterPopupService />
-  <!-- Observers.. -->
-  <ObserveEdges />
 {/snippet}
 
 {#snippet afterFlowRealOps()}

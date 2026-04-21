@@ -4,9 +4,15 @@
  */
 export namespace plstate {
 
+  export interface SlotDataManual {
+    dtype: string;
+    encoded: string;
+  }
+
   export interface SlotState {
     inEdges: number[];
     outEdges: number[];
+    manual?: SlotDataManual;
     genId: number;
   }
 

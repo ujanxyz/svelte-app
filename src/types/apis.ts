@@ -21,13 +21,27 @@ export namespace apis {
         func: fn.FunctionInfo,
       };
       response: {
-        nodeInfo: plinfo.NodeInfo;
+        nodeInfo?: plinfo.NodeInfo;
+        nodeState?: plstate.NodeState;
         inInfos: plinfo.SlotInfo[];
         outInfos: plinfo.SlotInfo[];
         inoutInfos: plinfo.SlotInfo[];
         inStates: plstate.SlotState[];
         outStates: plstate.SlotState[];
         inoutStates: plstate.SlotState[];
+      };
+    };
+
+    createIONode: {
+      request: {
+        dtype: string;
+        isOutput: boolean;
+      };
+      response: {
+        nodeInfo?: plinfo.NodeInfo;
+        nodeState?: plstate.NodeState;
+        slotInfo?: plinfo.SlotInfo;
+        slotState?: plstate.SlotState;
       };
     };
   
@@ -42,7 +56,7 @@ export namespace apis {
         edgeInfo: plinfo.EdgeInfo;
         sourceState: plstate.SlotState;
         targetState: plstate.SlotState;
-      }
+      };
     };
   
     deleteElements: {
@@ -56,7 +70,7 @@ export namespace apis {
         deletedSlotIds: plinfo.SlotId[];
         affectedSlotIds: plinfo.SlotId[];
         topoOrder?: string[];
-      }
+      };
     };
 
     getSlotStates: {
@@ -66,7 +80,30 @@ export namespace apis {
       response: {
         slotStates: [plinfo.SlotId, plstate.SlotState][];
       };
-    }
+    };
+
+    getAvailableFuncs: {
+      request: VoidType;
+      response: {
+        infos: fn.FunctionInfo[];
+      };
+    };
+
+    syncGraphInputs: {
+      request: {
+        updateData: [number /* nodeId */, string /* encoded */][];
+        deleteIds: number[]; // nodeIds whose inputs are deleted
+      };
+      response: {
+        inputData: [number /* nodeId */, string? /* encoded */][];
+      };
+    };
+
+    runPipeline: {
+      request: VoidType;
+      response: VoidType;
+    };
+
   };
 
   export type Names = keyof ApiDict;

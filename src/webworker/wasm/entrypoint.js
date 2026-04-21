@@ -23,23 +23,23 @@ async function CreateUjWasmModule(moduleArg = {}) {
   var TARGET_NOT_SUPPORTED = 2147483647;
 
   var currentNodeVersion = typeof process !== 'undefined' && process?.versions?.node ? humanReadableVersionToPacked(process.versions.node) : TARGET_NOT_SUPPORTED;
-  if (currentNodeVersion < 160000) {
-    throw new Error(`This emscripten-generated code requires node v${ packedVersionToHumanReadable(160000) } (detected v${packedVersionToHumanReadable(currentNodeVersion)})`);
+  if (currentNodeVersion < 170000) {
+    throw new Error(`This emscripten-generated code requires node v${ packedVersionToHumanReadable(170000) } (detected v${packedVersionToHumanReadable(currentNodeVersion)})`);
   }
 
   var currentSafariVersion = typeof navigator !== 'undefined' && navigator?.userAgent?.includes("Safari/") && navigator.userAgent.match(/Version\/(\d+\.?\d*\.?\d*)/) ? humanReadableVersionToPacked(navigator.userAgent.match(/Version\/(\d+\.?\d*\.?\d*)/)[1]) : TARGET_NOT_SUPPORTED;
-  if (currentSafariVersion < 150000) {
-    throw new Error(`This emscripten-generated code requires Safari v${ packedVersionToHumanReadable(150000) } (detected v${currentSafariVersion})`);
+  if (currentSafariVersion < 150200) {
+    throw new Error(`This emscripten-generated code requires Safari v${ packedVersionToHumanReadable(150200) } (detected v${currentSafariVersion})`);
   }
 
   var currentFirefoxVersion = typeof navigator !== 'undefined' && navigator?.userAgent?.match(/Firefox\/(\d+(?:\.\d+)?)/) ? parseFloat(navigator.userAgent.match(/Firefox\/(\d+(?:\.\d+)?)/)[1]) : TARGET_NOT_SUPPORTED;
-  if (currentFirefoxVersion < 79) {
-    throw new Error(`This emscripten-generated code requires Firefox v79 (detected v${currentFirefoxVersion})`);
+  if (currentFirefoxVersion < 100) {
+    throw new Error(`This emscripten-generated code requires Firefox v100 (detected v${currentFirefoxVersion})`);
   }
 
   var currentChromeVersion = typeof navigator !== 'undefined' && navigator?.userAgent?.match(/Chrome\/(\d+(?:\.\d+)?)/) ? parseFloat(navigator.userAgent.match(/Chrome\/(\d+(?:\.\d+)?)/)[1]) : TARGET_NOT_SUPPORTED;
-  if (currentChromeVersion < 85) {
-    throw new Error(`This emscripten-generated code requires Chrome v85 (detected v${currentChromeVersion})`);
+  if (currentChromeVersion < 95) {
+    throw new Error(`This emscripten-generated code requires Chrome v95 (detected v${currentChromeVersion})`);
   }
 })();
 
@@ -510,6 +510,19 @@ function abort(what) {
   // definition for WebAssembly.RuntimeError claims it takes no arguments even
   // though it can.
   // TODO(https://github.com/google/closure-compiler/pull/3913): Remove if/when upstream closure gets fixed.
+  // See above, in the meantime, we resort to wasm code for trapping.
+  //
+  // In case abort() is called before the module is initialized, wasmExports
+  // and its exported '__trap' function is not available, in which case we throw
+  // a RuntimeError.
+  //
+  // We trap instead of throwing RuntimeError to prevent infinite-looping in
+  // Wasm EH code (because RuntimeError is considered as a foreign exception and
+  // caught by 'catch_all'), but in case throwing RuntimeError is fine because
+  // the module has not even been instantiated, even less running.
+  if (runtimeInitialized) {
+    ___trap();
+  }
   /** @suppress {checkTypes} */
   var e = new WebAssembly.RuntimeError(what);
 
@@ -753,10 +766,6 @@ async function createWasm() {
       default: abort(`invalid type for setValue: ${type}`);
     }
   }
-
-  var stackRestore = (val) => __emscripten_stack_restore(val);
-
-  var stackSave = () => _emscripten_stack_get_current();
 
   var warnOnce = (text) => {
       warnOnce.shown ||= {};
@@ -2868,48 +2877,6 @@ async function createWasm() {
       return 0;
     ;
   }
-
-  var readEmAsmArgsArray = [];
-  var readEmAsmArgs = (sigPtr, buf) => {
-      // Nobody should have mutated _readEmAsmArgsArray underneath us to be something else than an array.
-      assert(Array.isArray(readEmAsmArgsArray));
-      // The input buffer is allocated on the stack, so it must be stack-aligned.
-      assert(buf % 16 == 0);
-      readEmAsmArgsArray.length = 0;
-      var ch;
-      // Most arguments are i32s, so shift the buffer pointer so it is a plain
-      // index into HEAP32.
-      while (ch = HEAPU8[sigPtr++]) {
-        var chr = String.fromCharCode(ch);
-        var validChars = ['d', 'f', 'i', 'p'];
-        // In WASM_BIGINT mode we support passing i64 values as bigint.
-        validChars.push('j');
-        assert(validChars.includes(chr), `Invalid character ${ch}("${chr}") in readEmAsmArgs! Use only [${validChars}], and do not specify "v" for void return argument.`);
-        // Floats are always passed as doubles, so all types except for 'i'
-        // are 8 bytes and require alignment.
-        var wide = (ch != 105);
-        wide &= (ch != 112);
-        buf += wide && (buf % 8) ? 4 : 0;
-        readEmAsmArgsArray.push(
-          // Special case for pointers under wasm64 or CAN_ADDRESS_2GB mode.
-          ch == 112 ? HEAPU32[((buf)>>2)] :
-          ch == 106 ? HEAP64[((buf)>>3)] :
-          ch == 105 ?
-            HEAP32[((buf)>>2)] :
-            HEAPF64[((buf)>>3)]
-        );
-        buf += wide ? 8 : 4;
-      }
-      return readEmAsmArgsArray;
-    };
-  var runEmAsmFunction = (code, sigPtr, argbuf) => {
-      var args = readEmAsmArgs(sigPtr, argbuf);
-      assert(ASM_CONSTS.hasOwnProperty(code), `No EM_ASM constant found at address ${code}.  The loaded WebAssembly file is likely out of sync with the generated JavaScript.`);
-      return ASM_CONSTS[code](...args);
-    };
-  var _emscripten_asm_const_int = (code, sigPtr, argbuf) => {
-      return runEmAsmFunction(code, sigPtr, argbuf);
-    };
 
   var ENV = {
   };
@@ -5769,6 +5736,57 @@ async function createWasm() {
       }
       quit_(1, e);
     };
+
+  
+  var getCppExceptionTag = () => ___cpp_exception;
+  
+  var getCppExceptionThrownObjectFromWebAssemblyException = (ex) => {
+      // In Wasm EH, the value extracted from WebAssembly.Exception is a pointer
+      // to the unwind header. Convert it to the actual thrown value.
+      var unwind_header = ex.getArg(getCppExceptionTag(), 0);
+      return ___thrown_object_from_unwind_exception(unwind_header);
+    };
+  var incrementExceptionRefcount = (ex) => {
+      var ptr = getCppExceptionThrownObjectFromWebAssemblyException(ex);
+      ___cxa_increment_exception_refcount(ptr);
+    };
+
+  
+  var decrementExceptionRefcount = (ex) => {
+      var ptr = getCppExceptionThrownObjectFromWebAssemblyException(ex);
+      ___cxa_decrement_exception_refcount(ptr);
+    };
+
+  
+  
+  
+  var stackSave = () => _emscripten_stack_get_current();
+  
+  var stackRestore = (val) => __emscripten_stack_restore(val);
+  
+  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
+  
+  var getExceptionMessageCommon = (ptr) => {
+      var sp = stackSave();
+      var type_addr_addr = stackAlloc(4);
+      var message_addr_addr = stackAlloc(4);
+      ___get_exception_message(ptr, type_addr_addr, message_addr_addr);
+      var type_addr = HEAPU32[((type_addr_addr)>>2)];
+      var message_addr = HEAPU32[((message_addr_addr)>>2)];
+      var type = UTF8ToString(type_addr);
+      _free(type_addr);
+      var message;
+      if (message_addr) {
+        message = UTF8ToString(message_addr);
+        _free(message_addr);
+      }
+      stackRestore(sp);
+      return [type, message];
+    };
+  var getExceptionMessage = (ex) => {
+      var ptr = getCppExceptionThrownObjectFromWebAssemblyException(ex);
+      return getExceptionMessageCommon(ptr);
+    };
 init_ClassHandle();
 init_RegisteredPointer();
 assert(emval_handles.length === 5 * 2);
@@ -5834,7 +5852,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'convertI32PairToI53',
   'convertI32PairToI53Checked',
   'convertU32PairToI53',
-  'stackAlloc',
   'getTempRet0',
   'setTempRet0',
   'zeroMemory',
@@ -5848,7 +5865,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'inetNtop6',
   'readSockaddr',
   'writeSockaddr',
-  'runMainThreadEmAsm',
+  'readEmAsmArgs',
   'jstoi_q',
   'autoResumeAudioContext',
   'getDynCaller',
@@ -5936,8 +5953,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'makePromise',
   'idsToPromises',
   'makePromiseCallback',
-  'ExceptionInfo',
-  'findMatchingCatch',
   'Browser_asyncPrepareDataCounter',
   'getSocketFromFD',
   'getSocketAddress',
@@ -6012,6 +6027,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'bigintToI53Checked',
   'stackSave',
   'stackRestore',
+  'stackAlloc',
   'createNamedFunction',
   'ptrToString',
   'exitJS',
@@ -6024,8 +6040,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'timers',
   'warnOnce',
   'readEmAsmArgsArray',
-  'readEmAsmArgs',
-  'runEmAsmFunction',
   'getExecutableName',
   'handleException',
   'keepRuntimeAlive',
@@ -6077,9 +6091,9 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'emClearImmediate_deps',
   'emClearImmediate',
   'promiseMap',
-  'uncaughtExceptionCount',
-  'exceptionLast',
-  'exceptionCaught',
+  'getExceptionMessageCommon',
+  'getCppExceptionTag',
+  'getCppExceptionThrownObjectFromWebAssemblyException',
   'Browser',
   'requestFullscreen',
   'requestFullScreen',
@@ -6311,6 +6325,9 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 
   // End runtime exports
   // Begin JS library exports
+  Module['incrementExceptionRefcount'] = incrementExceptionRefcount;
+  Module['decrementExceptionRefcount'] = decrementExceptionRefcount;
+  Module['getExceptionMessage'] = getExceptionMessage;
   // End JS library exports
 
 // end include: postlibrary.js
@@ -6318,10 +6335,6 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
-var ASM_CONSTS = {
-  117012: () => { return (typeof wasmOffsetConverter !== 'undefined'); }
-};
-function HaveOffsetConverter() { return typeof wasmOffsetConverter !== 'undefined'; }
 
 // Imports from the Wasm binary.
 var _malloc = makeInvalidEarlyAccess('_malloc');
@@ -6331,12 +6344,19 @@ var _free = makeInvalidEarlyAccess('_free');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
 var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
 var _strerror = makeInvalidEarlyAccess('_strerror');
+var ___trap = makeInvalidEarlyAccess('___trap');
 var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
 var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
 var __emscripten_stack_restore = makeInvalidEarlyAccess('__emscripten_stack_restore');
+var __emscripten_stack_alloc = makeInvalidEarlyAccess('__emscripten_stack_alloc');
 var _emscripten_stack_get_current = makeInvalidEarlyAccess('_emscripten_stack_get_current');
+var ___cxa_decrement_exception_refcount = makeInvalidEarlyAccess('___cxa_decrement_exception_refcount');
+var ___cxa_increment_exception_refcount = makeInvalidEarlyAccess('___cxa_increment_exception_refcount');
+var ___thrown_object_from_unwind_exception = makeInvalidEarlyAccess('___thrown_object_from_unwind_exception');
+var ___get_exception_message = makeInvalidEarlyAccess('___get_exception_message');
 var memory = makeInvalidEarlyAccess('memory');
 var __indirect_function_table = makeInvalidEarlyAccess('__indirect_function_table');
+var ___cpp_exception = makeInvalidEarlyAccess('___cpp_exception');
 var wasmMemory = makeInvalidEarlyAccess('wasmMemory');
 var wasmTable = makeInvalidEarlyAccess('wasmTable');
 
@@ -6355,23 +6375,35 @@ function assignWasmExports(wasmExports) {
   _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];
   assert(wasmExports['strerror'], 'missing Wasm export: strerror');
   _strerror = createExportWrapper('strerror', 1);
+  assert(wasmExports['__trap'], 'missing Wasm export: __trap');
+  ___trap = wasmExports['__trap'];
   assert(wasmExports['emscripten_stack_init'], 'missing Wasm export: emscripten_stack_init');
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   assert(wasmExports['emscripten_stack_get_free'], 'missing Wasm export: emscripten_stack_get_free');
   _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];
   assert(wasmExports['_emscripten_stack_restore'], 'missing Wasm export: _emscripten_stack_restore');
   __emscripten_stack_restore = wasmExports['_emscripten_stack_restore'];
+  assert(wasmExports['_emscripten_stack_alloc'], 'missing Wasm export: _emscripten_stack_alloc');
+  __emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'];
   assert(wasmExports['emscripten_stack_get_current'], 'missing Wasm export: emscripten_stack_get_current');
   _emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'];
+  assert(wasmExports['__cxa_decrement_exception_refcount'], 'missing Wasm export: __cxa_decrement_exception_refcount');
+  ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount', 1);
+  assert(wasmExports['__cxa_increment_exception_refcount'], 'missing Wasm export: __cxa_increment_exception_refcount');
+  ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount', 1);
+  assert(wasmExports['__thrown_object_from_unwind_exception'], 'missing Wasm export: __thrown_object_from_unwind_exception');
+  ___thrown_object_from_unwind_exception = createExportWrapper('__thrown_object_from_unwind_exception', 1);
+  assert(wasmExports['__get_exception_message'], 'missing Wasm export: __get_exception_message');
+  ___get_exception_message = createExportWrapper('__get_exception_message', 3);
   assert(wasmExports['memory'], 'missing Wasm export: memory');
   memory = wasmMemory = wasmExports['memory'];
   assert(wasmExports['__indirect_function_table'], 'missing Wasm export: __indirect_function_table');
   __indirect_function_table = wasmTable = wasmExports['__indirect_function_table'];
+  assert(wasmExports['__cpp_exception'], 'missing Wasm export: __cpp_exception');
+  ___cpp_exception = wasmExports['__cpp_exception'];
 }
 
 var wasmImports = {
-  /** @export */
-  HaveOffsetConverter,
   /** @export */
   _embind_register_bigint: __embind_register_bigint,
   /** @export */
@@ -6424,8 +6456,6 @@ var wasmImports = {
   _emval_set_property: __emval_set_property,
   /** @export */
   clock_time_get: _clock_time_get,
-  /** @export */
-  emscripten_asm_const_int: _emscripten_asm_const_int,
   /** @export */
   environ_get: _environ_get,
   /** @export */

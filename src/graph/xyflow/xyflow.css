@@ -1,13 +1,13 @@
 .svelte-flow {
 }
 
-.svelte-flow__node-default {
-  padding: 0;
+.svelte-flow__node-function {
   width: 120px;
   border-width: 0.5px;
   padding-top: 5px;
   padding-bottom: 5px;
   background-color: #161616;
+  border-radius: 4px;
 }
 
 .svelte-flow__handle {

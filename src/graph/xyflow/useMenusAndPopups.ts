@@ -1,11 +1,15 @@
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
 import { type FinalConnectionState } from "@xyflow/system";
 
-import { lookupFnDetailsAsync } from "../../modules/fngallery/apiFunctionInfos";
+import type { fn } from "@/types/function";
+import type { plinfo } from "@/types/plinfo";
+
 import { ReturnStatus } from "../../overlay/constants";
-import type { ClientXY } from "../../overlay/types";
+import type { ClientXY, StatusOr } from "../../overlay/types";
 import { MenuCodes } from "../constants";
 import { useGraphService } from "../graph-services";
+
+type Ntype = plinfo.NodeInfo["ntype"];
 
 function getClientXY(event: MouseEvent | TouchEvent): ClientXY {
   if (event instanceof MouseEvent) {
@@ -22,11 +26,6 @@ export default function useMenusAndPopups() {
   const flowGraphService = useGraphService("flowGraphService");
   const menuService = useGraphService("menuService");
   const popupService = useGraphService("popupService");
-
-  // const dispatchRmNode = useEventDispatch(EventKinds.XY_RM_NODE);
-  // const dispatchRmEdge = useEventDispatch(EventKinds.XY_RM_EDGE);
-  // const dispatchRmSelection = useEventDispatch(EventKinds.XY_RM_SELECTION);
-  // const dispatchPickFn = useEventDispatch(EventKinds.FN_GALLERY_SELECT);
 
   async function onpaneclick({ event }: { event: MouseEvent }): Promise<void> {
     event.preventDefault();
@@ -48,7 +47,13 @@ export default function useMenusAndPopups() {
     if (retval.status !== ReturnStatus.OK) return;
     switch (retval.value) {
       case MenuCodes.NEW_NODE:
-        await _internalOpenGallery(flowPosn);
+        await _internalOpenGallery("FN", flowPosn);
+        break;
+      case MenuCodes.NEW_INPUT:
+        await _internalOpenGallery("IN", flowPosn);
+        break;
+      case MenuCodes.NEW_OUTPUT:
+        await _internalOpenGallery("OUT", flowPosn);
         break;
       case MenuCodes.RM_EDGES:
         await flowGraphService.deleteAllEdges();
@@ -147,7 +152,7 @@ export default function useMenusAndPopups() {
     console.log(retval);
     switch (retval.value) {
       default:
-        _internalOpenGallery(flowPosn);
+        _internalOpenGallery("FN", flowPosn);
       // TODO: Continue to connect the edge.
     }
   }
@@ -158,7 +163,7 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    await _internalOpenGallery(rawStoreService.pivot);
+    await _internalOpenGallery("FN", rawStoreService.pivot);
   }
 
   async function ondatainspector(event: MouseEvent): Promise<void> {
@@ -173,16 +178,22 @@ export default function useMenusAndPopups() {
     console.log("Save json .. ", graph);
   }
 
-  async function _internalOpenGallery(position: XYPosition): Promise<void> {
-    const retval = await popupService.nodeFunctionGallery();
-    if (retval.status !== ReturnStatus.OK) return;
-    const funcId = retval.value as string;
-    const funcInfo = await lookupFnDetailsAsync(funcId);
-    if (!funcInfo) {
-      // TODO: Make error toast.
-      throw new Error("Function not found: " + funcId);
+  async function onplaypipeline(): Promise<void> {
+    await flowGraphService.playPipeline();
+  }
+
+  async function _internalOpenGallery(ntype: Ntype, position: XYPosition): Promise<void> {
+    if (ntype === "FN") {
+      const retval = await popupService.nodeTemplateGallery(ntype) as StatusOr<fn.FunctionInfo>;
+      if (retval.status !== ReturnStatus.OK) return;
+      const funcInfo = retval.value as fn.FunctionInfo;
+      await flowGraphService.newNodeAt(funcInfo, position);
+    } else if (ntype === "IN" || ntype === "OUT") {
+      const retval = await popupService.nodeTemplateGallery(ntype) as StatusOr<fn.GraphIoInfo>;
+      if (retval.status !== ReturnStatus.OK) return;
+      const ioInfo = retval.value as fn.GraphIoInfo;
+      await flowGraphService.newGraphIOAt(ioInfo.dtype, ntype === "OUT" /* isOutput */, position);
     }
-    flowGraphService.newNodeAt(funcInfo, position);
   }
 
   return {
@@ -193,8 +204,9 @@ export default function useMenusAndPopups() {
     onselectioncontextmenu,
     onconnectend,
     // Custom app-declared handlers.
-    onsavelocalstorage,
     onpopupgallery,
     ondatainspector,
+    onsavelocalstorage,
+    onplaypipeline,
   };
 }

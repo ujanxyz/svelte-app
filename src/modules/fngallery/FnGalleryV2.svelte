@@ -1,31 +1,35 @@
 <script lang="ts">
-import { onMount } from "svelte";
 
+import ButtonGroup from "@/components/ButtonGroup.svelte";
 import { type fn } from "@/types/function";
+import type { plinfo } from "@/types/plinfo";
 
 import useCurrentOverlay from "../../overlay/useCurrentOverlay";
-import { fetchFnInfos } from "./apiFunctionInfos";
-import FunctionCard from "./FunctionCard.svelte";
+import FuncTemplatesView from "./FuncTemplatesView.svelte";
+import GraphIOTemplatesView from "./GraphIOTemplatesView.svelte";
+
+type Ntype = plinfo.NodeInfo["ntype"];
+type OverlayPayload = { ntype: Ntype };
 
 const overlay = useCurrentOverlay();
-const { fetchItemsAsync, abortFetch } = fetchFnInfos();
+const overlayPayload = overlay.getLayerPayload() as OverlayPayload;
 
-let itemsPromise = $state(fetchItemsAsync());
-
-onMount(() => {
-  return () => abortFetch();
-});
+const modes: { code: plinfo.NodeInfo["ntype"]; label: string }[] = [
+  { code: "FN", label: "Functions" },
+  { code: "IN", label: "Graph Inputs" },
+  { code: "OUT", label: "Graph Outputs" },
+];
+let selected = $state<plinfo.NodeInfo["ntype"]>(overlayPayload.ntype);
 
 function closeGallery() {
   overlay.abortOverlay();
 }
 
-function onSelect(spec: fn.FunctionInfo) {
-  overlay.settleOverlay(spec.uri);
+function handleSelectFnType(code: string) {
+  // Nothing.
 }
 </script>
 
-<!-- elevated-rounded-md" -->
 <div class={["gallery-main"]}>
   <div class="topbar">
     <h2 class="header-l1">www.mockaroo.com</h2>
@@ -33,22 +37,15 @@ function onSelect(spec: fn.FunctionInfo) {
     <input type="text" name="search" class="textfield" value="search" />
     <button aria-label="close" class="iconbtn" onclick={closeGallery}>X</button>
   </div>
-  {#await itemsPromise}
-    <p>Loading...</p>
-  {:then items}
-    <div class="contentroot">
-      <div class="gridbox">
-        {#each items as item}
-          <FunctionCard spec={item} {onSelect} />
-        {/each}
-      </div>
-      <div class="bottombox">Bottom box.</div>
-    </div>
-  {:catch err}
-    <p style="color:red;">
-      {err.name === "AbortError" ? "Request cancelled." : err.message}
-    </p>
-  {/await}
+  <ButtonGroup buttons={modes} bind:value={selected} onselect={handleSelectFnType} />
+
+  {#if selected === "FN"}
+    <FuncTemplatesView />
+  {:else if selected === "IN"}
+    <GraphIOTemplatesView ntype="IN" />
+  {:else if selected === "OUT"}
+    <GraphIOTemplatesView ntype="OUT" />
+  {/if}
 </div>
 
 <style>
@@ -71,14 +68,6 @@ function onSelect(spec: fn.FunctionInfo) {
   .gallery-main {
     min-width: 600px;
   }
-}
-
-.elevated-rounded-md {
-  border-radius: 4px;
-  box-shadow:
-    0px 11px 15px -7px rgba(var(--box-shadow-rgb), 0.2),
-    0px 24px 38px 3px rgba(var(--box-shadow-rgb), 0.14),
-    0px 9px 46px 8px rgba(var(--box-shadow-rgb), 0.12);
 }
 
 .topbar {

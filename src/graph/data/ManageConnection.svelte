@@ -14,6 +14,6 @@ $effect(() => {
 });
 
 function handleConnProgress(state: ConnectionState) {
-  console.log(state);
+  // console.log(state);
 }
 </script>

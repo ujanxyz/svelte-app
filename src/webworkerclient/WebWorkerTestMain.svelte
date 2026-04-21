@@ -15,7 +15,7 @@ async function onGetGraph() {
 
 async function onCreateNode() {
   const func: fn.FunctionInfo = {
-    uri: "/fn/geom/translate-x",
+    uri: "/basic/displace-point",
     label: "Translate Point X",
     desc: "Translate a 2D point along X-axis by a given delta",
     params: [
@@ -28,19 +28,9 @@ async function onCreateNode() {
   console.log(res);
 }
 
-async function onAddEdges() {
-  const res = await pipelineBuilder.addEdge({
-    sourceNode: "s2GhcWpBLP",
-    sourceSlot: "fp",
-    targetNode: "ZBqg1rBrgq",
-    targetSlot: "p",
-  });
-  console.log(res);
-}
-
 async function onDeleteElements() {
   const res = await pipelineBuilder.deleteElements({
-    nodeIds: ["s2GhcWpBLP"],
+    nodeIds: [1],
     edgeIds: [],
   });
   console.log(res);
@@ -51,7 +41,5 @@ async function onDeleteElements() {
 <div>
   <TextButton text="getGraph" onclick={onGetGraph} />
   <TextButton text="createNode" onclick={onCreateNode} />
-  <TextButton text="addEdges" onclick={onAddEdges} />
   <TextButton text="deleteElements" onclick={onDeleteElements} />
-  <TextButton text="clearGraph" onclick={onAddEdges} />
 </div>

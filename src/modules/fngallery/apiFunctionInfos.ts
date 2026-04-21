@@ -1,6 +1,8 @@
+
 import { type fn } from "@/types/function";
 
 import getFunctionSpecs from "./functionSpecs";
+import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
 // Invalid during dev stage.
 const FETCH_URL = "http://example.com/func-defs";
@@ -32,26 +34,32 @@ async function delayedDummyData<T>(
   });
 }
 
-export function fetchFnInfos() {
+function fetchFnInfos(pipeline: PipelineBuilder) {
   let controller: AbortController | null = null;
+
+  async function _fetchInternal(): Promise<fn.FunctionInfo[]> {
+    if (USE_DUMMY_DATA) {
+      return delayedDummyData<fn.FunctionInfo[]>(
+        getFunctionSpecs,
+        DUMMY_DATA_DELAY_MS,
+        controller!.signal,
+      );
+    } else {
+      return fetch(FETCH_URL, { signal: controller!.signal }).then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<fn.FunctionInfo[]>;
+      });
+    }
+  }
 
   async function fetchItemsAsync(): Promise<fn.FunctionInfo[]> {
     if (controller) {
       controller.abort();
     }
     controller = new AbortController();
-    if (USE_DUMMY_DATA) {
-      return delayedDummyData<fn.FunctionInfo[]>(
-        getFunctionSpecs,
-        DUMMY_DATA_DELAY_MS,
-        controller.signal,
-      );
-    } else {
-      return fetch(FETCH_URL, { signal: controller.signal }).then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<fn.FunctionInfo[]>;
-      });
-    }
+    const apiResponse = await pipeline.getAvailableFuncs({});
+    const fetchedFuncs: fn.FunctionInfo[] = await _fetchInternal();
+    return [...apiResponse.infos, ...fetchedFuncs];
   }
 
   function abortFetch() {
@@ -61,12 +69,4 @@ export function fetchFnInfos() {
   return { fetchItemsAsync, abortFetch };
 }
 
-export async function lookupFnDetailsAsync(
-  funcUri: string,
-): Promise<fn.FunctionInfo | undefined> {
-  if (!USE_DUMMY_DATA) {
-    throw new Error("Real api lookup not implemented");
-  }
-  const specs = getFunctionSpecs();
-  return specs.find((fnInfo: fn.FunctionInfo) => fnInfo.uri === funcUri);
-}
+export {fetchFnInfos};

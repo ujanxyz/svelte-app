@@ -1,24 +1,28 @@
 <script lang="ts">
 import { Panel } from "@xyflow/svelte";
 
+import type { fn } from "@/types/function";
+import type { plinfo } from "@/types/plinfo";
+
 import FnGalleryV2 from "../../modules/fngallery/FnGalleryV2.svelte";
 import { useOverlayUi } from "../../overlay/overlayStore";
 import { type StatusOr } from "../../overlay/types";
-import FlowDataInspector from "../datainspector/FlowDataInspector.svelte";
 import { registerGraphService } from "../graph-services";
+
+type Ntype = plinfo.NodeInfo["ntype"];
 
 const galleryPopup = useOverlayUi(renderFnGallery);
 //const dataInspectorPopup = useOverlayUi(renderDataInspector);
 
 registerGraphService("popupService", {
-  nodeFunctionGallery,
+  nodeTemplateGallery,
   flowDataInspector,
 });
 
 let showDataInspector = $state(false);
 
-async function nodeFunctionGallery(): Promise<StatusOr<string>> {
-  return await galleryPopup.openOverlayAsync<string>({});
+async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
+  return await galleryPopup.openOverlayAsync<fn.FunctionInfo | fn.GraphIoInfo>({ntype});
 }
 
 async function flowDataInspector(): Promise<void> {
@@ -27,6 +31,7 @@ async function flowDataInspector(): Promise<void> {
   console.log("showDataInspector = true");
 }
 </script>
+
 
 {#snippet renderFnGallery()}
   <FnGalleryV2 />

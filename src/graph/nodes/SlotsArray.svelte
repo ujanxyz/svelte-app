@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
 
-import { type GraphServiceType,useGraphService } from "../graph-services";
+import { type GraphServiceType } from "../graph-services";
 import type { UjOverrideData } from "../types";
 import NodeSlot from "./NodeSlot.svelte";
 
@@ -16,9 +15,6 @@ interface Props {
 }
 
 const { nodeId, rawNodeId, ins, outs, inouts, slotService }: Props = $props();
-
-/* svelte-ignore state_referenced_locally */
-// const nodeState = slotService.useNodeState(rawNodeId); // Ensure nodeGenId exists for this node.
 
 function onDataEntry(slotName: string, data: UjOverrideData): void {
   console.log(slotName, data);

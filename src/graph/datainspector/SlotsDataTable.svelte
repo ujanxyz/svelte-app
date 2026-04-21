@@ -5,7 +5,5 @@ const slotService = useGraphService("slotService");
 console.log(slotService);
 
 $effect(() => {
-  const entries = slotService.reactiveSlotEntries();
-  console.log(entries);
 });
 </script>

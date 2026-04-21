@@ -24,6 +24,10 @@ class PipelineBuilder {
     return await this.invokeAsync<"createNode">("createNode", request);
   }
 
+  public async createIONode(request: apis.Request<"createIONode">): Promise<apis.Response<"createIONode">> {
+    return await this.invokeAsync<"createIONode">("createIONode", request);
+  }
+
   public async addEdge(request: apis.Request<"addEdge">): Promise<apis.Response<"addEdge">> {
     return await this.invokeAsync<"addEdge">("addEdge", request);
   }
@@ -34,6 +38,19 @@ class PipelineBuilder {
 
   public async getSlotStates(request: apis.Request<"getSlotStates">): Promise<apis.Response<"getSlotStates">> {
     return await this.invokeAsync<"getSlotStates">("getSlotStates", request);
+  }
+
+
+  public async getAvailableFuncs(request: apis.Request<"getAvailableFuncs">): Promise<apis.Response<"getAvailableFuncs">> {
+    return await this.invokeAsync<"getAvailableFuncs">("getAvailableFuncs", request);
+  }
+
+  public async syncGraphInputs(request: apis.Request<"syncGraphInputs">): Promise<apis.Response<"syncGraphInputs">> {
+    return await this.invokeAsync<"syncGraphInputs">("syncGraphInputs", request);
+  }
+
+  public async runPipeline(request: apis.Request<"runPipeline">): Promise<apis.Response<"runPipeline">> {
+    return await this.invokeAsync<"runPipeline">("runPipeline", request);
   }
 
   // </ C++ apis> --------------------------------------------------------------
