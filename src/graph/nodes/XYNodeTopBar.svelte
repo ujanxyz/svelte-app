@@ -9,27 +9,29 @@ import TrashIcon from "phosphor-svelte/lib/TrashIcon";
 import type { plinfo } from "@/types/plinfo";
 
 import IconButton from "../../components/IconButton.svelte";
-import { getNodeContextOps } from "./nodeContextOps";
+
+export interface ActionHandler {
+  onSelfInput: () => Promise<void>;
+  onDeleteSelf: () => Promise<void>;
+}
 
 interface Props {
   ntype: plinfo.NodeInfo["ntype"];
-  rawNodeId: number;
+  actionHandler: ActionHandler;
 };
 
-const { ntype, rawNodeId }: Props = $props();
-
-const nodeCtxOps = getNodeContextOps();
+const { ntype, actionHandler }: Props = $props();
 
 function notImplemented() {
   alert("Function not implemented");
 }
 
-async function onSelfInput() {
-    await nodeCtxOps.onSelfInput("3.1234");
+async function onSelfInput(): Promise<void> {
+  await actionHandler.onSelfInput();
 }
 
-async function onDeleteSelf() {
-    await nodeCtxOps.onDeleteSelf();
+async function onDeleteSelf(): Promise<void> {
+  await actionHandler.onDeleteSelf();
 }
 </script>
 

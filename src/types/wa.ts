@@ -13,6 +13,7 @@ export namespace wa {
 
   export interface WasmModuleType {
     getBuildInfo: () => object;
+    parseAbseilFlags: (args: string[]) => number;
     GraphEngineApi: { new (): wa.ApiInstance };
   }
 }

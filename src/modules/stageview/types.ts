@@ -1,6 +1,6 @@
 export interface PipelineSlot {
   name: string;
-  type: string; // e.g. "int", "float3", "point2d"
+  type: string; // e.g. "int", "float3", "points2d"
 }
 
 export interface PipelineStage {

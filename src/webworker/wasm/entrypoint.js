@@ -2815,6 +2815,12 @@ async function createWasm() {
       }
     };
 
+  var __emval_instanceof = (object, constructor) => {
+      object = Emval.toValue(object);
+      constructor = Emval.toValue(constructor);
+      return object instanceof constructor;
+    };
+
   
   
   var __emval_invoke = (caller, handle, methodName, destructorsRef, args) => {
@@ -6442,6 +6448,8 @@ var wasmImports = {
   _emval_get_property: __emval_get_property,
   /** @export */
   _emval_incref: __emval_incref,
+  /** @export */
+  _emval_instanceof: __emval_instanceof,
   /** @export */
   _emval_invoke: __emval_invoke,
   /** @export */

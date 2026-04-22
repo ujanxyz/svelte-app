@@ -36,6 +36,10 @@ class PipelineBuilder {
     return await this.invokeAsync<"deleteElements">("deleteElements", request);
   }
 
+  public async getNodeStates(request: apis.Request<"getNodeStates">): Promise<apis.Response<"getNodeStates">> {
+    return await this.invokeAsync<"getNodeStates">("getNodeStates", request);
+  }
+
   public async getSlotStates(request: apis.Request<"getSlotStates">): Promise<apis.Response<"getSlotStates">> {
     return await this.invokeAsync<"getSlotStates">("getSlotStates", request);
   }

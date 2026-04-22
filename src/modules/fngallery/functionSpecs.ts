@@ -33,7 +33,7 @@ const genFns: fn.FunctionInfo[] = [
     desc: "Generates points along the circumference of a circle",
     params: [
       { name: "center", dtype: "float2", access: "I" },
-      { name: "radius", dtype: "float", access: "I" },
+      { name: "radius", dtype: "floats", access: "I" },
       { name: "count", dtype: "int", access: "I" },
       { name: "points", dtype: "float2[]", access: "O" },
     ],
@@ -44,7 +44,7 @@ const genFns: fn.FunctionInfo[] = [
     desc: "Poisson-disk or uniform distribution within a radius",
     params: [
       { name: "center", dtype: "float2", access: "I" },
-      { name: "radius", dtype: "float", access: "I" },
+      { name: "radius", dtype: "floats", access: "I" },
       { name: "seed", dtype: "int", access: "I" },
       { name: "count", dtype: "int", access: "I" },
       { name: "points", dtype: "float2[]", access: "O" },
@@ -55,9 +55,9 @@ const genFns: fn.FunctionInfo[] = [
     label: "Float Range",
     desc: "Generates a sequence of numbers (arithmetic progression)",
     params: [
-      { name: "start", dtype: "float", access: "I" },
-      { name: "stop", dtype: "float", access: "I" },
-      { name: "step", dtype: "float", access: "I" },
+      { name: "start", dtype: "floats", access: "I" },
+      { name: "stop", dtype: "floats", access: "I" },
+      { name: "step", dtype: "floats", access: "I" },
       { name: "out", dtype: "float[]", access: "O" },
     ],
   },
@@ -74,8 +74,8 @@ const noiseFns: fn.FunctionInfo[] = [
     desc: "Returns 2D Perlin values (-1 to 1)",
     params: [
       { name: "uv", dtype: "float2[]", access: "I" },
-      { name: "scale", dtype: "float", access: "I" },
-      { name: "seed", dtype: "float", access: "I" },
+      { name: "scale", dtype: "floats", access: "I" },
+      { name: "seed", dtype: "floats", access: "I" },
       { name: "val", dtype: "float[]", access: "O" },
     ],
   },
@@ -85,7 +85,7 @@ const noiseFns: fn.FunctionInfo[] = [
     desc: "Higher quality noise often used for time-based animation (XY + Time)",
     params: [
       { name: "uv", dtype: "float2[]", access: "I" },
-      { name: "z", dtype: "float", access: "I" },
+      { name: "z", dtype: "floats", access: "I" },
       { name: "val", dtype: "float[]", access: "O" },
     ],
   },
@@ -96,7 +96,7 @@ const noiseFns: fn.FunctionInfo[] = [
     params: [
       { name: "uv", dtype: "float2[]", access: "I" },
       { name: "octaves", dtype: "int", access: "I" },
-      { name: "persistence", dtype: "float", access: "I" },
+      { name: "persistence", dtype: "floats", access: "I" },
       { name: "val", dtype: "float[]", access: "O" },
     ],
   },
@@ -106,7 +106,7 @@ const noiseFns: fn.FunctionInfo[] = [
     desc: "Calculates the curl of a noise field, perfect for flow fields",
     params: [
       { name: "uv", dtype: "float2[]", access: "I" },
-      { name: "step", dtype: "float", access: "I" },
+      { name: "step", dtype: "floats", access: "I" },
       { name: "vectors", dtype: "float2[]", access: "O" },
     ],
   },
@@ -132,10 +132,10 @@ const samplingFns: fn.FunctionInfo[] = [
     desc: "Maps a value from [sourceMin, sourceMax] to [targetMin, targetMax]",
     params: [
       { name: "val", dtype: "float[]", access: "M" },
-      { name: "sMin", dtype: "float", access: "I" },
-      { name: "sMax", dtype: "float", access: "I" },
-      { name: "tMin", dtype: "float", access: "I" },
-      { name: "tMax", dtype: "float", access: "I" },
+      { name: "sMin", dtype: "floats", access: "I" },
+      { name: "sMax", dtype: "floats", access: "I" },
+      { name: "tMin", dtype: "floats", access: "I" },
+      { name: "tMax", dtype: "floats", access: "I" },
     ],
   },
   {
@@ -155,7 +155,7 @@ const samplingFns: fn.FunctionInfo[] = [
     desc: "Returns 0 or 1 based on a threshold value",
     params: [
       { name: "val", dtype: "float[]", access: "M" },
-      { name: "edge", dtype: "float", access: "I" },
+      { name: "edge", dtype: "floats", access: "I" },
     ],
   },
   {
@@ -182,7 +182,7 @@ const vecFns: fn.FunctionInfo[] = [
     params: [
       { name: "points", dtype: "float2[]", access: "M" },
       { name: "vectors", dtype: "float2[]", access: "I" },
-      { name: "strength", dtype: "float", access: "I" },
+      { name: "strength", dtype: "floats", access: "I" },
     ],
   },
   {
@@ -192,7 +192,7 @@ const vecFns: fn.FunctionInfo[] = [
     params: [
       { name: "points", dtype: "float2[]", access: "M" },
       { name: "center", dtype: "float2", access: "I" },
-      { name: "angle", dtype: "float", access: "I" },
+      { name: "angle", dtype: "floats", access: "I" },
     ],
   },
   {
@@ -224,7 +224,7 @@ const colorFns: fn.FunctionInfo[] = [
     desc: "Convert Hue, Saturation, and Value to RGB float3",
     params: [
       { name: "h", dtype: "float[]", access: "I" }, // 0 to 360 or 0 to 1
-      { name: "s", dtype: "float", access: "I" },
+      { name: "s", dtype: "floats", access: "I" },
       { name: "v", dtype: "float[]", access: "I" },
       { name: "rgb", dtype: "float3[]", access: "O" },
     ],
@@ -265,7 +265,7 @@ const colorFns: fn.FunctionInfo[] = [
     desc: "Generate colors adjacent to the base color on the wheel",
     params: [
       { name: "base", dtype: "float3", access: "I" },
-      { name: "spread", dtype: "float", access: "I" },
+      { name: "spread", dtype: "floats", access: "I" },
       { name: "count", dtype: "int", access: "I" },
       { name: "palette", dtype: "float3[]", access: "O" },
     ],
@@ -338,7 +338,7 @@ const artFns: fn.FunctionInfo[] = [
     params: [
       { name: "rect", dtype: "float4", access: "I" },
       { name: "iterations", dtype: "int", access: "I" },
-      { name: "minSize", dtype: "float", access: "I" },
+      { name: "minSize", dtype: "floats", access: "I" },
       { name: "rects", dtype: "float4[]", access: "O" },
     ],
   },

@@ -73,6 +73,15 @@ export namespace apis {
       };
     };
 
+    getNodeStates: {
+      request: {
+        nodeIds: number[];
+      };
+      response: {
+        nodeStates: [number /* nodeId */, plstate.NodeState][];
+      };
+    };
+
     getSlotStates: {
       request: {
         slotIds: plinfo.SlotId[];

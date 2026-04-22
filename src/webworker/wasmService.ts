@@ -43,7 +43,7 @@ class WasmService {
   async #loadWasm(): Promise<void> {
     const start = Date.now();
     try {
-      this.wasmModule = await _loadWasmInternal();
+      this.wasmModule = await _loadWasmInternal(this.#makeModuleArg());
       this.#postLoadSteps(start);
     } catch (error) {
       this.wasmModule = undefined;
@@ -54,20 +54,36 @@ class WasmService {
   #postLoadSteps(loadStartTime: number): void {
     const mod = this.wasmModule!;
     const now = Date.now();
+    const legibleLoadingTime = `${now - loadStartTime} ms`;
+
+    const numParsedFlags = mod.parseAbseilFlags(this.#makeAbseilFlags());
     const buildInfo = mod.getBuildInfo() as Record<string, any>;
-    const infoObj = { ...buildInfo };
-    infoObj["legibleLoadingTime"] = `${now - loadStartTime} ms`;
+    
+    const infoObj: Record<string, any> = { ...buildInfo, legibleLoadingTime, numParsedFlags };
     if (buildInfo.timestamp) {
-      infoObj["legibleBuildInstant"] = new Date(
+      infoObj.legibleBuildInstant = new Date(
         (buildInfo.timestamp as number) * 1000,
       ).toLocaleString();
     }
     console.log(infoObj);
   }
+
+  #makeModuleArg(): Record<string, any> {
+    const moduleArg: Record<string, any> = {};
+    return moduleArg;
+  }
+
+  #makeAbseilFlags(): string[] {
+    const flags: string[] = [
+      "binaryRef", // The 0-th arg is reserved for the binary ref, which is not consumed in flags.
+      "--vmodule=PipelineRunner=1,PipelineIONode=1,PipelineFnNode=1,FloatListAttr=1",
+    ];
+    return flags;
+  }
 }
 
-async function _loadWasmInternal(): Promise<wa.WasmModuleType> {
-  const wasmModulePromise = CreateUjWasmModule() as Promise<wa.WasmModuleType>;
+async function _loadWasmInternal(moduleArg: Record<string, any>): Promise<wa.WasmModuleType> {
+  const wasmModulePromise = CreateUjWasmModule(moduleArg) as Promise<wa.WasmModuleType>;
   const wasmModule = await wasmModulePromise;
   console.assert(
     !!wasmModule,

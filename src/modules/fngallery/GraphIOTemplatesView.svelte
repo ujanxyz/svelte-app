@@ -25,10 +25,10 @@ function onSelect(dtype: string) {
 <div>
   {"Graph IO templates for " + ntype}
   <p>
-    <TextButton text={"dtype: float32"} onclick={() => onSelect("float")} />
+    <TextButton text={"dtype: float32"} onclick={() => onSelect("floats")} />
   </p>
   <p>
-    <TextButton text={"dtype: Point2D"} onclick={() => onSelect("point2d")} />
+    <TextButton text={"dtype: Point2D"} onclick={() => onSelect("points2d")} />
   </p>
   <p>
     <TextButton text={"dtype: Bitmap"} onclick={() => onSelect("bitmap")} />

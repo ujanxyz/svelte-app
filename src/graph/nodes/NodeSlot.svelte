@@ -5,15 +5,12 @@ import DotOutlineIcon from "phosphor-svelte/lib/DotOutlineIcon";
 import LinkSimpleBreakIcon from "phosphor-svelte/lib/LinkSimpleBreakIcon";
 import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
 
-import DataPicker from "@/modules/sloteditor/DataPicker.svelte";
-import { ReturnStatus } from "@/overlay/constants";
-import { useOverlayUi } from "@/overlay/overlayStore";
 import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 
 import type { UjOverrideData } from "../types";
 import MyHandle from "./MyHandle.svelte";
-
+import { getNodeContextOps } from "./nodeContextOps";
 
 interface Props {
   slotInfo: plinfo.SlotInfo;
@@ -39,36 +36,14 @@ const {
   onDataLookup,
 }: Props = $props();
 
-const editorPopup = useOverlayUi(miniEditor);
+const nodeOps = getNodeContextOps();
 
 // TODO: Re-visit this logic later, there are several corner cases.
 async function onClickPane(ev: MouseEvent): Promise<void> {
   ev.preventDefault();
-  if (!onDataEntry) {
-    return;
-  }
-  if (slotInfo.access === "O") {
-    window.alert("On click out param not implemented");
-    return;
-  }
-  if (slotState.inEdges.length > 0) {
-    window.alert(
-      "Cannot enter data. Delete the connection(s) at the input slot and try again.",
-    );
-    return;
-  }
-  const slotName = (slotInfo.access === "I") ? slotInfo.name : slotInfo.name + "/in";
-  const prior = onDataLookup?.(slotName) ?? null;
-
   const anchor = ev.currentTarget as HTMLButtonElement;
-  const datatype = "float2";
-  const editedData = await editorPopup.openOverlayAsync<UjOverrideData>({
-    anchor,
-    datatype,
-    prior,
-  });
-  if (editedData.status !== ReturnStatus.OK) return;
-  onDataEntry(slotName, editedData.value!);
+  const rect = anchor.getBoundingClientRect();
+  await nodeOps.onSlotInput(slotInfo, slotState, rect);
 }
 
 </script>
@@ -158,10 +133,6 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
 
 {#snippet blankIcon()}
   <DotOutlineIcon size={8} />
-{/snippet}
-
-{#snippet miniEditor()}
-  <DataPicker />
 {/snippet}
 
 <style>

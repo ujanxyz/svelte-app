@@ -19,9 +19,9 @@ async function onCreateNode() {
     label: "Translate Point X",
     desc: "Translate a 2D point along X-axis by a given delta",
     params: [
-      { name: "p", dtype: "point2d", access: "I" },
-      { name: "dx", dtype: "float", access: "I" },
-      { name: "fp", dtype: "point2d", access: "O" },
+      { name: "p", dtype: "points2d", access: "I" },
+      { name: "dx", dtype: "floats", access: "I" },
+      { name: "fp", dtype: "points2d", access: "O" },
     ],
   };
   const res = await pipelineBuilder.createNode({func});

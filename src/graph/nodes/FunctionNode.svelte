@@ -1,5 +1,6 @@
 <script lang="ts">
 
+import type { plstate } from "@/types/plstate";
 import type { xy } from "@/types/xy";
 
 import { useGraphService } from "../graph-services";
@@ -20,14 +21,11 @@ const funcNodeData = baseNodeData as xy.xyFuncNodeData;
 const rawNodeId: number = funcNodeData.info.rawId;
 
 const slotService = useGraphService("slotService");
-const flowService = useGraphService("flowGraphService");
 
 /* svelte-ignore state_referenced_locally */
-setNodeContextOps(nodeId, rawNodeId, flowService);
+const nodeOps = setNodeContextOps(funcNodeData.info);
 
-const nodeState = slotService.useNodeState(rawNodeId);
-console.log(nodeState);
-
+const nodeState = $derived(nodeOps.reactiveNodeState()) as plstate.NodeState;
 </script>
 
 <div class="noderoot">

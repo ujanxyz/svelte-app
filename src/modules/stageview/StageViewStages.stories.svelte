@@ -25,14 +25,14 @@ const stage2: PipelineStage = {
   id: "abcd02",
   label: "Math Function",
   inputs: [{ name: "x", type: "float2" }],
-  outputs: [{ name: "fx", type: "float" }],
+  outputs: [{ name: "fx", type: "floats" }],
 };
 
 const stage3: PipelineStage = {
   id: "abcd03",
   label: "Conversion",
-  inputs: [{ name: "x", type: "float" }],
-  outputs: [{ name: "fx", type: "float" }],
+  inputs: [{ name: "x", type: "floats" }],
+  outputs: [{ name: "fx", type: "floats" }],
 };
 
 const { Story } = defineMeta({

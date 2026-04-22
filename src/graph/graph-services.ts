@@ -78,6 +78,7 @@ interface FlowGraphService {
   deleteGraph: () => Promise<void>;
   assignGraph: (newNodes: Node[], newEdges: Edge[]) => void;
   setGraphInput: (rawNodeId: number, encoded: string) => Promise<void>;
+  setSlotInput: (rawNodeId: number, slotName: string, encoded: string) => Promise<void>;
   playPipeline: () => Promise<void>;
 }
 
@@ -94,6 +95,9 @@ interface ContextMenuService {
 interface PopupService {
   nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
   flowDataInspector: () => Promise<void>;
+  graphInputEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
+      => Promise<StatusOr<plstate.EncodedData>>;
+
 }
 
 export interface GraphServices {

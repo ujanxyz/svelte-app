@@ -55,6 +55,8 @@ registerGraphService("flowGraphService", {
   deleteGraph,
   assignGraph,
   setGraphInput,
+  setSlotInput,
+  // getGraphState,
   playPipeline,
 });
 
@@ -217,7 +219,21 @@ async function setGraphInput(rawNodeId: number, encoded: string): Promise<void> 
     updateData: [[rawNodeId, encoded]],
     deleteIds: [],
   });
+  await _internalUpdateNodeState(rawNodeId);
 }
+
+async function setSlotInput(rawNodeId: number, slotName: string, encoded: string): Promise<void> {
+  throw new Error("Not implemented yet");
+  // await pipeline.syncGraphInputs({
+  //   updateData: [[rawNodeId, encoded]],
+  //   deleteIds: [],
+  // });
+  // await _internalUpdateNodeState(rawNodeId);
+}
+
+// async function getGraphState(rawNodeId: number): Promise<void> {
+
+// }
 
 async function playPipeline(): Promise<void> {
   console.log("Playing pipeline ...");
@@ -238,5 +254,12 @@ function _removeSuffix(text: string, suffix: string): string {
     return text.slice(0, -suffix.length);
   }
   return text;
+}
+
+async function _internalUpdateNodeState(rawNodeId: number): Promise<void> {
+  const { nodeStates } = await pipeline.getNodeStates({ nodeIds: [rawNodeId] });
+  for (const [nodeId, nodeState] of nodeStates) {
+    slotService.setNodeState(nodeId, nodeState);
+  }
 }
 </script>
