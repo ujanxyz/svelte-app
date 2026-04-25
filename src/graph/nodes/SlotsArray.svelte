@@ -1,28 +1,25 @@
 <script lang="ts">
 import type { plinfo } from "@/types/plinfo";
 
-import { type GraphServiceType } from "../graph-services";
 import type { UjOverrideData } from "../types";
+import type { NodeContextOps } from "./nodeContextOps";
 import NodeSlot from "./NodeSlot.svelte";
 
 interface Props {
-  nodeId: string;
-  rawNodeId: number;
   ins: plinfo.SlotInfo[];
   outs: plinfo.SlotInfo[];
   inouts: plinfo.SlotInfo[];
-  slotService: GraphServiceType<"slotService">;
+  nodeOps: NodeContextOps;
 }
 
-const { nodeId, rawNodeId, ins, outs, inouts, slotService }: Props = $props();
+const { ins, outs, inouts, nodeOps }: Props = $props();
 
 function onDataEntry(slotName: string, data: UjOverrideData): void {
-  console.log(slotName, data);
-  slotService.setOverride(nodeId, slotName, true, data);
+  throw new Error("[onDataEntry] Not implemented");
 }
 
 function onDataLookup(slotName: string): UjOverrideData | null {
-  return slotService.lookupOverride(nodeId, slotName);
+    throw new Error("[onDataLookup] Not implemented");
 }
 
 </script>
@@ -40,17 +37,17 @@ function onDataLookup(slotName: string): UjOverrideData | null {
 </div>
 
 {#snippet inSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotState = slotService.useSlotState({parent: rawNodeId, name: slotInfo.name})}
+  {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
   <NodeSlot {slotInfo} {slotState} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet outSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotState = slotService.useSlotState({parent: rawNodeId, name: slotInfo.name})}
+  {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
   <NodeSlot {slotInfo} {slotState} {onDataEntry} {onDataLookup} />
 {/snippet}
 
 {#snippet inoutSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotState = slotService.useSlotState({parent: rawNodeId, name: slotInfo.name})}
+  {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
   <NodeSlot
     {slotInfo}
     {slotState}

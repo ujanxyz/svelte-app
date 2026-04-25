@@ -43,7 +43,15 @@ class WasmService {
   async #loadWasm(): Promise<void> {
     const start = Date.now();
     try {
-      this.wasmModule = await _loadWasmInternal(this.#makeModuleArg());
+      const waModule: WebAssembly.Module = {
+        preRun: [],
+        postRun: [],
+        print: (text: string) => console.log(text),
+        printErr: (text: string) => console.error(text),
+        myDemoFn: (x: number) => console.log("myDemoFn called with", x),
+      };
+
+      this.wasmModule = await _loadWasmInternal(waModule);
       this.#postLoadSteps(start);
     } catch (error) {
       this.wasmModule = undefined;
@@ -68,21 +76,16 @@ class WasmService {
     console.log(infoObj);
   }
 
-  #makeModuleArg(): Record<string, any> {
-    const moduleArg: Record<string, any> = {};
-    return moduleArg;
-  }
-
   #makeAbseilFlags(): string[] {
     const flags: string[] = [
       "binaryRef", // The 0-th arg is reserved for the binary ref, which is not consumed in flags.
-      "--vmodule=PipelineRunner=1,PipelineIONode=1,PipelineFnNode=1,FloatListAttr=1",
+      // "--vmodule=PipelineRunner=1,PipelineIONode=1,PipelineFnNode=1,FloatListAttr=1",
     ];
     return flags;
   }
 }
 
-async function _loadWasmInternal(moduleArg: Record<string, any>): Promise<wa.WasmModuleType> {
+async function _loadWasmInternal(moduleArg: WebAssembly.Module): Promise<wa.WasmModuleType> {
   const wasmModulePromise = CreateUjWasmModule(moduleArg) as Promise<wa.WasmModuleType>;
   const wasmModule = await wasmModulePromise;
   console.assert(

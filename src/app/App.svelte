@@ -4,7 +4,7 @@ import "./app.css";
 import MemLogger from "@/modules/memlogging/MemLogger.svelte";
 import Toaster from "@/modules/toast/Toaster.svelte";
 import OverlayProvider from "@/overlay/OverlayProvider.svelte";
-import PipelineBuilderProvider from "@/webworkerclient/PipelineBuilderProvider.svelte";
+import WorkerResourcesProvider from "@/webworkerclient/WorkerResourcesProvider.svelte";
 
 import ComponentTesterMain from "./ComponentTesterMain.svelte";
 import useNewEventTarget from "./useNewEventTarget";
@@ -12,7 +12,7 @@ import useNewEventTarget from "./useNewEventTarget";
 useNewEventTarget();
 </script>
 
-<PipelineBuilderProvider>
+<WorkerResourcesProvider>
   <OverlayProvider>
     <main>
       <ComponentTesterMain />
@@ -20,7 +20,8 @@ useNewEventTarget();
   </OverlayProvider>
   <MemLogger />
   <Toaster />
-</PipelineBuilderProvider>
+</WorkerResourcesProvider>
+
 
 <style>
 main {

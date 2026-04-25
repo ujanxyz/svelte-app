@@ -3,17 +3,13 @@
  * Fixed information for pipeline elements, node, edge, slot etc.
  */
 export namespace plinfo {
-  /**
-   * See C++ repo -> ujcore::plinfo::SlotId
-   */
+  // See C++ repo -> //ujcore/data/IdTypes.h
   export interface SlotId {
     parent: number;
     name: string;
   };
 
-  /**
-   * See C++ repo -> ujcore::plinfo::SlotInfo
-   */
+  // See C++ repo -> //ujcore/data/plinfo.h
   export interface SlotInfo {
     parent: number;
     name: string;
@@ -21,9 +17,7 @@ export namespace plinfo {
     access: "I" | "O" | "M";
   };
 
-  /**
-   * See C++ repo -> ujcore::plinfo::NodeInfo
-   */
+  // See C++ repo -> //ujcore/data/plinfo.h
   export interface NodeInfo {
     rawId: number;
     alnumid: string;
@@ -35,9 +29,7 @@ export namespace plinfo {
     inouts: string[];
   };
 
-  /**
-   * See C++ repo -> ujcore::plinfo::GraphEdge
-   */
+  // See C++ repo -> //ujcore/data/plinfo.h
   export interface EdgeInfo {
     id: number;
     catid: string;
@@ -45,5 +37,19 @@ export namespace plinfo {
     node1: number;
     slot0: string;
     slot1: string;
+  };
+
+  // See C++ repo -> //ujcore/data/ResourceInfo.h
+  export interface BitmapInfo {
+    id: string;
+    backend: string;
+    width: number;
+    height: number;
+    bytesPerPixel: number;
+  };
+
+  export interface ResourceInfo {
+    type: "UNKNOWN" | "BITMAP";
+    bitmap: BitmapInfo | null;
   };
 }

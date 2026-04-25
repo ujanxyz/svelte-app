@@ -2,7 +2,7 @@ import type { wa } from "@/types/wa";
 
 class CppGraphBuilder {
   private readonly graph: wa.ApiInstance;
-  private readonly cmdPrefix: string
+  private readonly cmdPrefix: string;
   private readonly availableApis: string[] = [];
 
   public constructor(graph: wa.ApiInstance, cmdPrefix: string) {

@@ -14,7 +14,6 @@ import { getContext } from "svelte";
 import type { ClientXY } from "@/overlay/types";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
 import type { xy } from "@/types/xy";
 import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
@@ -39,7 +38,7 @@ const {
 const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 
 const rawStoreService = useGraphService("rawStoreService");
-const slotService = useGraphService("slotService");
+const reactiveService = useGraphService("reactiveService");
 
 registerGraphService("flowGraphService", {
   newNodeAt,
@@ -75,7 +74,7 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise
     position,
   };
 
-  slotService.setNodeState(nodeInfo.rawId, nodeState!);
+  reactiveService.setNodeState(nodeInfo.rawId, nodeState!);
 
   const allSlotInfos = [...inInfos, ...outInfos, ...inoutInfos];
   const allSlotStates = [...inStates, ...outStates, ...inoutStates];
@@ -85,7 +84,7 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise
   for (let i = 0; i < allSlotInfos.length; i++) {
     const slotInfo = allSlotInfos[i];
     const slotId: plinfo.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
-    slotService.setSlotState(slotId, allSlotStates[i]);
+    reactiveService.setSlotState(slotId, allSlotStates[i]);
   }
 
   _updateNodes((nodes: Node[]) => {
@@ -109,9 +108,9 @@ async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPositi
     position,
   };
 
-  slotService.setNodeState(nodeInfo.rawId, nodeState!);
+  reactiveService.setNodeState(nodeInfo.rawId, nodeState!);
   const slotId: plinfo.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
-  slotService.setSlotState(slotId, slotState!);
+  reactiveService.setSlotState(slotId, slotState!);
 
   _updateNodes((nodes: Node[]) => {
     return [...nodes, newNode];
@@ -147,11 +146,10 @@ async function addEdge(connection: Connection): Promise<void> {
     data,
   };
   rawStoreService.edges = _addEdge(edge, rawStoreService.edges);
-  slotService.testUpdate();
   const slotId0: plinfo.SlotId = {parent: edgeInfo.node0, name: edgeInfo.slot0};
   const slotId1: plinfo.SlotId = {parent: edgeInfo.node1, name: edgeInfo.slot1};  
-  slotService.setSlotState(slotId0, sourceState);
-  slotService.setSlotState(slotId1, targetState);
+  reactiveService.setSlotState(slotId0, sourceState);
+  reactiveService.setSlotState(slotId1, targetState);
 }
 
 async function deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void> {
@@ -161,12 +159,12 @@ async function deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<v
     nodeIds,
     edgeIds,
   });
-  slotService.deleteSlots(deletedSlotIds);
+  reactiveService.deleteSlots(deletedSlotIds);
   const { slotStates } = await pipeline.getSlotStates({
     slotIds: affectedSlotIds,
   });
   for (const [slotId, slotState] of slotStates) {
-    slotService.setSlotState(slotId, slotState);
+    reactiveService.setSlotState(slotId, slotState);
   }
 }
 
@@ -236,8 +234,11 @@ async function setSlotInput(rawNodeId: number, slotName: string, encoded: string
 // }
 
 async function playPipeline(): Promise<void> {
-  console.log("Playing pipeline ...");
-  await pipeline.runPipeline({});
+  await pipeline.runPipeline({
+    build: true,
+    execute: true,
+  });
+  const resources = await pipeline.getResources({});
 }
 
 function _getClientXY(event: MouseEvent | TouchEvent): ClientXY {
@@ -259,7 +260,7 @@ function _removeSuffix(text: string, suffix: string): string {
 async function _internalUpdateNodeState(rawNodeId: number): Promise<void> {
   const { nodeStates } = await pipeline.getNodeStates({ nodeIds: [rawNodeId] });
   for (const [nodeId, nodeState] of nodeStates) {
-    slotService.setNodeState(nodeId, nodeState);
+    reactiveService.setNodeState(nodeId, nodeState);
   }
 }
 </script>

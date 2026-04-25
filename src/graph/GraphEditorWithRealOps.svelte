@@ -8,7 +8,7 @@ import RegisterFlowGraphService from "./data/RegisterFlowGraphService.svelte";
 import RegisterIoService from "./data/RegisterIoService.svelte";
 import RegisterPopupService from "./data/RegisterPopupService.svelte";
 import RegisterRawStoreService from "./data/RegisterRawStoreService.svelte";
-import RegisterSlotService from "./data/RegisterSlotService.svelte";
+import RegisterReactiveService from "./data/RegisterReactiveService.svelte";
 import FlowGraphWrapper from "./xyflow/FlowGraphWrapper.svelte";
 </script>
 
@@ -19,7 +19,7 @@ import FlowGraphWrapper from "./xyflow/FlowGraphWrapper.svelte";
 
 {#snippet beforeFlowRealOps()}
   <RegisterRawStoreService />
-  <RegisterSlotService />
+  <RegisterReactiveService />
   <RegisterIoService />
   <RegisterFlowGraphService />
   <RegisterContextMenuService />

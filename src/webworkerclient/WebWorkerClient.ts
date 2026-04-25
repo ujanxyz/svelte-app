@@ -42,6 +42,33 @@ class WebWorkerClient {
     this.#setupListener();
   }
 
+  public async send(code: string, request: any, transferables: Transferable[], timeoutMs: number = 2500): Promise<ResponseData> {
+    // Ensure worker is initialized.
+    await this.readyPromise;
+
+    // Valid sequence ids start at 0. -ve is reserved for IAM_READY message.
+    const seq = this.currentSeq++;
+
+    return new Promise<ResponseData>((resolve, reject) => {
+      // Start the timeout for receiving the response. 
+      const timer = window.setTimeout(() => {
+        if (this.pendingRequests.has(seq)) {
+          this.pendingRequests.delete(seq);
+          reject(new Error(`Request ${seq} timed out after ${timeoutMs}ms`));
+        }
+      }, timeoutMs);
+
+      this.pendingRequests.set(seq, { resolve, reject, timer });
+      const secureMsg: SecureMessage = { seq, code, payload: request };
+      this.worker.postMessage(secureMsg, transferables);
+    });
+  }
+
+  public destroy(): void {
+    this.#rejectAllPendingReqs("Worker shutting down");
+    this.worker.terminate();
+  }
+
   #setupListener(): void {
     this.worker.addEventListener(
       "message",
@@ -71,7 +98,7 @@ class WebWorkerClient {
           }
           this.pendingRequests.delete(ack);
         } else {
-          console.warn(`Received unexpected ack: ${ack}`);
+          console.warn(`Received unexpected ack: ${ack}`, event.data);
         }
       },
     );
@@ -95,33 +122,6 @@ class WebWorkerClient {
       // Note: Usually, we don't get an 'ack' here because the message
       // couldn't be read. This often requires a heartbeat/timeout to recover.
     };
-  }
-
-  public async send(code: string, request: any, timeoutMs: number = 5000): Promise<ResponseData> {
-    // 1. Ensure worker is initialized
-    await this.readyPromise;
-
-    // Valid sequence ids start at 0. -ve is reserved for IAM_READY message.
-    const seq = this.currentSeq++;
-
-    return new Promise<ResponseData>((resolve, reject) => {
-      // 2. Setup the timeout
-      const timer = window.setTimeout(() => {
-        if (this.pendingRequests.has(seq)) {
-          this.pendingRequests.delete(seq);
-          reject(new Error(`Request ${seq} timed out after ${timeoutMs}ms`));
-        }
-      }, timeoutMs);
-
-      this.pendingRequests.set(seq, { resolve, reject, timer });
-      const secureMsg: SecureMessage = { seq, code, payload: request };
-      this.worker.postMessage(secureMsg);
-    });
-  }
-
-  public destroy(): void {
-    this.#rejectAllPendingReqs("Worker shutting down");
-    this.worker.terminate();
   }
 
   #rejectAllPendingReqs(message: string): void {

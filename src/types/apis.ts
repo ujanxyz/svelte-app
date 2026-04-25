@@ -109,8 +109,18 @@ export namespace apis {
     };
 
     runPipeline: {
-      request: VoidType;
+      request: {
+        build: boolean;
+        execute: boolean;
+      };
       response: VoidType;
+    };
+
+    getResources: {
+      request: VoidType;
+      response: {
+        resources: plinfo.ResourceInfo[];
+      };
     };
 
   };

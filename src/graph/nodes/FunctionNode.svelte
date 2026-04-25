@@ -20,8 +20,6 @@ const funcNodeData = baseNodeData as xy.xyFuncNodeData;
 /* svelte-ignore state_referenced_locally */
 const rawNodeId: number = funcNodeData.info.rawId;
 
-const slotService = useGraphService("slotService");
-
 /* svelte-ignore state_referenced_locally */
 const nodeOps = setNodeContextOps(funcNodeData.info);
 
@@ -32,8 +30,8 @@ const nodeState = $derived(nodeOps.reactiveNodeState()) as plstate.NodeState;
   <h3 class="card-title">{rawNodeId} / {nodeState.label}</h3>
   <span class="nodeid">{nodeId}</span>
 </div>
-<SlotsArray {nodeId} {rawNodeId} ins={funcNodeData.inInfos} outs={funcNodeData.outInfos} inouts={funcNodeData.inoutInfos} {slotService} />
-<XYNodeTopBar ntype="FN" {rawNodeId} />
+<SlotsArray ins={funcNodeData.inInfos} outs={funcNodeData.outInfos} inouts={funcNodeData.inoutInfos} {nodeOps} />
+<XYNodeTopBar ntype={funcNodeData.info.ntype} {rawNodeId} />
 
 <style>
 :global(.svelte-flow .svelte-flow__node) {

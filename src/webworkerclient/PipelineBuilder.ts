@@ -3,18 +3,11 @@ import { type apis } from "@/types/apis";
 import type { WebWorkerClient } from "./WebWorkerClient";
 
 class PipelineBuilder {
-  readonly #client: WebWorkerClient;
-  #deleted: boolean = false;
+  readonly client: WebWorkerClient;
 
   public constructor(client: WebWorkerClient) {
-    this.#client = client;
+    this.client = client;
   }
-
-  public destroy(): void {
-    this.#client.destroy();
-  }
-
-  // < C++ apis> ---------------------------------------------------------------
 
   public async getGraph(request: apis.Request<"getGraph">): Promise<apis.Response<"getGraph">> {
     return await this.invokeAsync<"getGraph">("getGraph", request);
@@ -44,7 +37,6 @@ class PipelineBuilder {
     return await this.invokeAsync<"getSlotStates">("getSlotStates", request);
   }
 
-
   public async getAvailableFuncs(request: apis.Request<"getAvailableFuncs">): Promise<apis.Response<"getAvailableFuncs">> {
     return await this.invokeAsync<"getAvailableFuncs">("getAvailableFuncs", request);
   }
@@ -57,12 +49,13 @@ class PipelineBuilder {
     return await this.invokeAsync<"runPipeline">("runPipeline", request);
   }
 
-  // </ C++ apis> --------------------------------------------------------------
+  public async getResources(request: apis.Request<"getResources">): Promise<apis.Response<"getResources">> {
+    return await this.invokeAsync<"getResources">("getResources", request);
+  }
 
+  
   private async invokeAsync<K extends apis.Names>(name: apis.Names, request: apis.Request<K>): Promise<apis.Response<K>> {
-    const { ok, code, payload, error } = await this.#client.send(`GRAPH:${name}`, request);
-    // console.log(ok, code, payload, error);
-    if (this.#deleted) throw new Error('builder deleted');
+    const { ok, code, payload, error } = await this.client.send(`GRAPH:${name}`, request, []);
     if (!ok) {
       throw new Error(`${code}: ${error}`);
     }

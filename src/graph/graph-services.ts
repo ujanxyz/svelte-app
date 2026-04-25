@@ -13,7 +13,7 @@ import type { xy } from "@/types/xy";
 
 import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
-import type { UjGraphStorage, UjOverrideData, UjSlotInfo } from "./types";
+import type { UjGraphStorage } from "./types";
 
 interface RawStoreService {
   // List of nodes.
@@ -32,22 +32,12 @@ interface RawStoreService {
   currentViewport(): Viewport;
 }
 
-interface SlotService {
+interface ReactiveService {
   setNodeState(rawNodeId: number, state: plstate.NodeState): void;
   useNodeState(rawNodeId: number): plstate.NodeState;
   setSlotState(slotId: plinfo.SlotId, state: plstate.SlotState): void;
   useSlotState(slotId: plinfo.SlotId): plstate.SlotState;
   deleteSlots(slotIds: plinfo.SlotId[]): void;
-
-  testUpdate(): void;
-
-  setOverride(
-    nodeId: string,
-    slotName: string,
-    override: boolean,
-    data: UjOverrideData | null,
-  ): void;
-  lookupOverride(nodeId: string, slotName: string): UjOverrideData | null;
 }
 
 interface IoService {
@@ -102,11 +92,11 @@ interface PopupService {
 
 export interface GraphServices {
   rawStoreService?: RawStoreService;
-  slotService?: SlotService;
   ioService?: IoService;
   flowGraphService?: FlowGraphService;
   menuService?: ContextMenuService;
   popupService?: PopupService;
+  reactiveService?: ReactiveService;
 }
 
 const graphContext = createReactiveContext<GraphServices>(

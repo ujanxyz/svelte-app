@@ -2,6 +2,7 @@ import { getContext, setContext } from "svelte";
 
 import type { plinfo } from "@/types/plinfo";
 import { type plstate } from "@/types/plstate";
+import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
 
 import { useGraphService } from "../graph-services";
 
@@ -11,12 +12,17 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
   const rawNodeId: number = nodeInfo.rawId;
   const nodeId: string = nodeInfo.alnumid;
   const flowService = useGraphService("flowGraphService");
-  const slotService = useGraphService("slotService");
+  const reactiveService = useGraphService("reactiveService");
   const popupService = useGraphService("popupService");
+  const graphIo = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
 
   return {
     reactiveNodeState: function(): plstate.NodeState {
-      return slotService.useNodeState(rawNodeId);
+      return reactiveService.useNodeState(rawNodeId);
+    },
+
+    reactiveSlotState: function(slotName: string): plstate.SlotState {
+      return reactiveService.useSlotState({ parent: rawNodeId, name: slotName });
     },
 
     onDeleteSelf: async function(): Promise<void> {
@@ -56,10 +62,16 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
       await flowService!.setSlotInput(rawNodeId, slotInfo.name, data.payload);
     },
 
+    getPreviewCanvas: async function(slotInfo: plinfo.SlotInfo): Promise<HTMLCanvasElement> {
+      if (slotInfo.dtype !== "bitmap") {
+        throw new Error("Previews are only supported for bitmap data");
+      }
+      const slotId: plinfo.SlotId = { parent: rawNodeId, name: slotInfo.name };
+      return await graphIo.getOrCreatePreviewCanvas(slotId);
+    }
+
   };
 }
-
-type NodeContextOps = ReturnType<typeof makeNodeContextOps>;
 
 function setNodeContextOps(nodeInfo: plinfo.NodeInfo): NodeContextOps {
   const nodeOps = makeNodeContextOps(nodeInfo);
@@ -71,4 +83,5 @@ function getNodeContextOps(): NodeContextOps {
   return getContext(CONTEXT_KEY) as NodeContextOps;
 }
 
+export type NodeContextOps = ReturnType<typeof makeNodeContextOps>;
 export { getNodeContextOps, setNodeContextOps };

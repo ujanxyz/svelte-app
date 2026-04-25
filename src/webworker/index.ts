@@ -3,8 +3,9 @@ import {
   type WorkerResponse,
 } from "@/types/worker-message-types";
 
-import { CppGraphBuilder } from "./CppGraphBuilder";
+import { CppGraphBuilder } from "./CppGraphBuilder.js";
 import wasmService from "./wasmService.js";
+import { WorkerIoManager } from "./WorkerIoManager.js";
 
 const SysCodes = Object.freeze({
   OK: "_OK",
@@ -17,6 +18,7 @@ const SysCodes = Object.freeze({
 });
 
 let graphBuilder: CppGraphBuilder | null = null;
+let ioManager: WorkerIoManager | null = null;
 
 //-----------------------------------------------------------------------------
 const postman = (function createPostman() {
@@ -76,6 +78,7 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
   function markHandlerReady() {
     const graph = wasmService.newGraphEngineApi();
     graphBuilder = new CppGraphBuilder(graph, "GRAPH:");
+    ioManager = new WorkerIoManager((globalThis as any).pipelineEvents as EventTarget);
     isThisWorkerReady = true;
     postman.postImReady();
   }
@@ -109,6 +112,16 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
     try {
       if (code.startsWith("GRAPH:")) {
         const response = await graphBuilder!.process(code, payload);
+        if (response instanceof Error) {
+          const errmsg = (response as Error).message;
+          console.warn(seq, code, SysCodes.APP_ERROR, errmsg);
+          postman.postError(seq, code, SysCodes.APP_ERROR, errmsg);
+        } else {
+          console.log(`[Worker] Rooundtrip (Seq: ${seq}, Code: ${code}): `, payload, response);
+          postman.postResponse(seq, code, response!);
+        }
+      } else if (code.startsWith("IO:")) {
+        const response = await ioManager!.process(code, payload);
         if (response instanceof Error) {
           const errmsg = (response as Error).message;
           console.warn(seq, code, SysCodes.APP_ERROR, errmsg);

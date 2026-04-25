@@ -20,7 +20,6 @@ async function onClickSlotBtn(
     datatype: string;
     payload: any;
   }>({ anchor, datatype, prior: null });
-  console.log(editedData);
   if (editedData.status !== ReturnStatus.OK) return;
 }
 </script>

@@ -81,6 +81,15 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
+// include: ujcore/wasm/pre_steps.js
+const isWorker = typeof WorkerGlobalScope !== 'undefined' && globalThis instanceof WorkerGlobalScope;
+if (!isWorker) {
+    throw new Error("The wasm module is not running in a worker context.");
+}
+
+// This event target is used from inline JS code inside C++ / wasm.
+globalThis.pipelineEvents = new EventTarget();
+// end include: ujcore/wasm/pre_steps.js
 
 
 var arguments_ = [];
@@ -419,7 +428,7 @@ function updateMemoryViews() {
   var b = wasmMemory.buffer;
   HEAP8 = new Int8Array(b);
   HEAP16 = new Int16Array(b);
-  HEAPU8 = new Uint8Array(b);
+  Module['HEAPU8'] = HEAPU8 = new Uint8Array(b);
   HEAPU16 = new Uint16Array(b);
   HEAP32 = new Int32Array(b);
   HEAPU32 = new Uint32Array(b);
@@ -624,6 +633,10 @@ async function instantiateAsync(binary, binaryFile, imports) {
 }
 
 function getWasmImports() {
+  // instrumenting imports is used in asyncify in two ways: to add assertions
+  // that check for proper import use, and for ASYNCIFY=2 we use them to set up
+  // the Promise API on the import side.
+  Asyncify.instrumentWasmImports(wasmImports);
   // prepare imports
   var imports = {
     'env': wasmImports,
@@ -641,6 +654,8 @@ async function createWasm() {
   /** @param {WebAssembly.Module=} module*/
   function receiveInstance(instance, module) {
     wasmExports = instance.exports;
+
+    wasmExports = Asyncify.instrumentWasmExports(wasmExports);
 
     assignWasmExports(wasmExports);
 
@@ -1550,18 +1565,21 @@ async function createWasm() {
       if (!func) {
         /** @suppress {checkTypes} */
         wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
+        if (Asyncify.isAsyncExport(func)) {
+          wasmTableMirror[funcPtr] = func = Asyncify.makeAsyncFunction(func);
+        }
       }
-      /** @suppress {checkTypes} */
-      assert(wasmTable.get(funcPtr) == func, 'JavaScript-side Wasm function table mirror is out of date!');
       return func;
     };
   var embind__requireFunction = (signature, rawFunction, isAsync = false) => {
-      assert(!isAsync, 'Async bindings are only supported with JSPI.');
   
       signature = AsciiToString(signature);
   
       function makeDynCaller() {
         var rtn = getWasmTableEntry(rawFunction);
+        if (isAsync) {
+          rtn = WebAssembly.promising(rtn);
+        }
         return rtn;
       }
   
@@ -1831,6 +1849,7 @@ async function createWasm() {
       invokerFnBody += (returns || isAsync ? "var rv = ":"") + `invoker(${argsListWired});\n`;
   
       var returnVal = returns ? "rv" : "";
+      invokerFnBody += `function onDone(${returnVal}) {\n`;
   
       if (needsDestructorStack) {
         invokerFnBody += "runDestructors(destructors);\n";
@@ -1849,6 +1868,9 @@ async function createWasm() {
                          "return ret;\n";
       } else {
       }
+  
+      invokerFnBody += "}\n";
+      invokerFnBody += "return " + (isAsync ? "rv.then(onDone)" : `onDone(${returnVal})`) + ";";
   
       invokerFnBody += "}\n";
   
@@ -1884,7 +1906,6 @@ async function createWasm() {
         throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
       }
   
-      assert(!isAsync, 'Async bindings are only supported with JSPI.');
       var isClassMethodFunc = (argTypes[1] !== null && classType !== null);
   
       // Free functions with signature "void function()" do not need an invoker that marshalls between wire types.
@@ -2884,6 +2905,11 @@ async function createWasm() {
     ;
   }
 
+  var _emscripten_notify_memory_growth = (memoryIndex) => {
+      assert(memoryIndex == 0);
+      updateMemoryViews();
+    };
+
   var ENV = {
   };
   
@@ -3497,6 +3523,13 @@ async function createWasm() {
   write(stream, buffer, offset, length, position, canOwn) {
           // The data buffer should be a typed array view
           assert(!(buffer instanceof ArrayBuffer));
+          // If the buffer is located in main memory (HEAP), and if
+          // memory can grow, we can't hold on to references of the
+          // memory buffer, as they may get invalidated. That means we
+          // need to do copy its contents.
+          if (buffer.buffer === HEAP8.buffer) {
+            canOwn = false;
+          }
   
           if (!length) return 0;
           var node = stream.node;
@@ -5743,6 +5776,108 @@ async function createWasm() {
       quit_(1, e);
     };
 
+  var runAndAbortIfError = (func) => {
+      try {
+        return func();
+      } catch (e) {
+        abort(e);
+      }
+    };
+  
+  
+  var _exit = exitJS;
+  
+  
+  var maybeExit = () => {
+      if (!keepRuntimeAlive()) {
+        try {
+          _exit(EXITSTATUS);
+        } catch (e) {
+          handleException(e);
+        }
+      }
+    };
+  var callUserCallback = (func) => {
+      if (ABORT) {
+        err('user callback triggered after runtime exited or application aborted.  Ignoring.');
+        return;
+      }
+      try {
+        func();
+        maybeExit();
+      } catch (e) {
+        handleException(e);
+      }
+    };
+  
+  var runtimeKeepalivePush = () => {
+      runtimeKeepaliveCounter += 1;
+    };
+  
+  var runtimeKeepalivePop = () => {
+      assert(runtimeKeepaliveCounter > 0);
+      runtimeKeepaliveCounter -= 1;
+    };
+  var Asyncify = {
+  instrumentWasmImports(imports) {
+        assert('Suspending' in WebAssembly, 'JSPI not supported by current environment. Perhaps it needs to be enabled via flags?');
+        var importPattern = /^(invoke_.*|__asyncjs__.*)$/;
+  
+        for (let [x, original] of Object.entries(imports)) {
+          if (typeof original == 'function') {
+            let isAsyncifyImport = original.isAsync || importPattern.test(x);
+            // Wrap async imports with a suspending WebAssembly function.
+            if (isAsyncifyImport) {
+              imports[x] = original = new WebAssembly.Suspending(original);
+            }
+          }
+        }
+      },
+  instrumentFunction(original) {
+        var wrapper = (...args) => {
+            return original(...args);
+        };
+        return wrapper;
+      },
+  instrumentWasmExports(exports) {
+        var exportPattern = /^(main|__main_argc_argv)$/;
+        Asyncify.asyncExports = new Set();
+        var ret = {};
+        for (let [x, original] of Object.entries(exports)) {
+          if (typeof original == 'function') {
+            // Wrap all exports with a promising WebAssembly function.
+            let isAsyncifyExport = exportPattern.test(x);
+            if (isAsyncifyExport) {
+              Asyncify.asyncExports.add(original);
+              original = Asyncify.makeAsyncFunction(original);
+            }
+            var wrapper = Asyncify.instrumentFunction(original);
+            ret[x] = wrapper;
+  
+         } else {
+            ret[x] = original;
+          }
+        }
+        return ret;
+      },
+  asyncExports:null,
+  isAsyncExport(func) {
+        return Asyncify.asyncExports?.has(func);
+      },
+  handleAsync:async (startAsync) => {
+        
+        try {
+          return await startAsync();
+        } finally {
+          
+        }
+      },
+  handleSleep:(startAsync) => Asyncify.handleAsync(() => new Promise(startAsync)),
+  makeAsyncFunction(original) {
+        return WebAssembly.promising(original);
+      },
+  };
+
   
   var getCppExceptionTag = () => ___cpp_exception;
   
@@ -5862,7 +5997,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'setTempRet0',
   'zeroMemory',
   'getHeapMax',
-  'abortOnCannotGrowMemory',
   'growMemory',
   'withStackSave',
   'inetPton4',
@@ -5876,10 +6010,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'autoResumeAudioContext',
   'getDynCaller',
   'dynCall',
-  'runtimeKeepalivePush',
-  'runtimeKeepalivePop',
-  'callUserCallback',
-  'maybeExit',
   'asmjsMangle',
   'alignMemory',
   'HandleAllocator',
@@ -5985,7 +6115,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   '__glGetActiveAttribOrUniform',
   'writeGLArray',
   'registerWebGlEventCallback',
-  'runAndAbortIfError',
   'ALLOC_NORMAL',
   'ALLOC_STACK',
   'allocate',
@@ -6019,7 +6148,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'HEAPF32',
   'HEAPF64',
   'HEAP8',
-  'HEAPU8',
   'HEAP16',
   'HEAPU16',
   'HEAP32',
@@ -6049,6 +6177,10 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'getExecutableName',
   'handleException',
   'keepRuntimeAlive',
+  'runtimeKeepalivePush',
+  'runtimeKeepalivePop',
+  'callUserCallback',
+  'maybeExit',
   'asyncLoad',
   'mmapAlloc',
   'wasmTable',
@@ -6246,6 +6378,9 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'EGL',
   'GLEW',
   'IDBStore',
+  'runAndAbortIfError',
+  'Asyncify',
+  'Fibers',
   'SDL',
   'SDL_gfx',
   'print',
@@ -6341,12 +6476,18 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
+function JsOnCreateBitmap(handle,pixelsData) { const target = Emval.toValue(handle); const {id, width, height, numBytes} = target; const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CREATED", { detail: { ... target, uint8arr } })); return ptr; }
+JsOnCreateBitmap.sig = 'iii';
+function JsOnDestroyBitmap(idStr,pixelsData) { globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_DELETED", { detail: { id: UTF8ToString(idStr) } })); Module._free(pixelsData); }
+JsOnDestroyBitmap.sig = 'vii';
+function JsOnFlushBitmap(idStr) { globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_FLUSHED", { detail: { id: UTF8ToString(idStr) } })); }
+JsOnFlushBitmap.sig = 'vi';
 
 // Imports from the Wasm binary.
-var _malloc = makeInvalidEarlyAccess('_malloc');
+var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
 var ___getTypeName = makeInvalidEarlyAccess('___getTypeName');
 var __initialize = Module['__initialize'] = makeInvalidEarlyAccess('__initialize');
-var _free = makeInvalidEarlyAccess('_free');
+var _free = Module['_free'] = makeInvalidEarlyAccess('_free');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
 var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
 var _strerror = makeInvalidEarlyAccess('_strerror');
@@ -6368,13 +6509,13 @@ var wasmTable = makeInvalidEarlyAccess('wasmTable');
 
 function assignWasmExports(wasmExports) {
   assert(wasmExports['malloc'], 'missing Wasm export: malloc');
-  _malloc = createExportWrapper('malloc', 1);
+  _malloc = Module['_malloc'] = createExportWrapper('malloc', 1);
   assert(wasmExports['__getTypeName'], 'missing Wasm export: __getTypeName');
   ___getTypeName = createExportWrapper('__getTypeName', 1);
   assert(wasmExports['_initialize'], 'missing Wasm export: _initialize');
   __initialize = Module['__initialize'] = createExportWrapper('_initialize', 0);
   assert(wasmExports['free'], 'missing Wasm export: free');
-  _free = createExportWrapper('free', 1);
+  _free = Module['_free'] = createExportWrapper('free', 1);
   assert(wasmExports['emscripten_stack_get_end'], 'missing Wasm export: emscripten_stack_get_end');
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
   assert(wasmExports['emscripten_stack_get_base'], 'missing Wasm export: emscripten_stack_get_base');
@@ -6410,6 +6551,12 @@ function assignWasmExports(wasmExports) {
 }
 
 var wasmImports = {
+  /** @export */
+  JsOnCreateBitmap,
+  /** @export */
+  JsOnDestroyBitmap,
+  /** @export */
+  JsOnFlushBitmap,
   /** @export */
   _embind_register_bigint: __embind_register_bigint,
   /** @export */
@@ -6465,6 +6612,8 @@ var wasmImports = {
   /** @export */
   clock_time_get: _clock_time_get,
   /** @export */
+  emscripten_notify_memory_growth: _emscripten_notify_memory_growth,
+  /** @export */
   environ_get: _environ_get,
   /** @export */
   environ_sizes_get: _environ_sizes_get,
@@ -6488,7 +6637,7 @@ var calledRun;
 
 var mainArgs = undefined;
 
-function callMain(args = []) {
+async function callMain(args = []) {
   assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on Module["onRuntimeInitialized"])');
   assert(typeof onPreRuns === 'undefined' || onPreRuns.length == 0, 'cannot call main when preRun functions remain to be called');
 
@@ -6503,6 +6652,10 @@ function callMain(args = []) {
     // that if we get here main returned zero.
     var ret = 0;
 
+    // The current spec of JSPI returns a promise only if the function suspends
+    // and a plain value otherwise. This will likely change:
+    // https://github.com/WebAssembly/js-promise-integration/issues/11
+    ret = await ret;
     // if we're not running an evented main loop, it's time to exit
     exitJS(ret, /* implicit = */ true);
     return ret;
@@ -6537,7 +6690,7 @@ function run(args = arguments_) {
     return;
   }
 
-  function doRun() {
+  async function doRun() {
     // run may have just been called through dependencies being fulfilled just in this very frame,
     // or while the async setStatus time below was happening
     assert(!calledRun);
@@ -6555,7 +6708,7 @@ function run(args = arguments_) {
     consumedModuleProp('onRuntimeInitialized');
 
     var noInitialRun = Module['noInitialRun'] || false;
-    if (!noInitialRun) callMain(args);
+    if (!noInitialRun) await callMain(args);
 
     postRun();
   }
@@ -6620,6 +6773,9 @@ wasmExports = await (createWasm());
 run();
 
 // end include: postamble.js
+
+// include: ujcore/wasm/post_steps.js
+// Nothing nfor now, but this file is reserved for any JS code that needs to run after the wasm module is loaded.// end include: ujcore/wasm/post_steps.js
 
 // include: postamble_modularize.js
 // In MODULARIZE mode we wrap the generated code in a factory function
