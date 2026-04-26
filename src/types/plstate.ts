@@ -10,13 +10,13 @@ export namespace plstate {
   export interface SlotState {
     inEdges: number[];
     outEdges: number[];
-    manual: EncodedData | null;
+    encodedData: EncodedData | null;
     genId: number;
   }
 
   export interface NodeState {
     label: string;
-    ioData: EncodedData | null;
+    encodedData: EncodedData | null;
     connected: "WAIT" | "RUN" | "ERR";
     genId: number;
   }

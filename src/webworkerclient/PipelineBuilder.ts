@@ -41,8 +41,8 @@ class PipelineBuilder {
     return await this.invokeAsync<"getAvailableFuncs">("getAvailableFuncs", request);
   }
 
-  public async syncGraphInputs(request: apis.Request<"syncGraphInputs">): Promise<apis.Response<"syncGraphInputs">> {
-    return await this.invokeAsync<"syncGraphInputs">("syncGraphInputs", request);
+  public async setEncodedData(request: apis.Request<"setEncodedData">): Promise<apis.Response<"setEncodedData">> {
+    return await this.invokeAsync<"setEncodedData">("setEncodedData", request);
   }
 
   public async runPipeline(request: apis.Request<"runPipeline">): Promise<apis.Response<"runPipeline">> {

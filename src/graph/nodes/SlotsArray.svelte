@@ -1,26 +1,18 @@
 <script lang="ts">
 import type { plinfo } from "@/types/plinfo";
 
-import type { UjOverrideData } from "../types";
-import type { NodeContextOps } from "./nodeContextOps";
+import { getNodeContextOps } from "./nodeContextOps";
 import NodeSlot from "./NodeSlot.svelte";
 
 interface Props {
   ins: plinfo.SlotInfo[];
   outs: plinfo.SlotInfo[];
   inouts: plinfo.SlotInfo[];
-  nodeOps: NodeContextOps;
 }
 
-const { ins, outs, inouts, nodeOps }: Props = $props();
+const { ins, outs, inouts }: Props = $props();
 
-function onDataEntry(slotName: string, data: UjOverrideData): void {
-  throw new Error("[onDataEntry] Not implemented");
-}
-
-function onDataLookup(slotName: string): UjOverrideData | null {
-    throw new Error("[onDataLookup] Not implemented");
-}
+const nodeOps = getNodeContextOps();
 
 </script>
 
@@ -38,22 +30,17 @@ function onDataLookup(slotName: string): UjOverrideData | null {
 
 {#snippet inSlot(slotInfo: plinfo.SlotInfo)}
   {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
-  <NodeSlot {slotInfo} {slotState} {onDataEntry} {onDataLookup} />
+  <NodeSlot {slotInfo} {slotState} />
 {/snippet}
 
 {#snippet outSlot(slotInfo: plinfo.SlotInfo)}
   {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
-  <NodeSlot {slotInfo} {slotState} {onDataEntry} {onDataLookup} />
+  <NodeSlot {slotInfo} {slotState} />
 {/snippet}
 
 {#snippet inoutSlot(slotInfo: plinfo.SlotInfo)}
   {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
-  <NodeSlot
-    {slotInfo}
-    {slotState}
-    {onDataEntry}
-    {onDataLookup}
-  />
+  <NodeSlot {slotInfo} {slotState} />
 {/snippet}
 
 <style>

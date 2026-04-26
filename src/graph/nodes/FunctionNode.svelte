@@ -3,7 +3,6 @@
 import type { plstate } from "@/types/plstate";
 import type { xy } from "@/types/xy";
 
-import { useGraphService } from "../graph-services";
 import { setNodeContextOps } from "./nodeContextOps";
 import SlotsArray from "./SlotsArray.svelte";
 import XYNodeTopBar from "./XYNodeTopBar.svelte";
@@ -30,7 +29,7 @@ const nodeState = $derived(nodeOps.reactiveNodeState()) as plstate.NodeState;
   <h3 class="card-title">{rawNodeId} / {nodeState.label}</h3>
   <span class="nodeid">{nodeId}</span>
 </div>
-<SlotsArray ins={funcNodeData.inInfos} outs={funcNodeData.outInfos} inouts={funcNodeData.inoutInfos} {nodeOps} />
+<SlotsArray ins={funcNodeData.inInfos} outs={funcNodeData.outInfos} inouts={funcNodeData.inoutInfos} />
 <XYNodeTopBar ntype={funcNodeData.info.ntype} {rawNodeId} />
 
 <style>

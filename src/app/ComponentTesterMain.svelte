@@ -1,5 +1,4 @@
 <script lang="ts">
-import SlotEditorTester from "@/modules/sloteditor/SlotEditorTester.svelte";
 import WebWorkerTestMain from "@/webworkerclient/WebWorkerTestMain.svelte";
 
 import ButtonGroup from "../components/ButtonGroup.svelte";
@@ -16,7 +15,6 @@ const modes = [
   { code: "recursive", label: "Cards" },
   { code: "ctxmenu", label: "Ctx Menu" },
   { code: "local", label: "Masonry" },
-  { code: "slots", label: "Slots" },
   { code: "graph", label: "Graph" },
   { code: "stage", label: "Stage" },
   // { code: "screen", label: "Screen" },
@@ -25,7 +23,7 @@ const modes = [
   { code: "worker", label: "WebWorker" },
 ];
 
-let selected = $state<string>("worker");
+let selected = $state<string>("graph");
 
 function handleSelect(code: string) {
   // Nothing.
@@ -44,8 +42,6 @@ function handleSelect(code: string) {
     <ContextMenuMain />
   {:else if selected === "local"}
     <LocalPopupsMain />
-  {:else if selected === "slots"}
-    <SlotEditorTester />
   {:else if selected === "graph"}
     <GraphEditorWithRealOps />
   {:else if selected === "stage"}

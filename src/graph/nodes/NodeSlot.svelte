@@ -8,33 +8,15 @@ import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
 import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 
-import type { UjOverrideData } from "../types";
 import MyHandle from "./MyHandle.svelte";
 import { getNodeContextOps } from "./nodeContextOps";
 
 interface Props {
   slotInfo: plinfo.SlotInfo;
   slotState: plstate.SlotState;
-  /**
-   * Invoked when use manually enters data and applies.
-   * @param slotName The name of this slot.
-   * @param data The entered data.
-   */
-  onDataEntry?: (slotName: string, data: UjOverrideData) => void;
-
-  /**
-   * Used in "in" and "inout" slots
-   * @param slotName The name of this slot.
-   */
-  onDataLookup?: (slotName: string) => UjOverrideData | null;
 }
 
-const {
-  slotInfo,
-  slotState,
-  onDataEntry,
-  onDataLookup,
-}: Props = $props();
+const { slotInfo, slotState }: Props = $props();
 
 const nodeOps = getNodeContextOps();
 

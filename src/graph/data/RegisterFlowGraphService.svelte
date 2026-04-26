@@ -18,6 +18,7 @@ import type { xy } from "@/types/xy";
 import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
 import { registerGraphService, useGraphService } from "../graph-services";
+import type { plstate } from "@/types/plstate";
 
 const {
   current: _currentNodes,
@@ -213,25 +214,25 @@ function assignGraph(newNodes: Node[], newEdges: Edge[]): void {
 }
 
 async function setGraphInput(rawNodeId: number, encoded: string): Promise<void> {
-  await pipeline.syncGraphInputs({
-    updateData: [[rawNodeId, encoded]],
-    deleteIds: [],
+  await pipeline.setEncodedData({
+    isNode: true,
+    nodeId: rawNodeId,
+    slotId: null,
+    encodedData: { payload: encoded } as plstate.EncodedData,
   });
   await _internalUpdateNodeState(rawNodeId);
 }
 
 async function setSlotInput(rawNodeId: number, slotName: string, encoded: string): Promise<void> {
-  throw new Error("Not implemented yet");
-  // await pipeline.syncGraphInputs({
-  //   updateData: [[rawNodeId, encoded]],
-  //   deleteIds: [],
-  // });
-  // await _internalUpdateNodeState(rawNodeId);
+  const slotId: plinfo.SlotId = { parent: rawNodeId, name: slotName };
+  await pipeline.setEncodedData({
+    isNode: false,
+    nodeId: null,
+    slotId,
+    encodedData: { payload: encoded } as plstate.EncodedData,
+  });
+  await _internalUpdateSlotState(slotId);
 }
-
-// async function getGraphState(rawNodeId: number): Promise<void> {
-
-// }
 
 async function playPipeline(): Promise<void> {
   await pipeline.runPipeline({
@@ -261,6 +262,13 @@ async function _internalUpdateNodeState(rawNodeId: number): Promise<void> {
   const { nodeStates } = await pipeline.getNodeStates({ nodeIds: [rawNodeId] });
   for (const [nodeId, nodeState] of nodeStates) {
     reactiveService.setNodeState(nodeId, nodeState);
+  }
+}
+
+async function _internalUpdateSlotState(slotId: plinfo.SlotId): Promise<void> {
+  const { slotStates } = await pipeline.getSlotStates({ slotIds: [slotId] });
+  for (const [slotId, slotState] of slotStates) {
+    reactiveService.setSlotState(slotId, slotState);
   }
 }
 </script>

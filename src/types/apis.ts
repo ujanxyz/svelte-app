@@ -98,15 +98,15 @@ export namespace apis {
       };
     };
 
-    syncGraphInputs: {
+    setEncodedData: {
       request: {
-        updateData: [number /* nodeId */, string /* encoded */][];
-        deleteIds: number[]; // nodeIds whose inputs are deleted
+        isNode: boolean;
+        nodeId: number | null;
+        slotId: plinfo.SlotId | null;
+        encodedData: plstate.EncodedData | null;
       };
-      response: {
-        inputData: [number /* nodeId */, string? /* encoded */][];
-      };
-    };
+      response: VoidType;
+    }
 
     runPipeline: {
       request: {

@@ -37,13 +37,19 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
       if (nodeInfo.ntype !== "IN") {
         throw new Error("Only IN nodes can have graph input");
       }
+
       const result = await popupService.graphInputEditor(rawNodeId, dtypeStr, ioData, triggerRect);
       if (result.status !== "OK") {
         return;
       }
-      const data = result.value as plstate.EncodedData;
-      console.log("Graph input editor closed with result:", dtypeStr, data);
-      await flowService!.setGraphInput(rawNodeId, data.payload);      
+      // TODO: Correct this flow.
+      const editedData = result.value as plstate.EncodedData;
+      if (editedData === null) {
+        throw new Error("Expected graph input editor to return data");
+      }
+      console.log("Graph input editor closed with result:", dtypeStr, editedData);
+      // TODO: Set whole payload.
+      await flowService!.setGraphInput(rawNodeId, editedData.payload);      
     },
 
     onSlotInput: async function(slotInfo: plinfo.SlotInfo, slotState: plstate.SlotState, triggerRect: DOMRect): Promise<void> {
@@ -53,7 +59,8 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
       if (slotState.inEdges.length > 0) {
         throw new Error("Cannot enter data. Delete the connection(s) at the input slot and try again.");
       }
-      const result = await popupService.graphInputEditor(rawNodeId, slotInfo.dtype, slotState.manual, triggerRect);
+      const result = await popupService.graphInputEditor(rawNodeId, slotInfo.dtype, slotState.encodedData, triggerRect);
+      console.log("result => ", result);
       if (result.status !== "OK") {
         return;
       }

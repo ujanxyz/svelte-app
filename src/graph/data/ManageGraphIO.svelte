@@ -6,7 +6,6 @@ import useAppLocalData from "@/modules/persistence/useAppLocalData";
 
 import { useGraphService } from "../graph-services";
 import type { UjGraphStorage } from "../types";
-import { initialEdges, initialNodes } from "../xyflow/nodes-and-edges";
 
 const ioService = useGraphService("ioService");
 const flowGraphService = useGraphService("flowGraphService");

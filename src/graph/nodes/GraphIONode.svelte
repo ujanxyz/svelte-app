@@ -34,22 +34,7 @@ const actionHandler: ActionHandler = {
 
   onSelfInput: async function (): Promise<void> {
     const rect = (refDataButton as HTMLButtonElement).getBoundingClientRect();
-    console.log(graphIONodeData, nodeState);
-
-    const data: plstate.EncodedData = nodeState.ioData ?? {
-      payload: "",
-    };
-    switch (graphIONodeData.slotInfo.dtype) {
-      case "floats":
-        data.payload = "[3.5555]";
-        break;
-      case "points2d":
-        data.payload = '[{"x":1.357, "y":2.468}]';
-        break;
-      default:
-        throw new Error("Unsupported dtype: " + graphIONodeData.slotInfo.dtype);
-    }
-    await nodeOps.onGraphInput(slotInfo.dtype, data, rect);
+    await nodeOps.onGraphInput(slotInfo.dtype, nodeState.encodedData, rect);
   },
 
   onDeleteSelf: async function (): Promise<void> {
@@ -68,7 +53,7 @@ async function handlePaneClick(ev: MouseEvent): Promise<void> {
   ev.preventDefault();
   const anchor = refDataButton || (ev.currentTarget as HTMLButtonElement);
   const rect = anchor.getBoundingClientRect();
-  await nodeOps.onGraphInput(slotInfo.dtype, nodeState.ioData, rect);
+  await nodeOps.onGraphInput(slotInfo.dtype, nodeState.encodedData, rect);
 }
 
 onMount(() => {
@@ -94,11 +79,8 @@ onMount(() => {
   <span>{nodeState.label}</span>
 </div>
 <div class="content" bind:this={contentDiv}>
-  {#if graphIONodeData.slotInfo.dtype === "bitmap" }
-    <!-- <NodeGraphic /> -->
-  {/if}
   <button onclick={handlePaneClick} bind:this={refDataButton}>
-    {nodeState.ioData?.payload ?? "n/a"}
+    {nodeState.encodedData?.payload ?? "n/a"}
   </button>
 </div>
 
@@ -124,7 +106,6 @@ onMount(() => {
 }
 .content {
   width: 100%;
-  height: 80px;
   padding: 6px;
 
   font-size: 0.675rem;

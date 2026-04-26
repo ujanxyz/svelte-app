@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import type { UjOverrideData } from "@/graph/types";
 import type { ClientXY } from "@/overlay/types";
 import useCurrentOverlay from "@/overlay/useCurrentOverlay";
 import type { plstate } from "@/types/plstate";
@@ -9,14 +8,13 @@ import type { plstate } from "@/types/plstate";
 import PickColors from "./PickColors.svelte";
 import PickCoords2D from "./PickCoords2D.svelte";
 import PickTexts from "./PickTexts.svelte";
+import PickFloats from "./PickFloats.svelte";
 
 interface Props {}
 
 const {}: Props = $props();
 
 let clientXY = $state<ClientXY>({ x: 0, y: 0 });
-let datatype = $state<string>("");
-let ioData = $state.raw<plstate.EncodedData | null>(null);
 let rawText = $state<string>("");
 
 /**
@@ -28,40 +26,37 @@ const styleString: string = $derived(
 
 const current = useCurrentOverlay();
 
-onMount(() => {
-  const {
-    anchor,
-    datatype: payloadDatatype,
-    priorIoData,
-    triggerRect
-  } = current.getLayerPayload();
-  console.log(current.getLayerPayload());
+const { dtypeStr: payloadDatatype, priorIoData, rawNodeId, triggerRect } = current.getLayerPayload() as {
+  dtypeStr: string;
+  priorIoData: plstate.EncodedData | null;
+  rawNodeId: number;
+  triggerRect: DOMRect;
+};
 
-  const { left: clientLeft, bottom: clientBottom } = triggerRect as DOMRect;
-  clientXY = { x: clientLeft, y: clientBottom };
-  ioData = priorIoData as plstate.EncodedData | null;
-  rawText = JSON.stringify(ioData, null, 2);
+//---------------
+
+onMount(() => {
+  const { left: clientLeft, top: clientTop } = triggerRect as DOMRect;
+  clientXY = { x: clientLeft, y: clientTop };
+  rawText = JSON.stringify(priorIoData);
 });
 
-function onData(typedPayload: object) {
-  // const ujData: UjOverrideData = {
-  //   datatype,
-  //   timestamp: Date.now(),
-  //   payload: typedPayload,
-  // };
-  current.settleOverlay(null);
+function onData(edited: plstate.EncodedData): void {
+  console.log("onData = ", edited);
+  current.settleOverlay(edited);
 }
 
-function applyRawPayload() {
-  current.settleOverlay(JSON.parse(rawText));
-}
 </script>
 
 <div class="layer contextmenu" style={styleString}>
-  <span class="title"> Picker: {datatype} </span>
-  <span> {JSON.stringify(ioData)} </span>
-  <textarea bind:value={rawText} placeholder="Encoded payload (JSON)" rows="8"></textarea>
-  <button onclick={applyRawPayload}>Apply</button>
+  <span class="title"> Picker: {payloadDatatype} </span>
+  {#if payloadDatatype === "points2d"}
+    <PickCoords2D initial={priorIoData} {onData} />
+  {:else if payloadDatatype === "floats"}
+    <PickFloats initial={priorIoData} {onData} />
+  {/if}
+
+  <!-- <textarea bind:value={rawText} placeholder="Encoded payload (JSON)" rows="8"></textarea> -->
 </div>
 
 <style>
@@ -73,6 +68,8 @@ function applyRawPayload() {
   position: fixed;
   left: var(--left, 0);
   top: var(--top, 0);
+  width: 240px;
+  height: auto;
 
   background-color: #222222;
   font-size: 0.8rem;
@@ -84,12 +81,10 @@ function applyRawPayload() {
 
 .contextmenu {
   padding-top: calc(0.2rem + 1px);
-  /* padding-bottom: calc(0.2rem + 1px); */
-  padding-bottom: 80px;
+  padding-bottom: calc(0.2rem + 1px);
   padding-left: 6px;
   padding-right: 6px;
 
-  width: 400px;
   background-color: #222222;
   border-radius: 4px;
 

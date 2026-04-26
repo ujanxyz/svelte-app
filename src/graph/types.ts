@@ -1,8 +1,4 @@
 import type {
-  Edge,
-  EdgeProps,
-  Node,
-  NodeProps,
   Viewport,
   XYPosition,
 } from "@xyflow/svelte";
@@ -52,18 +48,4 @@ export interface UjGraphStorage {
   nodes: UjNodeStorage[];
   edges: UjEdgeStorage[];
   viewport: Viewport;
-}
-
-// Keep this flat object, it is used as non-reactive value in SvelteMap.
-export interface UjSlotInfo {
-  parentNode: string;
-  paramname: string;
-  datatype: string;
-  state: "blank" | "edge" | "data";
-}
-
-export interface UjOverrideData {
-  datatype: string;
-  timestamp: number;
-  payload: object;
 }

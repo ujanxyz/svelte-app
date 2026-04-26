@@ -1,10 +1,9 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import {
+  Binding,
   Button,
   type ButtonClickEvent,
-  Point,
-  type PointValue2d,
   Separator,
 } from "svelte-tweakpane-ui";
 
@@ -15,21 +14,26 @@ interface Props {
   onData: (edited: plstate.EncodedData) => void;
 }
 
+interface Float {
+  n: number;
+}
+
 const { initial, onData }: Props = $props();
 
-let valueArray = $state<PointValue2d[]>([]);
+let valueArray = $state<Float[]>([]);
 
 onMount(parseInitialIoData);
 
 function onClickAdd(ev: ButtonClickEvent) {
   ev.preventDefault();
-  valueArray.push({ x: 0, y: 0 });
+  valueArray.push({ n: 0 });
 }
 
 function onClickApply(ev: ButtonClickEvent) {
   ev.preventDefault();
+  const valueArrayPlain = $state.snapshot(valueArray).map((v) => v.n);
   const data: plstate.EncodedData = {
-    payload: JSON.stringify($state.snapshot(valueArray)),
+    payload: JSON.stringify(valueArrayPlain),
   };
   onData(data);
 }
@@ -47,12 +51,12 @@ function parseInitialIoData(): void {
   }
   if (!Array.isArray(parsed) || parsed.length === 0) return;
   const p0 = parsed[0];
-  if (typeof p0 !== "object" || p0 === null || !("x" in p0) || !("y" in p0)) {
-    console.warn("Invalid initial data for PickCoords2D: ", initial);
+  if (typeof p0 !== "number") {
+    console.warn("Invalid initial data for PickFloats: ", initial);
     return;
   }
   for (const p of parsed) {
-    valueArray.push({ x: p.x, y: p.y });
+    valueArray.push({ n: p });
   }
 }
 
@@ -63,7 +67,7 @@ function onChangeCell(ev: any) {
 
 <div>
   {#each valueArray as _, i (i)}
-    <Point bind:value={valueArray[i]} on:change={onChangeCell} />
+    <Binding bind:object={valueArray[i]} key="n" label="Value" />
   {/each}
   <Separator />
   <Button on:click={onClickAdd} title="ADD" />
