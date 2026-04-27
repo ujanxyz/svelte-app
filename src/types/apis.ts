@@ -73,6 +73,18 @@ export namespace apis {
       };
     };
 
+    validateEdge: {
+      request: {
+        sourceNode: number;
+        sourceSlot: string;
+        targetNode: number;
+        targetSlot: string;
+      };
+      response: {
+        validity: plstate.SlotValidity;
+      };
+    };
+
     getNodeStates: {
       request: {
         nodeIds: number[];
@@ -113,7 +125,9 @@ export namespace apis {
         build: boolean;
         execute: boolean;
       };
-      response: VoidType;
+      response: {
+        runResult: plstate.GraphRunOutput[];
+      };
     };
 
     getResources: {

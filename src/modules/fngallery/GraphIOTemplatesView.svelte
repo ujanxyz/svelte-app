@@ -33,4 +33,7 @@ function onSelect(dtype: string) {
   <p>
     <TextButton text={"dtype: Bitmap"} onclick={() => onSelect("bitmap")} />
   </p>
+  <p>
+    <TextButton text={"dtype: Colors"} onclick={() => onSelect("colors")} />
+  </p>
 </div>

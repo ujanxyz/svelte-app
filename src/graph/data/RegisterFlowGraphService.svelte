@@ -14,11 +14,11 @@ import { getContext } from "svelte";
 import type { ClientXY } from "@/overlay/types";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
+import type { plstate } from "@/types/plstate";
 import type { xy } from "@/types/xy";
 import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
 import { registerGraphService, useGraphService } from "../graph-services";
-import type { plstate } from "@/types/plstate";
 
 const {
   current: _currentNodes,
@@ -44,6 +44,7 @@ const reactiveService = useGraphService("reactiveService");
 registerGraphService("flowGraphService", {
   newNodeAt,
   newGraphIOAt,
+  validateEdge,
   addEdge,
   deletionHandle,
   screenToFlowXY,
@@ -116,6 +117,27 @@ async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPositi
   _updateNodes((nodes: Node[]) => {
     return [...nodes, newNode];
   });
+}
+
+async function validateEdge(connection: Connection): Promise<plstate.SlotValidity> {
+  const sourceHandle = connection.sourceHandle!;
+  const targetHandle = connection.targetHandle!;
+  const sourceSlot = _removeSuffix(sourceHandle, "/out");
+  const targetSlot = _removeSuffix(targetHandle, "/in");
+
+  const nodeData0 = _getNode(connection.source)?.data as xy.xyBaseNodeData;
+  const nodeData1 = _getNode(connection.target)?.data as xy.xyBaseNodeData;
+  if (!nodeData0 || !nodeData1) {
+    throw new Error("Source or target node data not found");
+  }
+
+  const { validity } = await pipeline.validateEdge({
+    sourceNode: nodeData0.info.rawId,
+    targetNode: nodeData1.info.rawId,
+    sourceSlot,
+    targetSlot,
+  });
+  return validity as plstate.SlotValidity;
 }
 
 async function addEdge(connection: Connection): Promise<void> {
@@ -240,6 +262,7 @@ async function playPipeline(): Promise<void> {
     execute: true,
   });
   const resources = await pipeline.getResources({});
+  console.log("Resources after run:", resources);
 }
 
 function _getClientXY(event: MouseEvent | TouchEvent): ClientXY {

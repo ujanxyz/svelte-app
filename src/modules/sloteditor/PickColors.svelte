@@ -5,11 +5,14 @@ import {
   type ButtonClickEvent,
   Color,
   type ColorChangeEvent,
+  Separator,
 } from "svelte-tweakpane-ui";
 
+import type { plstate } from "@/types/plstate";
+
 interface Props {
-  initial: object | null;
-  onData: (typedPayload: object) => void;
+  initial: plstate.EncodedData | null;
+  onData: (edited: plstate.EncodedData) => void;
 }
 
 const { initial, onData }: Props = $props();
@@ -17,32 +20,51 @@ const { initial, onData }: Props = $props();
 let valueArray = $state<string[]>([]);
 let lastColor: string = "#000000";
 
-onMount(() => {
-  if (initial === null) return;
-  valueArray = initial as string[];
-});
+onMount(parseInitialIoData);
 
 function onClickAdd(ev: ButtonClickEvent) {
   ev.preventDefault();
-  valueArray.push(lastColor);
-  _updated();
+  valueArray.push($state.snapshot(lastColor));
 }
 
 function onClickApply(ev: ButtonClickEvent) {
   ev.preventDefault();
-  onData($state.snapshot(valueArray));
+  const data: plstate.EncodedData = {
+    payload: JSON.stringify($state.snapshot(valueArray)),
+  };
+  onData(data);
 }
 
-function onChangeCell(ev: ColorChangeEvent) {
-  const { value: color } = ev.detail;
-  if (typeof color === "string") {
-    lastColor = color;
+function parseInitialIoData(): void {
+  if (!initial || typeof initial !== "object" || !("payload" in initial)) return;
+  const payload = initial.payload;
+  if (typeof payload !== "string") return;
+  let parsed: any;
+  try {
+    parsed = JSON.parse(payload);
+  } catch (e) {
+    console.warn("Failed to parse initial payload as JSON: ", payload);
+    return;
   }
-  _updated();
+  if (!Array.isArray(parsed) || parsed.length === 0) return;
+  const p0 = parsed[0];
+  if (typeof p0 !== "string" || !p0.startsWith("#")) {
+    console.warn("Invalid initial data for colors: ", initial);
+    return;
+  }
+
+  let lastValue: string | undefined;
+  for (const p of parsed) {
+    valueArray.push(p);
+    lastValue = p;
+  }
+  if (lastValue) {
+    lastColor = lastValue;
+  }
 }
 
-function _updated() {
-  // TODO: Maybe support preview / auto-sync of node data while editing in popup.
+function onChangeCell(ev: any) {
+  //_updated();
 }
 </script>
 
@@ -50,14 +72,7 @@ function _updated() {
   {#each valueArray as _, i (i)}
     <Color bind:value={valueArray[i]} on:change={onChangeCell} />
   {/each}
+  <Separator />
   <Button on:click={onClickAdd} title="+" />
   <Button on:click={onClickApply} title="APPLY" />
 </div>
-
-<style>
-/* .paneui {
-  --bld-vw: 50px;
-  width: 120px;
-  max-width: 200px;
-} */
-</style>

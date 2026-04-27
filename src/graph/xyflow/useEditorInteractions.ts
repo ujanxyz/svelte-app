@@ -26,7 +26,17 @@ export default function useEditorInteractions() {
   }
 
   function onbeforeconnect(connection: Connection): false | xy.xyEdge {
-    flowGraphService.addEdge(connection);
+    console.log("onbeforeconnect ... ", connection);
+    flowGraphService.validateEdge(connection).then((validity) => {
+      console.log("Edge validity: ", validity);
+      if (validity === "VALID") {
+        flowGraphService.addEdge(connection).then(() => {
+          debugLog("Edge added successfully.");
+        });
+      } else {
+        warnLog(`Invalid edge connection: ${validity}`);
+      }
+    });
     // NOTE: "onbeforeconnect" is not await-ed, so reject this edge and add it
     // manually above. Ref:
     // https://github.com/xyflow/xyflow/issues/5740

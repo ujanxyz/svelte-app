@@ -1,5 +1,0 @@
-
-class ClientCanvasPool {
-};
-
-export { ClientCanvasPool };

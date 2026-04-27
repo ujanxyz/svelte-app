@@ -54,6 +54,7 @@ interface FlowGraphService {
   newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition): Promise<void>;
 
   // Status: Done, Tested.
+  validateEdge(connection: Connection): Promise<plstate.SlotValidity>;
   addEdge(connection: Connection): Promise<void>;
 
   // Status: Done, Tested.
@@ -85,9 +86,8 @@ interface ContextMenuService {
 interface PopupService {
   nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
   flowDataInspector: () => Promise<void>;
-  graphInputEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
+  encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
       => Promise<StatusOr<plstate.EncodedData>>;
-
 }
 
 export interface GraphServices {

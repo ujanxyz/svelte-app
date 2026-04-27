@@ -102,13 +102,13 @@ function handleWinResize() {
 </script>
 
 <div
-  data-name="OverlayProvider"
   class="provider"
   use:clickoutside
   onclickoutside={_clearOverlays}
+  data-debug-name="overlay-provider-outer"
 >
   {@render children()}
-  <div class="contents" bind:this={rootDiv}>
+  <div class="contents" bind:this={rootDiv} data-debug-name="overlay-provider-outer">
     <LayerList {layers} />
   </div>
 </div>

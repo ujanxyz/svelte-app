@@ -29,6 +29,10 @@ class PipelineBuilder {
     return await this.invokeAsync<"deleteElements">("deleteElements", request);
   }
 
+  public async validateEdge(request: apis.Request<"validateEdge">): Promise<apis.Response<"validateEdge">> {
+    return await this.invokeAsync<"validateEdge">("validateEdge", request);
+  }
+
   public async getNodeStates(request: apis.Request<"getNodeStates">): Promise<apis.Response<"getNodeStates">> {
     return await this.invokeAsync<"getNodeStates">("getNodeStates", request);
   }
@@ -53,7 +57,6 @@ class PipelineBuilder {
     return await this.invokeAsync<"getResources">("getResources", request);
   }
 
-  
   private async invokeAsync<K extends apis.Names>(name: apis.Names, request: apis.Request<K>): Promise<apis.Response<K>> {
     const { ok, code, payload, error } = await this.client.send(`GRAPH:${name}`, request, []);
     if (!ok) {

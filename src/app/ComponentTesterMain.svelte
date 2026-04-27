@@ -10,6 +10,7 @@ import ContextMenuMain from "../overlay/context-menu/ContextMenuMain.svelte";
 import LocalPopupsMain from "../overlay/local-popups/LocalPopupsMain.svelte";
 import RecursiveCardsMain from "../overlay/recursive-cards/RecursiveCardsMain.svelte";
 import ScreenLayout from "./ScreenLayout.svelte";
+import PickFile from "@/modules/sloteditor/PickFile.svelte";
 
 const modes = [
   { code: "recursive", label: "Cards" },
@@ -21,6 +22,7 @@ const modes = [
   { code: "toast", label: "Toast" },
   { code: "memlog", label: "Mem-logging" },
   { code: "worker", label: "WebWorker" },
+  { code: "upload", label: "File Upload" },
 ];
 
 let selected = $state<string>("graph");
@@ -55,6 +57,8 @@ function handleSelect(code: string) {
     <MemLogTesterMain />
   {:else if selected === "worker"}
     <WebWorkerTestMain />
+  {:else if selected === "upload"}
+    <PickFile />
   {:else}
     No component to show.
   {/if}

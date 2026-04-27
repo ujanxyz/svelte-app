@@ -21,6 +21,10 @@ export default defineConfig({
   envDir: "./env",
   server: {
     port: 3000,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "X-Content-Type-Options": "nosniff",
+    },
   },
   resolve: {
     alias: [

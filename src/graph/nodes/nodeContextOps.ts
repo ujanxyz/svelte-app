@@ -38,7 +38,7 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
         throw new Error("Only IN nodes can have graph input");
       }
 
-      const result = await popupService.graphInputEditor(rawNodeId, dtypeStr, ioData, triggerRect);
+      const result = await popupService.encodedDataEditor(rawNodeId, dtypeStr, ioData, triggerRect);
       if (result.status !== "OK") {
         return;
       }
@@ -59,8 +59,7 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
       if (slotState.inEdges.length > 0) {
         throw new Error("Cannot enter data. Delete the connection(s) at the input slot and try again.");
       }
-      const result = await popupService.graphInputEditor(rawNodeId, slotInfo.dtype, slotState.encodedData, triggerRect);
-      console.log("result => ", result);
+      const result = await popupService.encodedDataEditor(rawNodeId, slotInfo.dtype, slotState.encodedData, triggerRect);
       if (result.status !== "OK") {
         return;
       }

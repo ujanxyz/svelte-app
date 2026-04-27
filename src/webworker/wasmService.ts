@@ -79,7 +79,7 @@ class WasmService {
   #makeAbseilFlags(): string[] {
     const flags: string[] = [
       "binaryRef", // The 0-th arg is reserved for the binary ref, which is not consumed in flags.
-      // "--vmodule=PipelineRunner=1,PipelineIONode=1,PipelineFnNode=1,FloatListAttr=1",
+      "--vmodule=PipelineRunner=1,PipelineIONode=1,PipelineFnNode=1,FloatListAttr=1",
     ];
     return flags;
   }

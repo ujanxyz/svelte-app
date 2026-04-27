@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Fileupload, Helper } from "flowbite-svelte";
 import { onMount } from "svelte";
 
 import type { plstate } from "@/types/plstate";
@@ -82,6 +83,12 @@ onMount(() => {
   <button onclick={handlePaneClick} bind:this={refDataButton}>
     {nodeState.encodedData?.payload ?? "n/a"}
   </button>
+
+  ntype={graphIONodeData.info.ntype}, dtype={graphIONodeData.slotInfo.dtype}
+  {#if graphIONodeData.info.ntype === "IN" && graphIONodeData.slotInfo.dtype === "bitmap"}
+    <Fileupload id="with_helper" class="mb-2" />
+    <Helper>SVG, PNG, JPG or GIF (MAX. 800x400px).</Helper>
+  {/if}
 </div>
 
 {#if graphIONodeData.info.ntype === "OUT"}

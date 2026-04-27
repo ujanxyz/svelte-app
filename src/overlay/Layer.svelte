@@ -87,8 +87,11 @@ function setTranslate(dx: number, dy: number) {
   left: 0;
   right: 0;
   bottom: 0;
+
   overflow: hidden;
   /* backdrop-filter: blur(4px); */
+
+  z-index: 1;
 }
 :global(.movable) {
   position: absolute;

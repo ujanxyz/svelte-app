@@ -20,4 +20,12 @@ export namespace plstate {
     connected: "WAIT" | "RUN" | "ERR";
     genId: number;
   }
+
+  export interface GraphRunOutput {
+    nodeId: number;
+    dtype: string;
+    encodedData: EncodedData | null;
+  };
+
+  export type SlotValidity = "VALID" | "WARN_DATA" | "ERR_TYPE" | "ERR_EDGE";
 }

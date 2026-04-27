@@ -55,8 +55,10 @@
   },
   "dependencies": {
     "@xyflow/svelte": "^1.5.1",
-    "bits-ui": "^2.16.1",
+    "bits-ui": "^2.18.0",
     "debounce": "^3.0.0",
+    "filepond": "^4.32.12",
+    "svelte-filepond": "^0.2.2",
     "svelte-tweakpane-ui": "^1.5.14"
   }
 }
