@@ -41,6 +41,8 @@ interface ReactiveService {
 }
 
 interface IoService {
+  uploadFile: (rawNodeId: number, slotName: string, file: File) => Promise<void>;
+
   serializeObject: (
     nodes: Node[],
     edges: Edge[],

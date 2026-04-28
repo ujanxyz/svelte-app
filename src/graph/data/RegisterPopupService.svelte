@@ -1,20 +1,21 @@
 <script lang="ts">
 import { Panel } from "@xyflow/svelte";
 
-import ManualInputEditor from "@/graph/data/ManualInputEditor.svelte";
+import ManualInputEditor, { type ManualInputOverlayPayload } from "@/graph/data/ManualInputEditor.svelte";
+import { createOverlayController, type OverlayResult,overlayStatuses, useOverlayManager } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 
-import FnGalleryV2 from "../../modules/fngallery/FnGalleryV2.svelte";
-import { useOverlayUi } from "../../overlay/overlayStore";
+import FnGalleryV2, { type FnGalleryPayload } from "../../modules/fngallery/FnGalleryV2.svelte";
 import { type StatusOr } from "../../overlay/types";
 import { registerGraphService } from "../graph-services";
 
 type Ntype = plinfo.NodeInfo["ntype"];
 
-const galleryPopup = useOverlayUi(renderFnGallery);
-const graphInputPopup = useOverlayUi(renderGraphInputEditor);
+const overlayMgr = useOverlayManager();
+const fnGallery = createOverlayController<FnGalleryPayload, fn.FunctionInfo | fn.GraphIoInfo>(overlayMgr, renderFnGallery);
+const manualInput = createOverlayController<ManualInputOverlayPayload, plstate.EncodedData>(overlayMgr, renderGraphInputEditor);
 
 registerGraphService("popupService", {
   nodeTemplateGallery,
@@ -25,7 +26,14 @@ registerGraphService("popupService", {
 const showDataInspector = $state<boolean>(false);
 
 async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
-  return await galleryPopup.openOverlayAsync<fn.FunctionInfo | fn.GraphIoInfo>({ntype});
+  const result: OverlayResult<fn.FunctionInfo | fn.GraphIoInfo> = await fnGallery.open({ ntype: "IN" });
+  if (result.status === overlayStatuses.OK) {
+    console.log("Selected item:", result.value);
+    return { status: "OK", value: result.value };
+  } else {
+    console.log("Gallery dismissed with status:", result.status);
+    return { status: "DISMISSED", reason: result.status };
+  }
 }
 
 async function flowDataInspector(): Promise<void> {
@@ -33,7 +41,12 @@ async function flowDataInspector(): Promise<void> {
 }
 
 async function encodedDataEditor(rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect): Promise<StatusOr<plstate.EncodedData>> {
-  return await graphInputPopup.openOverlayAsync<plstate.EncodedData>({rawNodeId, dtypeStr, priorIoData, triggerRect}, {movable: false});
+  const result = await manualInput.open({rawNodeId, dtypeStr, priorIoData, triggerRect});
+  if (result.status === overlayStatuses.OK) {
+    return { status: "OK", value: result.value };
+  } else {
+    return { status: "DISMISSED", reason: result.status };
+  }
 }
 
 </script>

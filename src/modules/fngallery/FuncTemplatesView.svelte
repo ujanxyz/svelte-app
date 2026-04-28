@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext, onMount } from "svelte";
 
-import useCurrentOverlay from "@/overlay/useCurrentOverlay";
+import { useOverlayInstance } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
 import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
@@ -10,7 +10,8 @@ import FunctionCard from "./FunctionCard.svelte";
 
 const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
 const { fetchItemsAsync, abortFetch } = fetchFnInfos(pipeline);
-const overlay = useCurrentOverlay();
+
+const overlay = useOverlayInstance<unknown, fn.FunctionInfo | fn.GraphIoInfo>();
 
 let itemsPromise = $state(fetchItemsAsync());
 
@@ -19,7 +20,7 @@ onMount(() => {
 });
 
 function onSelect(spec: fn.FunctionInfo) {
-  overlay.settleOverlay(spec);
+  overlay.settle(spec);
 }
 </script>
 

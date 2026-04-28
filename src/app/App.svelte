@@ -3,21 +3,25 @@ import "./app.css";
 
 import MemLogger from "@/modules/memlogging/MemLogger.svelte";
 import Toaster from "@/modules/toast/Toaster.svelte";
-import OverlayProvider from "@/overlay/OverlayProvider.svelte";
+import { createOverlayManager, OverlayRoot } from "@/modules/overlay2";
 import WorkerResourcesProvider from "@/webworkerclient/WorkerResourcesProvider.svelte";
 
 import ComponentTesterMain from "./ComponentTesterMain.svelte";
 import useNewEventTarget from "./useNewEventTarget";
 
+const overlayManager = createOverlayManager();
+
 useNewEventTarget();
 </script>
 
 <WorkerResourcesProvider>
-  <OverlayProvider>
+  <!-- <OverlayProvider> -->
+  <OverlayRoot manager={overlayManager}>
     <main>
       <ComponentTesterMain />
     </main>
-  </OverlayProvider>
+  </OverlayRoot>
+  <!-- </OverlayProvider> -->
   <MemLogger />
   <Toaster />
 </WorkerResourcesProvider>

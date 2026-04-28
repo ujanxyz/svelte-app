@@ -46,6 +46,11 @@ class GraphIoManager {
     await this.client.send("IO:DELETE_CANVAS", { rawNodeId: slotId.parent, slotName: slotId.name }, [], 5000);
     this.previewPool.delete(encodedId);
   }
+
+  public async uploadFile(file: File): Promise<void> {
+    const res = await this.client.send("IO:SEND_FILE", { file }, [], 5000);
+    console.log("File upload response: ", res);
+  }
 };
 
 export { GraphIoManager };

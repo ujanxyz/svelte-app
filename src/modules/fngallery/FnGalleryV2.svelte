@@ -1,28 +1,31 @@
-<script lang="ts">
+<script lang="ts" module>
+type Ntype = plinfo.NodeInfo["ntype"];
 
+export interface FnGalleryPayload {
+  ntype: Ntype;
+}
+</script>
+
+<script lang="ts">
 import ButtonGroup from "@/components/ButtonGroup.svelte";
+import { useOverlayInstance } from "@/modules/overlay2";
 import { type fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 
-import useCurrentOverlay from "../../overlay/useCurrentOverlay";
 import FuncTemplatesView from "./FuncTemplatesView.svelte";
 import GraphIOTemplatesView from "./GraphIOTemplatesView.svelte";
 
-type Ntype = plinfo.NodeInfo["ntype"];
-type OverlayPayload = { ntype: Ntype };
-
-const overlay = useCurrentOverlay();
-const overlayPayload = overlay.getLayerPayload() as OverlayPayload;
+const overlay = useOverlayInstance<FnGalleryPayload, fn.FunctionInfo | fn.GraphIoInfo>();
 
 const modes: { code: plinfo.NodeInfo["ntype"]; label: string }[] = [
   { code: "FN", label: "Functions" },
   { code: "IN", label: "Graph Inputs" },
   { code: "OUT", label: "Graph Outputs" },
 ];
-let selected = $state<plinfo.NodeInfo["ntype"]>(overlayPayload.ntype);
+let selected = $state<plinfo.NodeInfo["ntype"]>(overlay.payload.ntype);
 
 function closeGallery() {
-  overlay.abortOverlay();
+  overlay.abort();
 }
 
 function handleSelectFnType(code: string) {
@@ -30,7 +33,7 @@ function handleSelectFnType(code: string) {
 }
 </script>
 
-<div class={["gallery-main"]}>
+<div class={["shell", "gallery-main"]}>
   <div class="topbar">
     <h2 class="header-l1">www.mockaroo.com</h2>
     <div class="flex-remaining">m</div>
@@ -49,6 +52,12 @@ function handleSelectFnType(code: string) {
 </div>
 
 <style>
+.shell {
+  position: fixed;
+  pointer-events: auto;
+  min-width: 160px;
+  z-index: 1;
+}
 .gallery-main {
   width: calc(100vw - 48px);
   height: calc(100vh - 48px);

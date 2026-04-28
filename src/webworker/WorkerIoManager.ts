@@ -22,6 +22,14 @@ class WorkerIoManager {
         this.plEventsHandler.registerPreview(bitmapId, canvas);
         return { status: "Canvas registered" };
       }
+      case "SEND_FILE": {
+        console.log("Sending file with request:", request);
+        const { file } = request as { file: File };
+        console.log("Received file in worker:", file);
+        console.log("TODO: Save in db");
+        // Handle file sending logic here
+        return { status: "File sent" };
+      }
       default:
         throw new Error("Unknown IO command: " + ioCmd);
     }

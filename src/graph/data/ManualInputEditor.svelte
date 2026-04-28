@@ -1,14 +1,25 @@
+<script lang="ts" module>
+import type { plstate } from "@/types/plstate";
+
+export interface ManualInputOverlayPayload {
+  dtypeStr: string;
+  priorIoData: plstate.EncodedData | null;
+  rawNodeId: number;
+  triggerRect: DOMRect;
+};
+
+</script>
+
 <script lang="ts">
 import { onMount } from "svelte";
 
+import { useOverlayInstance } from "@/modules/overlay2";
 import PickColors from "@/modules/sloteditor/PickColors.svelte";
 import PickCoords2D from "@/modules/sloteditor/PickCoords2D.svelte";
+import PickFile from "@/modules/sloteditor/PickFile.svelte";
 import PickFloats from "@/modules/sloteditor/PickFloats.svelte";
 import PickTexts from "@/modules/sloteditor/PickTexts.svelte";
 import type { ClientXY } from "@/overlay/types";
-import useCurrentOverlay from "@/overlay/useCurrentOverlay";
-import type { plstate } from "@/types/plstate";
-import PickFile from "@/modules/sloteditor/PickFile.svelte";
 
 
 interface Props {}
@@ -24,9 +35,9 @@ const styleString: string = $derived(
   `left: ${clientXY.x}px; top: ${clientXY.y}px;`,
 );
 
-const current = useCurrentOverlay();
+const overlay = useOverlayInstance<ManualInputOverlayPayload, plstate.EncodedData>();
 
-const { dtypeStr: payloadDatatype, priorIoData, rawNodeId, triggerRect } = current.getLayerPayload() as {
+const { dtypeStr: payloadDatatype, priorIoData, rawNodeId, triggerRect } = overlay.payload as {
   dtypeStr: string;
   priorIoData: plstate.EncodedData | null;
   rawNodeId: number;
@@ -42,7 +53,7 @@ onMount(() => {
 
 function onData(edited: plstate.EncodedData): void {
   console.log("onData = ", edited);
-  current.settleOverlay(edited);
+  overlay.settle(edited);
 }
 
 function onChangeFile(ev: Event): void {

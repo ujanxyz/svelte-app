@@ -1,11 +1,11 @@
 <script lang="ts">
 import TextButton from "@/components/TextButton.svelte";
-import useCurrentOverlay from "@/overlay/useCurrentOverlay";
+import { useOverlayInstance } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 
 type Ntype = plinfo.NodeInfo["ntype"];
-const overlay = useCurrentOverlay();
+const overlay = useOverlayInstance<unknown, fn.FunctionInfo | fn.GraphIoInfo>();
 
 interface Props {
   ntype: Ntype;
@@ -18,7 +18,7 @@ function onSelect(dtype: string) {
     dtype,
     uri: (ntype === "IN" ? "/$IN/" : "/$OUT/") + dtype,
   };
-  overlay.settleOverlay(ioInfo);
+  overlay.settle(ioInfo);
 }
 </script>
 
