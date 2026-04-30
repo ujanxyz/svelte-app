@@ -77,7 +77,11 @@ interface FlowGraphService {
 
 type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
 
-interface ContextMenuService {
+interface PopupService {
+  nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
+  encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
+      => Promise<StatusOr<plstate.EncodedData>>;
+  // Context menu APIs.
   menuInPane: MenuFunction;
   menuInNode: MenuFunction;
   menuInEdge: MenuFunction;
@@ -85,17 +89,10 @@ interface ContextMenuService {
   menuInConnEnd: MenuFunction;
 }
 
-interface PopupService {
-  nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
-  encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
-      => Promise<StatusOr<plstate.EncodedData>>;
-}
-
 export interface GraphServices {
   rawStoreService?: RawStoreService;
   ioService?: IoService;
   flowGraphService?: FlowGraphService;
-  menuService?: ContextMenuService;
   popupService?: PopupService;
   reactiveService?: ReactiveService;
 }

@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onDestroy } from "svelte";
 
+import TextButton from "@/components/TextButton.svelte";
 import useMemlogging from "@/modules/memlogging/useMemlogging";
 import * as overlay2 from "@/modules/overlay2";
 
@@ -24,7 +25,7 @@ const recCards = overlay2.createOverlayController<{}, number>(overlayMgr, render
 
 const { debugLog, errorLog } = useMemlogging();
 
-async function openOverlayCards() {
+async function openOverlayCards(ev: MouseEvent) {
   const retValue: overlay2.OverlayResult<any> = await recCards.open({}, { dismissOnBackdrop: false });
   if (retValue.status === overlay2.overlayStatuses.OK) {
     debugLog(
@@ -47,15 +48,5 @@ onDestroy(() => {
   <RecursiveCardWrapper {cardColors} />
 {/snippet}
 
-<button class="trigger" onclick={openOverlayCards}>Recursive Cards</button>
+<TextButton onclick={openOverlayCards} text="Open Recursive Cards" />
 
-<style>
-.trigger {
-  background-color: #2656aa;
-  color: #f0f0f0;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-weight: 400;
-  cursor: pointer;
-}
-</style>

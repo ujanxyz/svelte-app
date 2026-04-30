@@ -23,7 +23,6 @@ export default function useMenusAndPopups() {
   const rawStoreService = useGraphService("rawStoreService");
   const ioService = useGraphService("ioService");
   const flowGraphService = useGraphService("flowGraphService");
-  const menuService = useGraphService("menuService");
   const popupService = useGraphService("popupService");
 
   async function onpaneclick({ event }: { event: MouseEvent }): Promise<void> {
@@ -42,7 +41,7 @@ export default function useMenusAndPopups() {
     };
     event.preventDefault();
     const flowPosn = flowGraphService.screenToFlowXY(event);
-    const retval = await menuService.menuInPane(clientXY);
+    const retval = await popupService.menuInPane(clientXY);
     if (retval.status !== "OK") return;
     switch (retval.value) {
       case MenuCodes.NEW_NODE:
@@ -75,7 +74,7 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await menuService.menuInNode(clientXY);
+    const retval = await popupService.menuInNode(clientXY);
     if (retval.status !== "OK") return;
     const nodeId = node.id as string;
     switch (retval.value) {
@@ -96,7 +95,7 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await menuService.menuInEdge(clientXY) as StatusOr<string>;
+    const retval = await popupService.menuInEdge(clientXY) as StatusOr<string>;
     if (retval.status !== "OK") return;
     const edgeId = edge.id as string;
     switch (retval.value) {
@@ -117,7 +116,7 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await menuService.menuInSelection(clientXY) as StatusOr<string>;
+    const retval = await popupService.menuInSelection(clientXY) as StatusOr<string>;
     if (retval.status !== "OK") return;
     switch (retval.value) {
       case MenuCodes.RM_SELECTION:
@@ -146,7 +145,7 @@ export default function useMenusAndPopups() {
     const clientXY: ClientXY = getClientXY(event);
     const flowPosn: XYPosition = flowGraphService.screenToFlowXY(clientXY);
 
-    const retval = await menuService.menuInConnEnd(clientXY) as StatusOr<string>;
+    const retval = await popupService.menuInConnEnd(clientXY) as StatusOr<string>;
     if (retval.status !== "OK") return;
     console.log(retval);
     switch (retval.value) {

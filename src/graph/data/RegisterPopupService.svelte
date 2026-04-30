@@ -1,15 +1,44 @@
-<script lang="ts">
-import { Panel } from "@xyflow/svelte";
+<script lang="ts" module>
+import type { Snippet } from "svelte";
 
+import * as ctxmenu from "@/modules/ctxmenu";
+import * as overlay2 from "@/modules/overlay2";
+import type { ClientXY, StatusOr } from "@/types/base";
+
+async function _internalOpenContextMenu(
+  overlayMgr: overlay2.OverlayManager,
+  clientXY: ClientXY,
+  menuSnippetFn: Snippet,
+  items: readonly ctxmenu.CtxMenuItem<string>[],
+): Promise<StatusOr<string>> {
+  const menuResult = await ctxmenu.openCtxMenu<string>(overlayMgr, menuSnippetFn, {
+    x: clientXY.x,
+    y: clientXY.y,
+    items,
+  });
+  if (menuResult.status === overlay2.overlayStatuses.OK) {
+    return { status: "OK", value: menuResult.value.code };
+  }
+  return { status: menuResult.status, reason: menuResult.reason };
+}
+</script>
+
+<script lang="ts">
 import ManualInputEditor, { type ManualInputOverlayPayload } from "@/graph/data/ManualInputEditor.svelte";
 import { createOverlayController, type OverlayResult,overlayStatuses, useOverlayManager } from "@/modules/overlay2";
-import type { StatusOr } from "@/types/base";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 
 import FnGalleryV2, { type FnGalleryPayload } from "../../modules/fngallery/FnGalleryV2.svelte";
 import { registerGraphService } from "../graph-services";
+import {
+  connEndMenuItems,
+  edgeMenuItems,
+  nodeMenuItems,
+  paneMenuItems, 
+  selectionMenuItems,
+} from "./menuData";
 
 type Ntype = plinfo.NodeInfo["ntype"];
 
@@ -20,9 +49,8 @@ const manualInput = createOverlayController<ManualInputOverlayPayload, plstate.E
 registerGraphService("popupService", {
   nodeTemplateGallery,
   encodedDataEditor,
+  ... _contextMenuApiImpls(overlayMgr),
 });
-
-const showDataInspector = $state<boolean>(false);
 
 async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
   const result: OverlayResult<fn.FunctionInfo | fn.GraphIoInfo> = await fnGallery.open({ ntype: "IN" });
@@ -44,7 +72,34 @@ async function encodedDataEditor(rawNodeId: number, dtypeStr: string, priorIoDat
   }
 }
 
+function _contextMenuApiImpls(overlayMgr: overlay2.OverlayManager) {
+  return {
+    menuInPane: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+      return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, paneMenuItems);
+    },
+
+    menuInNode: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+      return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, nodeMenuItems);
+    },
+
+    menuInEdge: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+      return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, edgeMenuItems);
+    },
+
+    menuInSelection: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+      return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, selectionMenuItems);
+    },
+
+    menuInConnEnd: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+      return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, connEndMenuItems);
+    },
+  };
+}
+
 </script>
+{#snippet renderCtxMenu()}
+  <ctxmenu.CtxMenuLayer />
+{/snippet}
 
 {#snippet renderFnGallery()}
   <FnGalleryV2 />
@@ -53,7 +108,3 @@ async function encodedDataEditor(rawNodeId: number, dtypeStr: string, priorIoDat
 {#snippet renderGraphInputEditor()}
   <ManualInputEditor />
 {/snippet}
-
-{#if showDataInspector}
-  <Panel position="bottom-left">Hello in pane</Panel>
-{/if}
