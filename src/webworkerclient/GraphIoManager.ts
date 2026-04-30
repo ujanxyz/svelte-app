@@ -8,6 +8,16 @@ interface RegistryEntry {
   onscreen: HTMLCanvasElement;
 };
 
+interface StoredFileMeta {
+  filename: string;
+  mimeType: string;
+  kind: "binary" | "image";
+  size: number;
+  lastModified: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
 class GraphIoManager {
   private readonly client: WebWorkerClient;
   private readonly previewPool: Map<string, RegistryEntry> = new Map();
@@ -50,6 +60,24 @@ class GraphIoManager {
   public async uploadFile(file: File): Promise<void> {
     const res = await this.client.send("IO:SEND_FILE", { file }, [], 5000);
     console.log("File upload response: ", res);
+  }
+
+  public async listFiles(): Promise<StoredFileMeta[]> {
+    const res = await this.client.send("IO:LIST_FILES", {}, [], 5000);
+    if (!res.ok) {
+      throw new Error(res.error ?? "Failed to list files.");
+    }
+
+    return (res.payload?.files as StoredFileMeta[] | undefined) ?? [];
+  }
+
+  public async deleteFile(filename: string): Promise<boolean> {
+    const res = await this.client.send("IO:DELETE_FILE", { filename }, [], 5000);
+    if (!res.ok) {
+      throw new Error(res.error ?? `Failed to delete ${filename}.`);
+    }
+
+    return (res.payload?.deleted as boolean | undefined) ?? false;
   }
 };
 

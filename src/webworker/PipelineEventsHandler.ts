@@ -7,7 +7,7 @@ interface GraphicEntry {
   width: number;
   height: number;
   numBytes: number;
-  uint8arr: Uint8ClampedArray;
+  uint8arr: Uint8ClampedArray; 
 };
 
 interface BitmapCreatedMessage {
@@ -22,6 +22,7 @@ const EventCodes = Object.freeze({
   BITMAP_CREATED: "BITMAP_CREATED",
   BITMAP_DELETED: "BITMAP_DELETED",
   BITMAP_FLUSHED: "BITMAP_FLUSHED",
+  FILE_UPLOADED: "FILE_UPLOADED",
 });
 
 // This class maanges a collection of graphics (bitmap, video etc), and a collection of preview canvases.
@@ -38,6 +39,7 @@ class PipelineEventsHandler {
     eventTarget.addEventListener(EventCodes.BITMAP_CREATED, this.#onBitmapCreated.bind(this));
     eventTarget.addEventListener(EventCodes.BITMAP_DELETED, this.#onBitmapDeleted.bind(this));
     eventTarget.addEventListener(EventCodes.BITMAP_FLUSHED, this.#onBitmapFlushed.bind(this));
+    eventTarget.addEventListener(EventCodes.FILE_UPLOADED, this.#onFileUploaded.bind(this));
   }
 
   public registerPreview(previewId: string, canvas: OffscreenCanvas): void {
@@ -82,6 +84,26 @@ class PipelineEventsHandler {
     this.#syncGrapicsToPreviews();
   }
 
+  #onFileUploaded(ev: Event): void {
+    const { file } = (ev as CustomEvent).detail as { file: File };
+    console.log(`File uploaded:`, file);
+
+    FileToBitmap(file).then((bitmapMsg) => {
+      if (!bitmapMsg) {
+        console.warn(`Uploaded file "${file.name}" is not a valid image.`);
+        return;
+      }
+      const { id, width, height, numBytes, uint8arr } = bitmapMsg;
+      const graphicEntry: GraphicEntry = { width, height, numBytes, uint8arr };
+      this.graphics.set(id, graphicEntry);
+
+      // After adding the new graphic, we trigger a flush to update the previews.
+      this.#syncGrapicsToPreviews();
+    }).catch((err) => {
+      console.error(`Error processing uploaded file "${file.name}":`, err);
+    });
+  }
+
   #syncGrapicsToPreviews(): void {
     // Ideally this should match the graphics to previews by ids, which is not yet implemented.
     // For now we just arbitrarily take any registered graphic and apply it to all graphic.
@@ -109,6 +131,44 @@ function drawOnCanvas(canvas: OffscreenCanvas) {
   ctx.fillRect(0, canvas.height / 2, canvas.width / 2, canvas.height / 2);
   ctx.fillStyle = "yellow";
   ctx.fillRect(canvas.width / 2, canvas.height / 2, canvas.width / 2, canvas.height / 2);
+}
+
+async function FileToImageBitmap(file: File): Promise<ImageData | null> {
+  if (typeof file.type == "string" && !file.type.startsWith("image/")) {
+    console.error(`File "${file.name}" is not an image. mimeType=${file.type}`);
+    return null;
+  }
+  try {
+    const bitmap = await createImageBitmap(file);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
+    ctx.drawImage(bitmap, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, bitmap.width, bitmap.height, {
+      colorSpace: "srgb",
+    });
+    console.log("imageData -- ", imageData.data.buffer);
+    return imageData;
+  } catch (err) {
+    console.error(`Error processing image file "${file.name}":`, err);
+    return null;
+  }
+}
+
+async function FileToBitmap(file: File): Promise<BitmapCreatedMessage | null> {
+  const imageData = await FileToImageBitmap(file);
+  if (!imageData) {
+    return null;
+  }
+  const bitmapId = `file:${file.name}:${file.lastModified}`;
+  const uint8arr = new Uint8ClampedArray(imageData.data);
+  return {
+    id: bitmapId,
+    width: imageData.width,
+    height: imageData.height,
+    numBytes: uint8arr.length,
+    uint8arr: uint8arr,
+  };
 }
 
 export { PipelineEventsHandler };

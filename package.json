@@ -59,6 +59,7 @@
     "bits-ui": "^2.18.0",
     "debounce": "^3.0.0",
     "filepond": "^4.32.12",
+    "idb": "^8.0.3",
     "svelte-tweakpane-ui": "^1.5.14"
   }
 }

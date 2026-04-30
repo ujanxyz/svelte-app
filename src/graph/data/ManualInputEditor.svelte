@@ -82,7 +82,7 @@ function onChangeFile(ev: Event): void {
   {:else if payloadDatatype === "colors"}
     <PickColors initial={priorIoData} {onData} />
   {:else if payloadDatatype === "bitmap"}
-    <PickFile />
+    <PickFile initial={priorIoData} {onData} />
   {:else}
     Bad payload type: {payloadDatatype}
   {/if}

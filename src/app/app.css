@@ -1,32 +1,20 @@
 @tailwind utilities;
 
-@import "./reset.css";
 @import "./metrics.css";
 @import "./theme.css";
 @import "./components.css";
-
-/*-------------------------------------------------------*/
-/* Font Families                                         */
-/*-------------------------------------------------------*/
-
-@font-face {
-  font-family: "MyFont";
-  src: url("/fonts/MyFont-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-}
 
 :root {
   --box-shadow-rgb: 0, 0, 0;
 
   /* Text Bodies */
-  --txt-body-sm-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
+  --txt-body-sm-strong-font-family: var(--font-family-base);
   --txt-body-sm-strong-font-size: 0.56rem;
   --txt-body-sm-strong-font-weight: 500;
   --txt-body-sm-strong-letter-spacing: 0.0168rem;
   --txt-body-sm-strong-line-height: 0.875rem;
 
-  --txt-body-md-strong-font-family: "Roboto", "Inter", ui-sans-serif, system-ui;
+  --txt-body-md-strong-font-family: var(--font-family-base);
   --txt-body-md-strong-font-size: 0.75rem;
   --txt-body-md-strong-font-weight: 500;
   --txt-body-md-strong-letter-spacing: 0.0168rem;
@@ -64,13 +52,6 @@
      TYPOGRAPHY
      ========================= */
 
-  --font-family-base:
-    Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    sans-serif;
-
-  --font-family-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
   /* Font sizes */
   --font-size-xs: 11px;
   --font-size-sm: 12px;
@@ -81,7 +62,7 @@
   /* Font weights */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
-  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
   /* Line heights */
   --line-height-tight: 1.2;
@@ -112,7 +93,7 @@
 /* App title */
 .text-xl {
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
 }
 

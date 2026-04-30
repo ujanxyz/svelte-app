@@ -21,11 +21,11 @@ onMount(() => {
 });
 </script>
 
-<div class="container">
+<div class="shell">
   {#each Array.from(entries) as [key, value]}
-    <span class="txt-sm-strong">{key}</span>
+    <span class="lbl">{key}</span>
     <input
-      class="txt-sm-strong"
+      class="txt"
       type="text"
       {value}
       oninput={(ev) => onInput(key, ev)}
@@ -34,13 +34,23 @@ onMount(() => {
 </div>
 
 <style>
-.container {
-  width: 10rem;
-  --spacer-2: 0.5rem;
-  --spacer-2: 1rem;
+.shell {
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: 4rem 1fr;
-  row-gap: 4px;
+  grid-template-columns: 1fr 3fr;
+  max-width: 24rem;
+  row-gap: var(--space-2);
+}
+.txt {
+  background-color: var(--color-bg-1);
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-mono);
+}
+.lbl, .txt {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-normal);
+  line-height: var(--line-height-tight);
 }
 </style>

@@ -26,14 +26,13 @@ const name = group ?? "radio_" + newRandomId();
 <style>
 .radio-group {
   display: inline-flex;
-
-  border: 1px solid #484848;
-  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .radio-group:focus-within {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -52,25 +51,29 @@ const name = group ?? "radio_" + newRandomId();
 
 .radio-ui {
   display: inline-block;
-  padding: 0.3rem 0.7rem;
+  padding: var(--space-2) var(--space-5);
   transition: all 0.15s ease;
+}
+
+.radio-item .radio-ui {
+  font-weight: var(--font-weight-medium);
+  background: var(--color-bg-1);
+  color: var(--color-text-hi-con);
 }
 
 /* Hover effect */
 .radio-item:hover .radio-ui {
-  border-color: #666;
-  background: #f5f5f5;
+  background: var(--color-bg-2);
 }
 
 .radio-item input[type="radio"]:checked + .radio-ui {
-  border-color: #4f46e5;
-  background: #4f46e5;
-  color: white;
+  background: var(--color-flip-bg-1);
+  color: var(--color-flip-text-hi-con);
 }
 
 /* Focus-visible for keyboard accessibility */
 .radio-item input[type="radio"]:focus-visible + .radio-ui {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 </style>

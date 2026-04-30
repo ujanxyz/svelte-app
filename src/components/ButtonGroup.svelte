@@ -30,7 +30,7 @@ function select(btn: ButtonItem) {
 }
 </script>
 
-<div class="btn-group">
+<div class="shell">
   {#each buttons as btn}
     <button class:selected={btn.code === value} onclick={() => select(btn)}>
       {btn.label}
@@ -39,27 +39,34 @@ function select(btn: ButtonItem) {
 </div>
 
 <style>
-.btn-group {
+.shell {
+  --border-style: 1px solid var(--border-default);
   box-sizing: border-box;
   display: inline-flex;
-  border: 1px solid var(--color-border-default);
-  border-radius: 6px;
+  border: var(--border-style);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
+.shell:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 button {
   border: none;
-  padding: 4px 10px;
+  padding: var(--space-2) var(--space-4);
   cursor: pointer;
-  background-color: var(--color-bg-4);
+  font-weight: var(--font-weight-medium);
+  background-color: var(--color-bg-3);
   color: var(--color-text-hi-con);
 }
 
 button:not(:last-child) {
-  border-right: 1px solid var(--color-border-default);
+  border-right: var(--border-style);
 }
 
 button.selected {
-  background: #2b7cff;
-  color: white;
+  background-color: var(--color-flip-bg-4);
+  color: var(--color-flip-text-hi-con);
 }
 </style>

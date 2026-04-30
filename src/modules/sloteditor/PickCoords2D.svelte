@@ -34,6 +34,7 @@ function onClickApply(ev: ButtonClickEvent) {
   onData(data);
 }
 
+
 function parseInitialIoData(): void {
   if (!initial || typeof initial !== "object" || !("payload" in initial)) return;
   const payload = initial.payload;

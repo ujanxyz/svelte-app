@@ -12,6 +12,7 @@ import RecursiveCardsMain from "../overlay/recursive-cards/RecursiveCardsMain.sv
 import ScreenLayout from "./ScreenLayout.svelte";
 import PickFile from "@/modules/sloteditor/PickFile.svelte";
 import OverlayV2Tester from "@/app/OverlayV2Tester.svelte";
+import StyleDemosMain from "@/modules/styledemos/StyleDemosMain.svelte";
 
 const modes = [
   { code: "recursive", label: "Cards" },
@@ -24,6 +25,7 @@ const modes = [
   { code: "memlog", label: "Mem-logging" },
   { code: "worker", label: "WebWorker" },
   { code: "upload", label: "File Upload" },
+  { code: "styles", label: "Styles" },
   { code: "overlayv2", label: "Overlay V2" },
 ];
 
@@ -61,6 +63,8 @@ function handleSelect(code: string) {
     <WebWorkerTestMain />
   {:else if selected === "upload"}
     <PickFile />
+  {:else if selected === "styles"}
+    <StyleDemosMain />
   {:else if selected === "overlayv2"}
     <OverlayV2Tester />
   {:else}

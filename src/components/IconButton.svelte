@@ -9,34 +9,31 @@ type Props = {
 const { children, onclick, tooltip }: Props = $props();
 </script>
 
-<button {onclick} class="rounded-sm" title={tooltip}>
+<button {onclick} class="btn" title={tooltip}>
   {@render children()}
 </button>
 
 <style>
-button {
+.btn {
   padding: var(--space-1) var(--space-2);
-  background-color: var(--color-bg-3);
-  color: var(--color-text-md-con);
-  border-width: 1px;
-  border-style: solid;
-  border-color: var(--comp-icon-btn-border-col, var(--color-border-subtle));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
 
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-}
 
-button:hover {
-  background-color: var(--color-bg-4);
+  font-family: var(--font-family-sans);
+
+  background-color: var(--color-bg-3);
   color: var(--color-text-hi-con);
-  border-color: var(
-    --comp-icon-btn-border-col-hover,
-    var(--color-border-default)
-  );
 }
 
-button:active {
+.btn:hover {
+  background-color: var(--color-bg-4);
+}
+
+.btn:focus-within {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }

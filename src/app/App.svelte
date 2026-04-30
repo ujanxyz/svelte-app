@@ -1,9 +1,10 @@
 <script lang="ts">
 import "./app.css";
+import "./styles/index.css";
 
 import MemLogger from "@/modules/memlogging/MemLogger.svelte";
-import Toaster from "@/modules/toast/Toaster.svelte";
 import { createOverlayManager, OverlayRoot } from "@/modules/overlay2";
+import Toaster from "@/modules/toast/Toaster.svelte";
 import WorkerResourcesProvider from "@/webworkerclient/WorkerResourcesProvider.svelte";
 
 import ComponentTesterMain from "./ComponentTesterMain.svelte";

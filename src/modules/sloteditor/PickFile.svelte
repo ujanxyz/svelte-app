@@ -7,11 +7,23 @@
 import "filepond/dist/filepond.min.css";
 
 import { type ActualFileObject, type ProcessServerConfigFunction, type ProgressServerConfigFunction } from 'filepond';
-import { getContext } from "svelte";
+import { getContext, onMount } from "svelte";
 import FilePond from "svelte-filepond";
 
 import { useGraphService } from "@/graph/graph-services";
+import type { plstate } from "@/types/plstate";
 import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+
+interface Props {
+  initial: plstate.EncodedData | null;
+  onData: (edited: plstate.EncodedData) => void;
+}
+
+interface FileInfo {
+  fname: string;
+}
+
+const { initial, onData }: Props = $props();
 
 const graphIo = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
 
@@ -26,6 +38,11 @@ let pond: any;
 // the name to use for the internal file input
 let name = 'filepond';
 
+let fileValue = $state<FileInfo>({fname: ""});
+
+let ondataUpdateTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+onMount(parseInitialIoData);
 
 function processFile(
 		fieldName: string,
@@ -40,19 +57,21 @@ function processFile(
 
 	const fileObj: File = file as File;
 
+	progress(false, 0, 100);
 	graphIo.uploadFile(fileObj)
 		.then(() => {
-			console.log("File uploaded successfully");
+			console.log("File uploaded successfully: ", fileObj);
+			progress(false, 100, 100);
 			load("f001");
+			const data: plstate.EncodedData = {
+				payload: JSON.stringify({ fname: fileObj.name }),
+			};
+			scheduleOndataUpdate(data);
 		})
 		.catch((e) => {
 			console.error("Error uploading file: ", e);
 			error("Error: " + e.message);
 		});
-
-	progress(false, 100, 100);
-	// error("Error foo");
-	load("f001");
 }
 
 const server = {
@@ -68,6 +87,37 @@ function handleInit() {
 
 function handleAddFile(err: any, fileItem: File) {
 	console.log('A file has been added', fileItem);
+}
+
+// Call onData after 0.1 seconds, also cancel any previously scheduled timeout.
+function scheduleOndataUpdate(data: plstate.EncodedData): void {
+	if (ondataUpdateTimeoutId) {
+		clearTimeout(ondataUpdateTimeoutId);
+	}
+	ondataUpdateTimeoutId = setTimeout(() => {
+		ondataUpdateTimeoutId = null;
+		onData(data);
+	}, 200);
+}
+
+function parseInitialIoData(): void {
+  if (!initial || typeof initial !== "object" || !("payload" in initial)) return;
+  const payload = initial.payload;
+  if (typeof payload !== "string") return;
+  let parsed: any;
+  try {
+    parsed = JSON.parse(payload);
+  } catch (e) {
+    console.warn("Failed to parse initial payload as JSON: ", payload);
+    return;
+  }
+  if (typeof parsed !== "object") return;
+  const fileInfo = parsed as FileInfo;
+	if (typeof fileInfo.fname !== "string") {
+		console.warn("Invalid initial data for PickFile: ", initial);
+		return;
+	}
+  fileValue = fileInfo;
 }
 
 </script>

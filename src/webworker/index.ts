@@ -128,7 +128,7 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
           postman.postError(seq, code, SysCodes.APP_ERROR, errmsg);
         } else {
           console.log(`[Worker] Rooundtrip (Seq: ${seq}, Code: ${code}): `, payload, response);
-          postman.postResponse(seq, code, response!);
+          postman.postResponse(seq, code, response);
         }
       } else {
         const errmsg = `Unknown app code: ${code}`;

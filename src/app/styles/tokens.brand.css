@@ -1,0 +1,24 @@
+/* Brand palette and derived brand ramps */
+:root {
+  --brand-ink: #30364f;
+  --brand-fog: #acbac4;
+  --brand-sand: #e1d9bc;
+  --brand-ivory: #f0f0db;
+
+  /* Action ramp based on brand ink */
+  --brand-action-50: #eceef3;
+  --brand-action-100: #d8dce8;
+  --brand-action-200: #b0b8d1;
+  --brand-action-300: #8993ba;
+  --brand-action-400: #616fa3;
+  --brand-action-500: #30364f;
+  --brand-action-600: #272d42;
+  --brand-action-700: #1e2335;
+
+  /* Supportive neutral tint from brand fog */
+  --brand-neutral-100: #eff2f4;
+  --brand-neutral-200: #dee4e8;
+  --brand-neutral-300: #ced7dc;
+  --brand-neutral-400: #bcc8cf;
+  --brand-neutral-500: #acbac4;
+}

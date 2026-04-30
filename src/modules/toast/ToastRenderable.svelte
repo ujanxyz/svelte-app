@@ -2,7 +2,7 @@
 import { onMount } from "svelte";
 import type { Subscriber, Unsubscriber } from "svelte/store";
 
-import TimedCloseBtn from "../../components/TimedCloseBtn.svelte";
+import ProgressArcButton from "../../components/ProgressArcButton.svelte";
 
 interface Props {
   id: string;
@@ -16,7 +16,7 @@ interface Props {
 const { id, message, startedAt, themeColor, subscribeNow, onexpire }: Props =
   $props();
 let progress = $state<number>(0);
-let progressBtn: TimedCloseBtn;
+let progressBtn: ProgressArcButton;
 
 onMount(() => {
   return subscribeNow(_onElapsed);
@@ -37,7 +37,7 @@ function onClose(ev: MouseEvent) {
 <div class="toast" style="--toast-color: {themeColor}">
   <span class="accent"></span>
   <span class="text">{message}</span>
-  <TimedCloseBtn
+  <ProgressArcButton
     bind:this={progressBtn}
     color={themeColor}
     iconSize={18}

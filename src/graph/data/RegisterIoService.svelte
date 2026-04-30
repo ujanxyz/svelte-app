@@ -4,7 +4,6 @@ import {
   type Node,
   type Viewport,
 } from "@xyflow/svelte";
-import { getContext } from "svelte";
 
 import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
 
@@ -13,8 +12,6 @@ import { type UjGraphStorage, type UjNodeData } from "../types";
 
 type UjNode = UjGraphStorage["nodes"][number];
 type UjEdge = UjGraphStorage["edges"][number];
-
-const graphIo = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
 
 registerGraphService("ioService", {
   uploadFile,

@@ -1,0 +1,46 @@
+/* Semantic tokens: component-facing aliases */
+:root {
+  --surface-page: var(--color-bg-0);
+  --surface-panel: var(--color-bg-1);
+  --surface-elevated: var(--color-bg-2);
+
+  --text-primary: var(--color-text-hi-con);
+  --text-secondary: var(--color-text-md-con);
+  --text-tertiary: var(--color-text-lo-con);
+  --text-danger: var(--color-text-error);
+
+  --border-subtle: var(--color-border-subtle);
+  --border-default: var(--color-border-default);
+  --border-strong: var(--color-border-strong);
+
+  /* Semantic */
+  --color-success: #3fb950;
+  --color-warning: #d29922;
+  --color-danger: #f85149;
+  --color-accent: #fc3dff;
+
+
+  
+  --interactive-primary-bg: var(--color-bg-3);
+  --interactive-primary-bg-hover: var(--brand-action-600);
+  --interactive-primary-text: var(--text-primary);
+
+  --interactive-muted-bg: var(--surface-panel);
+  --interactive-muted-bg-hover: var(--surface-elevated);
+  --interactive-muted-text: var(--text-primary);
+
+  --interactive-accent-bg: var(--brand-sand);
+  --interactive-accent-bg-hover: color-mix(in srgb, var(--brand-sand) 86%, black);
+  --interactive-accent-text: var(--brand-ink);
+
+  --focus-ring: 0 0 0 3px var(--color-focus-ring);
+
+  /* Selected / active interactive state */
+  --interactive-selected-bg: var(--brand-action-500);
+  --interactive-selected-text: #ffffff;
+
+  /* Accent state (active pressed) */
+  /* --color-accent: var(--color-focus-ring);
+  --color-accent-fill: var(--interactive-primary-bg);
+  --color-accent-text: var(--interactive-primary-text); */
+}

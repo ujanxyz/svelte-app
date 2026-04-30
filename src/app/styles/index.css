@@ -1,0 +1,18 @@
+@import "./font-faces.css";
+
+@import './tokens.foundation.css';
+@import './tokens.brand.css';
+@import './tokens.theme.css';
+@import './tokens.semantic.css';
+
+@import "./reset.css";
+
+:root {
+	/* Primary typography aliases used across app + components */
+	--font-family-sans:
+		"Public Sans", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-mono:
+    "IBM Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+  --font-family-base: var(--font-family-sans);
+}

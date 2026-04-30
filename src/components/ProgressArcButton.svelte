@@ -4,10 +4,11 @@ import XIcon from "phosphor-svelte/lib/XIcon";
 interface Props {
   iconSize: number;
   color: string;
+  initialProgress?: number;
   onClose: (ev: MouseEvent) => void;
 }
 
-let { iconSize, color = "red", onClose }: Props = $props();
+let { iconSize, color = "red", initialProgress = 1.0, onClose }: Props = $props();
 
 interface ComputedPaths {
   filledPath: string;
@@ -18,7 +19,8 @@ const cx = 128;
 const cy = 128;
 const r = 120;
 
-let progress = $state(1.0);
+/* svelte-ignore state_referenced_locally */
+let progress = $state<number>(initialProgress);
 const path = $derived<ComputedPaths | null>(toSvgPath(progress));
 
 export function setProgress(value: number) {
@@ -84,8 +86,8 @@ function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
   --icon-pad: calc(var(--icon-size) * 0.3);
 
   box-sizing: border-box;
-  background-color: var(--color-bg-1);
-  color: var(--color-border-strong);
+  background-color: var(--surface-panel);
+  color: var(--border-strong);
   border-radius: 50%;
   height: calc(var(--icon-size) + 2 * var(--icon-pad));
   width: calc(var(--icon-size) + 2 * var(--icon-pad));
