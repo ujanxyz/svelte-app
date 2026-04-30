@@ -6,12 +6,12 @@ import {
   type XYPosition,
 } from "@xyflow/svelte";
 
+import type { ClientXY, StatusOr } from "@/types/base";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 import type { xy } from "@/types/xy";
 
-import type { ClientXY, StatusOr } from "../overlay/types";
 import { createReactiveContext } from "../utils/reactive-context.svelte";
 import type { UjGraphStorage } from "./types";
 
@@ -87,7 +87,6 @@ interface ContextMenuService {
 
 interface PopupService {
   nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
-  flowDataInspector: () => Promise<void>;
   encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
       => Promise<StatusOr<plstate.EncodedData>>;
 }

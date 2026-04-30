@@ -3,6 +3,7 @@ export const overlayStatuses = {
   ABORTED: "aborted",
   DISMISSED: "dismissed",
   PARENT_ABORTED: "parent-aborted",
+  UNMOUNTED: "unmounted",
 } as const;
 
 export const defaultOverlayOptions = {

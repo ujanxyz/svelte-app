@@ -2,7 +2,7 @@
 import type { Snippet } from "svelte";
 import type { HTMLAttributes } from "svelte/elements";
 
-import OverlayProvider from "@/overlay/OverlayProvider.svelte";
+import { createOverlayManager, OverlayRoot } from "@/modules/overlay2";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   children: Snippet;
@@ -10,9 +10,10 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 }
 
 const { children, bgcolor, ...rest }: Props = $props();
+const overlayManager = createOverlayManager();
 </script>
 
-<OverlayProvider>
+<OverlayRoot manager={overlayManager}>
   In pregress:
   <div
     class={["container"]}
@@ -22,7 +23,7 @@ const { children, bgcolor, ...rest }: Props = $props();
   >
     {@render children()}
   </div>
-</OverlayProvider>
+</OverlayRoot>
 
 <style>
 .container {

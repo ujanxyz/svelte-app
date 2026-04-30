@@ -1,5 +1,6 @@
 <script lang="ts">
-import MoveButton from "../MoveButton.svelte";
+import MoveButton from "@/modules/overlay2/MoveButton.svelte";
+
 import CloseButton from "./CloseButton.svelte";
 
 interface Props {

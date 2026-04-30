@@ -3,18 +3,18 @@ import CheckIcon from "phosphor-svelte/lib/CheckIcon";
 // Icons
 import XIcon from "phosphor-svelte/lib/XIcon";
 
-import useCurrentOverlay from "../useCurrentOverlay";
+import * as overlay2 from "@/modules/overlay2";
 
-const overlay = useCurrentOverlay();
+const overlay2Instance = overlay2.useOverlayInstance<{}, string>();
 
 function closeOk(ev: MouseEvent) {
   ev.stopPropagation();
-  overlay.settleOverlay("CLOSED_OK");
+  overlay2Instance.settle("Hello");
 }
 
 function closeErr(ev: MouseEvent) {
   ev.stopPropagation();
-  overlay.abortOverlay();
+  overlay2Instance.abort();
 }
 </script>
 

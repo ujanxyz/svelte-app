@@ -44,6 +44,10 @@ export interface OverlayEntry<TPayload = unknown, TResult = unknown> {
   render: Snippet<[]>;
   resolve: (value: TResult) => void;
   reject: (reason: unknown) => void;
+
+  // TODO: Support moving the overlay (for drag, or repositioning on window resize).
+  // getTranslate(): { dx: number; dy: number };
+  // setTranslate(dx: number, dy: number);
 }
 
 export interface OverlayHandle<TResult> {

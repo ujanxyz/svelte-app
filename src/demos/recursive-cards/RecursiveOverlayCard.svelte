@@ -2,10 +2,8 @@
 import { onMount } from "svelte";
 
 import useMemlogging from "@/modules/memlogging/useMemlogging";
+import * as overlay2 from "@/modules/overlay2";
 
-import { ReturnStatus } from "../constants";
-import { useOverlayUi } from "../overlayStore";
-import useCurrentOverlay from "../useCurrentOverlay";
 import RecursiveCardWrapper from "./RecursiveCardWrapper.svelte";
 import TopNavBar from "./TopNavBar.svelte";
 
@@ -17,15 +15,17 @@ interface Props {
 
 const { cardIndex, selfColor, childColors }: Props = $props();
 
-const overlay = useOverlayUi(renderContent);
+const overlayMgr = overlay2.useOverlayManager();
+const recCards = overlay2.createOverlayController<{}, number>(overlayMgr, renderContent);
+
 const { debugLog, errorLog } = useMemlogging();
 
 onMount(() => {
   // Launch another child card after N msecs, unless it is the last card.
   if (childColors.length > 0) {
     const timeoutId = window.setTimeout(async () => {
-      const retVal = await overlay.openOverlayAsync({}, { movable: true });
-      if (ReturnStatus.OK === retVal.status) {
+      const retVal = await recCards.open({}, {});
+      if (retVal.status === overlay2.overlayStatuses.OK) {
         debugLog(
           `Card# ${cardIndex} received OK. value: ${JSON.stringify(retVal.value)}`,
         );

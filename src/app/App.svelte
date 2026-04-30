@@ -16,13 +16,11 @@ useNewEventTarget();
 </script>
 
 <WorkerResourcesProvider>
-  <!-- <OverlayProvider> -->
   <OverlayRoot manager={overlayManager}>
     <main>
       <ComponentTesterMain />
     </main>
   </OverlayRoot>
-  <!-- </OverlayProvider> -->
   <MemLogger />
   <Toaster />
 </WorkerResourcesProvider>

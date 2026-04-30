@@ -1,13 +1,25 @@
+<script lang="ts" module>
+import * as overlay2 from "@/modules/overlay2";
+import type { ClientRect } from "@/overlay/types";
+
+export interface PropsEditorPayload {
+  anchor: HTMLDivElement,
+  lorem: string
+}
+
+export interface PropsEditorResult {
+  editedLorem: string;
+}
+</script>
+
+
 <script lang="ts">
 import CheckIcon from "phosphor-svelte/lib/CheckIcon";
 import { onMount } from "svelte";
 import { quadOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 
-import type { ClientRect } from "../types";
-import useCurrentOverlay from "../useCurrentOverlay";
-
-const current = useCurrentOverlay();
+const overlay = overlay2.useOverlayInstance<PropsEditorPayload, PropsEditorResult>();
 
 let clientRect = $state<ClientRect>({ x: 0, y: 0, w: 0, h: 0 });
 let currentText = $state<string>("");
@@ -20,7 +32,7 @@ const containerStyle: string = $derived(
 );
 
 onMount(() => {
-  const { anchor, lorem } = current.getLayerPayload();
+  const { anchor, lorem } = overlay.payload;
   currentText = lorem;
   const rect = (anchor as HTMLDivElement).getBoundingClientRect();
   clientRect.x = rect.left;
@@ -31,7 +43,7 @@ onMount(() => {
 
 function onClickApply() {
   const editedLorem = $state.snapshot(currentText);
-  current.settleOverlay({ editedLorem });
+  overlay.settle({ editedLorem });
 }
 </script>
 

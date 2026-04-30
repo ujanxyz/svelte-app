@@ -2,9 +2,8 @@
 import { onDestroy } from "svelte";
 
 import useMemlogging from "@/modules/memlogging/useMemlogging";
+import * as overlay2 from "@/modules/overlay2";
 
-import { ReturnStatus } from "../constants";
-import { useOverlayUi } from "../overlayStore";
 import RecursiveCardWrapper from "./RecursiveCardWrapper.svelte";
 
 const cardColors = [
@@ -20,30 +19,27 @@ const cardColors = [
   "#F2B6C8",
 ];
 
-// let overlayCards: ReturnType<typeof useOverlayUi>;
+const overlayMgr = overlay2.useOverlayManager();
+const recCards = overlay2.createOverlayController<{}, number>(overlayMgr, renderRecursiveCards);
 
-const overlayCards = useOverlayUi(renderRecursiveCards);
 const { debugLog, errorLog } = useMemlogging();
 
 async function openOverlayCards() {
-  const retVal = await overlayCards.openOverlayAsync<number>(
-    {},
-    { movable: true },
-  );
-  if (ReturnStatus.OK === retVal.status) {
+  const retValue: overlay2.OverlayResult<any> = await recCards.open({}, { dismissOnBackdrop: false });
+  if (retValue.status === overlay2.overlayStatuses.OK) {
     debugLog(
-      `Original card received OK. value: ${JSON.stringify(retVal.value)}`,
+      `Original card received OK. value: ${JSON.stringify(retValue.value)}`,
     );
   } else {
     errorLog(
-      `Original card received status: ${retVal.status}. Reason: ${JSON.stringify(retVal.reason)}`,
+      `Original card received status: ${retValue.status}. Reason: ${JSON.stringify(retValue.reason)}`,
     );
   }
-  console.log(retVal);
+  console.log(retValue);
 }
 
 onDestroy(() => {
-  overlayCards.abortOverlay("UNMOUNTED");
+  recCards.abort(overlay2.overlayStatuses.UNMOUNTED);
 });
 </script>
 

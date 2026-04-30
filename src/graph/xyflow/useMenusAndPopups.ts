@@ -1,11 +1,10 @@
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
 import { type FinalConnectionState } from "@xyflow/system";
 
+import type { ClientXY, StatusOr } from "@/types/base";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 
-import { ReturnStatus } from "../../overlay/constants";
-import type { ClientXY, StatusOr } from "../../overlay/types";
 import { MenuCodes } from "../constants";
 import { useGraphService } from "../graph-services";
 
@@ -44,7 +43,7 @@ export default function useMenusAndPopups() {
     event.preventDefault();
     const flowPosn = flowGraphService.screenToFlowXY(event);
     const retval = await menuService.menuInPane(clientXY);
-    if (retval.status !== ReturnStatus.OK) return;
+    if (retval.status !== "OK") return;
     switch (retval.value) {
       case MenuCodes.NEW_NODE:
         await _internalOpenGallery("FN", flowPosn);
@@ -77,7 +76,7 @@ export default function useMenusAndPopups() {
     };
     event.preventDefault();
     const retval = await menuService.menuInNode(clientXY);
-    if (retval.status !== ReturnStatus.OK) return;
+    if (retval.status !== "OK") return;
     const nodeId = node.id as string;
     switch (retval.value) {
       case MenuCodes.RM_NODE:
@@ -97,8 +96,8 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await menuService.menuInEdge(clientXY);
-    if (retval.status !== ReturnStatus.OK) return;
+    const retval = await menuService.menuInEdge(clientXY) as StatusOr<string>;
+    if (retval.status !== "OK") return;
     const edgeId = edge.id as string;
     switch (retval.value) {
       case MenuCodes.RM_EDGE:
@@ -118,8 +117,8 @@ export default function useMenusAndPopups() {
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await menuService.menuInSelection(clientXY);
-    if (retval.status !== ReturnStatus.OK) return;
+    const retval = await menuService.menuInSelection(clientXY) as StatusOr<string>;
+    if (retval.status !== "OK") return;
     switch (retval.value) {
       case MenuCodes.RM_SELECTION:
         console.log(nodes);
@@ -147,8 +146,8 @@ export default function useMenusAndPopups() {
     const clientXY: ClientXY = getClientXY(event);
     const flowPosn: XYPosition = flowGraphService.screenToFlowXY(clientXY);
 
-    const retval = await menuService.menuInConnEnd(clientXY);
-    if (retval.status !== ReturnStatus.OK) return;
+    const retval = await menuService.menuInConnEnd(clientXY) as StatusOr<string>;
+    if (retval.status !== "OK") return;
     console.log(retval);
     switch (retval.value) {
       default:
@@ -167,7 +166,7 @@ export default function useMenusAndPopups() {
   }
 
   async function ondatainspector(event: MouseEvent): Promise<void> {
-    await popupService.flowDataInspector();
+    throw new Error("Not implemented");
   }
 
   async function onsavelocalstorage(): Promise<void> {
@@ -185,12 +184,12 @@ export default function useMenusAndPopups() {
   async function _internalOpenGallery(ntype: Ntype, position: XYPosition): Promise<void> {
     if (ntype === "FN") {
       const retval = await popupService.nodeTemplateGallery(ntype) as StatusOr<fn.FunctionInfo>;
-      if (retval.status !== ReturnStatus.OK) return;
+      if (retval.status !== "OK") return;
       const funcInfo = retval.value as fn.FunctionInfo;
       await flowGraphService.newNodeAt(funcInfo, position);
     } else if (ntype === "IN" || ntype === "OUT") {
       const retval = await popupService.nodeTemplateGallery(ntype) as StatusOr<fn.GraphIoInfo>;
-      if (retval.status !== ReturnStatus.OK) return;
+      if (retval.status !== "OK") return;
       const ioInfo = retval.value as fn.GraphIoInfo;
       await flowGraphService.newGraphIOAt(ioInfo.dtype, ntype === "OUT" /* isOutput */, position);
     }

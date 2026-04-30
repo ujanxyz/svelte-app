@@ -90,9 +90,9 @@ const {
 >
   <Background
     variant={BackgroundVariant.Dots}
-    gap={5}
+    gap={8}
     patternClass={"dots"}
-    size={0.75}
+    size={1.5}
   />
   <Controls position={"top-right"}>
     <ControlButton onclick={onsavelocalstorage}>

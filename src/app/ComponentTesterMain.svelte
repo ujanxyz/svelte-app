@@ -1,23 +1,22 @@
 <script lang="ts">
+import ContextMenuMain from "@/demos/ContextMenuMain.svelte";
+import MasonryGridMain from "@/demos/masonry-grid/MasonryGridMain.svelte";
+import StyleDemosMain from "@/demos/style-tokens/StyleDemosMain.svelte";
+import PickFile from "@/modules/sloteditor/PickFile.svelte";
 import WebWorkerTestMain from "@/webworkerclient/WebWorkerTestMain.svelte";
 
 import ButtonGroup from "../components/ButtonGroup.svelte";
+import RecursiveCardsMain from "../demos/recursive-cards/RecursiveCardsMain.svelte";
 import GraphEditorWithRealOps from "../graph/GraphEditorWithRealOps.svelte";
 import MemLogTesterMain from "../modules/memlogging/MemLogTesterMain.svelte";
 import StageViewMain from "../modules/stageview/StageViewMain.svelte";
 import ToastTesterMain from "../modules/toast/ToastTesterMain.svelte";
-import ContextMenuMain from "../overlay/context-menu/ContextMenuMain.svelte";
-import LocalPopupsMain from "../overlay/local-popups/LocalPopupsMain.svelte";
-import RecursiveCardsMain from "../overlay/recursive-cards/RecursiveCardsMain.svelte";
 import ScreenLayout from "./ScreenLayout.svelte";
-import PickFile from "@/modules/sloteditor/PickFile.svelte";
-import OverlayV2Tester from "@/app/OverlayV2Tester.svelte";
-import StyleDemosMain from "@/modules/styledemos/StyleDemosMain.svelte";
 
 const modes = [
   { code: "recursive", label: "Cards" },
   { code: "ctxmenu", label: "Ctx Menu" },
-  { code: "local", label: "Masonry" },
+  { code: "masonry", label: "Masonry" },
   { code: "graph", label: "Graph" },
   { code: "stage", label: "Stage" },
   // { code: "screen", label: "Screen" },
@@ -26,7 +25,6 @@ const modes = [
   { code: "worker", label: "WebWorker" },
   { code: "upload", label: "File Upload" },
   { code: "styles", label: "Styles" },
-  { code: "overlayv2", label: "Overlay V2" },
 ];
 
 let selected = $state<string>("graph");
@@ -46,8 +44,8 @@ function handleSelect(code: string) {
     <RecursiveCardsMain />
   {:else if selected === "ctxmenu"}
     <ContextMenuMain />
-  {:else if selected === "local"}
-    <LocalPopupsMain />
+  {:else if selected === "masonry"}
+    <MasonryGridMain />
   {:else if selected === "graph"}
     <GraphEditorWithRealOps />
   {:else if selected === "stage"}
@@ -65,8 +63,6 @@ function handleSelect(code: string) {
     <PickFile />
   {:else if selected === "styles"}
     <StyleDemosMain />
-  {:else if selected === "overlayv2"}
-    <OverlayV2Tester />
   {:else}
     No component to show.
   {/if}

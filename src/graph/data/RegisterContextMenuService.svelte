@@ -1,8 +1,8 @@
 <script lang="ts">
 import * as ctxmenu from "@/modules/ctxmenu";
 import * as overlay2 from "@/modules/overlay2";
+import type { ClientXY, StatusOr } from "@/types/base";
 
-import type { ClientXY, StatusOr } from "../../overlay/types";
 import { registerGraphService } from "../graph-services";
 import {
   connEndMenuItems,

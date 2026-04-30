@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount, type Snippet } from "svelte";
 
-import useCurrentOverlay from "./useCurrentOverlay";
+import { useOverlayInstance } from "./useOverlayInstance";
 
 interface Props {
   children: Snippet;
@@ -11,7 +11,8 @@ interface Props {
 
 const { children, width, height }: Props = $props();
 
-const overlay = useCurrentOverlay();
+const overlay2Instance = useOverlayInstance<{}, unknown>();
+
 let containerBtn: HTMLButtonElement;
 let capturedPtrId: number | undefined;
 let dragOffset: { x: number; y: number } | null = null;
@@ -21,7 +22,8 @@ function onPointerDown(ev: PointerEvent) {
   ev.stopPropagation();
   capturedPtrId = ev.pointerId;
   containerBtn.setPointerCapture(ev.pointerId);
-  const { dx: priorDx, dy: priorDy } = overlay.getTranslate();
+  console.log("payload ...", overlay2Instance.payload);
+  const { dx: priorDx, dy: priorDy } = overlay2Instance.payload as {dx: number, dy: number};
   dragOffset = { x: ev.clientX - priorDx, y: ev.clientY - priorDy };
 }
 
@@ -35,7 +37,7 @@ function onPointerUp(ev: PointerEvent) {
 function onPointerMove(ev: PointerEvent) {
   if (!dragOffset) return;
   ev.preventDefault();
-  overlay.setTranslate(ev.clientX - dragOffset.x, ev.clientY - dragOffset.y);
+  // overlay.setTranslate(ev.clientX - dragOffset.x, ev.clientY - dragOffset.y);
 }
 
 function onClick(ev: MouseEvent) {
