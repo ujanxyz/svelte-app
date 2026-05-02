@@ -5,18 +5,21 @@ export interface MediaManagerPayload {
 </script>
 
 <script lang="ts">
-import { onMount } from "svelte";
+import { getContext, onMount } from "svelte";
 
 import FileDropZone from "@/components/FileDropZone.svelte";
 import { useOverlayInstance } from "@/modules/overlay2";
+import type { StoredMediaMeta } from "@/types/worker-message-types";
+import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
 
 import MediaManagerGridItem from "./MediaManagerGridItem.svelte";
 import MediaManagerListItem from "./MediaManagerListItem.svelte";
 import type { MediaItem, MediaViewMode } from "./mediaManagerTypes";
 
+const io = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
 const overlay = useOverlayInstance<MediaManagerPayload, never>();
 
-let items = $state<MediaItem[]>([]);
+let items = $state.raw<MediaItem[]>([]);
 let loading = $state(true);
 let sortBy = $state<"date-desc" | "date-asc" | "name-asc">("date-desc");
 let viewMode = $state<MediaViewMode>("list");
@@ -27,7 +30,7 @@ const orderedItems = $derived(sortItems(items, sortBy));
 const selectedCount = $derived(selectedIds.size);
 
 onMount(async () => {
-  items = await fetchInitialDummyMedia();
+  await refreshMediaItems();
   const preselectedIds = overlay.payload?.preselectedIds;
   if (Array.isArray(preselectedIds) && preselectedIds.length > 0) {
     selectedIds = new Set(preselectedIds);
@@ -36,13 +39,12 @@ onMount(async () => {
   loading = false;
 });
 
-async function handleUpload(files: File[]): Promise<void> {
-  const [uploaded] = files;
-  if (!uploaded) return;
-
-  const newItem = await emulateApiCreate(uploaded);
+async function handleUpload(file: File): Promise<string> {
+  const { meta, thumbnail } = await io.uploadMedia({ file, overwrite: false });
+  const newItem = toMediaItem(meta, thumbnail);
   items = [newItem, ...items];
   await refreshUsageInsight(items);
+  return meta.id;
 }
 
 function handleClose(): void {
@@ -57,22 +59,22 @@ function handleCheckbox(id: string, checked: boolean): void {
 }
 
 async function handleDeleteOne(id: string): Promise<void> {
-  await emulateApiDelete();
-  items = items.filter((item) => item.id !== id);
+  await io.deleteMedia({ ids: [id] });
 
   const next = new Set(selectedIds);
   next.delete(id);
   selectedIds = next;
 
+  await refreshMediaItems();
   await refreshUsageInsight(items);
 }
 
 async function handleDeleteSelected(): Promise<void> {
   if (selectedIds.size === 0) return;
-  await emulateApiDelete();
-  items = items.filter((item) => !selectedIds.has(item.id));
+  await io.deleteMedia({ ids: [...selectedIds] });
   selectedIds = new Set();
 
+  await refreshMediaItems();
   await refreshUsageInsight(items);
 }
 
@@ -80,8 +82,9 @@ function handleTodoMenu(id: string): void {
   console.log("TODO: add item menu actions for", id);
 }
 
-function handleRefreshTodo(): void {
-  console.log("TODO: refresh media manager items");
+async function handleRefresh(): Promise<void> {
+  await refreshMediaItems();
+  await refreshUsageInsight(items);
 }
 
 function handleDownloadTodo(): void {
@@ -98,78 +101,17 @@ async function refreshUsageInsight(nextItems: MediaItem[]): Promise<void> {
   loadingUsageInsight = false;
 }
 
-// TODO: replace i.pravatar thumbnails with real image/video previews once backend thumbnail endpoint is ready.
-async function fetchInitialDummyMedia(): Promise<MediaItem[]> {
-  await delay(100);
-  return [
-    mkItem(
-      "m1",
-      "Mountains_Lake.jpg",
-      "mountains_lake.jpg",
-      2560,
-      1440,
-      "2.34 MB",
-      "JPG",
-      "2 minutes ago",
-    ),
-    mkItem(
-      "m2",
-      "Abstract_Waves.png",
-      "abstract_waves.png",
-      1920,
-      1080,
-      "1.45 MB",
-      "PNG",
-      "1 hour ago",
-    ),
-    mkItem(
-      "m5",
-      "Sunset_Beach.png",
-      "sunset_beach.png",
-      2048,
-      1365,
-      "1.08 MB",
-      "PNG",
-      "2 days ago",
-    ),
-    mkItem(
-      "m6",
-      "Snow_Mountain.webp",
-      "snow_mountain.webp",
-      3840,
-      2160,
-      "2.67 MB",
-      "WEBP",
-      "3 days ago",
-    ),
-  ];
-}
-
-async function emulateApiCreate(file: File): Promise<MediaItem> {
-  await delay(100);
-  const ext = (file.name.split(".").pop() || "png").toUpperCase();
-  const kind =
-    ext === "JPG" || ext === "JPEG"
-      ? "JPG"
-      : ext === "WEBP"
-        ? "WEBP"
-        : ext === "MP4"
-          ? "MP4"
-          : "PNG";
-  return mkItem(
-    crypto.randomUUID(),
-    file.name,
-    file.name,
-    1920,
-    1080,
-    `${Math.max(0.1, file.size / (1024 * 1024)).toFixed(2)} MB`,
-    kind,
-    "Just now",
+async function fetchMediaList(): Promise<MediaItem[]> {
+  const { mediaEntries } = await io.listMedia();
+  return mediaEntries.map(({ meta, thumbnail }: { meta: StoredMediaMeta; thumbnail: ImageBitmap }) =>
+    toMediaItem(meta, thumbnail),
   );
 }
 
-async function emulateApiDelete(): Promise<void> {
-  await delay(100);
+async function refreshMediaItems(): Promise<void> {
+  const nextItems = await fetchMediaList();
+  items = nextItems;
+  selectedIds = new Set([...selectedIds].filter((id) => nextItems.some((item) => item.id === id)));
 }
 
 async function emulateApiFetchUnusedCount(items: MediaItem[]): Promise<number> {
@@ -181,28 +123,55 @@ async function emulateApiFetchUnusedCount(items: MediaItem[]): Promise<number> {
   }, 0);
 }
 
-function mkItem(
-  id: string,
-  displayName: string,
-  filename: string,
-  width: number,
-  height: number,
-  sizeLabel: string,
-  kind: MediaItem["kind"],
-  addedAgoLabel: string,
-): MediaItem {
+function toMediaItem(meta: StoredMediaMeta, thumbnailBitmap: ImageBitmap): MediaItem {
+  const ext = getFileExtension(meta.filename);
+  const kind = extensionToMediaKind(ext);
+  const [width, height] = meta.dimension ?? [thumbnailBitmap.width, thumbnailBitmap.height];
+
   return {
-    id,
-    displayName,
-    filename,
+    id: meta.id,
+    displayName: meta.filename,
+    filename: meta.filename,
     width,
     height,
-    sizeLabel,
+    sizeLabel: formatByteSize(meta.byteSize),
     kind,
-    addedAt: Date.now() - Math.floor(Math.random() * 10_000_000),
-    addedAgoLabel,
-    thumbnailUrl: `https://i.pravatar.cc/100?u=${Math.random()}-${id}`,
+    addedAt: meta.updatedAt,
+    addedAgoLabel: formatDurationAgo(meta.updatedAt),
+    thumbnailBitmap,
   };
+}
+
+// TODO: Move to a shared common formatting library once media manager + inspector reuse it.
+function getFileExtension(filename: string): string {
+  return (filename.split(".").pop() || "png").toUpperCase();
+}
+
+// TODO: Move to a shared common formatting library once media manager + inspector reuse it.
+function formatByteSize(byteSize: number): string {
+  if (byteSize < 1024) return `${byteSize} B`;
+  if (byteSize < 1024 * 1024) return `${(byteSize / 1024).toFixed(1)} KB`;
+  if (byteSize < 1024 * 1024 * 1024) return `${(byteSize / (1024 * 1024)).toFixed(2)} MB`;
+  return `${(byteSize / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+// TODO: Move to a shared common formatting library once media manager + inspector reuse it.
+function formatDurationAgo(epochMs: number): string {
+  const deltaSec = Math.max(0, Math.floor((Date.now() - epochMs) / 1000));
+  if (deltaSec < 60) return `${deltaSec}s ago`;
+  const mins = Math.floor(deltaSec / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function extensionToMediaKind(ext: string): MediaItem["kind"] {
+  if (ext === "JPG" || ext === "JPEG") return "JPG";
+  if (ext === "WEBP") return "WEBP";
+  if (ext === "MP4") return "MP4";
+  return "PNG";
 }
 
 function sortItems(
@@ -231,7 +200,7 @@ function delay(ms: number): Promise<void> {
     </header>
 
     <div class="dropzone-wrap">
-      <FileDropZone onupload={handleUpload} />
+      <FileDropZone onUpload={handleUpload} />
     </div>
 
     <section class="media-panel">
@@ -241,7 +210,7 @@ function delay(ms: number): Promise<void> {
         <div class="controls">
           <button
             class="toolbar-btn"
-            onclick={handleRefreshTodo}
+            onclick={handleRefresh}
             title="Refresh media list"
           >
             Refresh
@@ -291,7 +260,11 @@ function delay(ms: number): Promise<void> {
       {#if loading}
         <div class="loading">Loading media...</div>
       {:else if orderedItems.length === 0}
-        <div class="loading">No media uploaded yet.</div>
+        <div class="placeholder-empty">
+          <img src="/images/placeholder.webp" alt="No media placeholder" loading="lazy" />
+          <h4>No media items yet</h4>
+          <p>There is currently no item. Start uploading some to begin with.</p>
+        </div>
       {:else if viewMode === "list"}
         <div class="table-wrap">
           <div class="table-head">
@@ -514,6 +487,36 @@ select {
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
+}
+
+.placeholder-empty {
+  display: grid;
+  place-items: center;
+  gap: 0.45rem;
+  min-height: 260px;
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+
+.placeholder-empty img {
+  width: min(18rem, 70%);
+  height: auto;
+  opacity: 0.95;
+}
+
+.placeholder-empty h4 {
+  margin: 0.15rem 0 0;
+  font-family: "Public Sans", "Segoe UI", sans-serif;
+  font-size: 1.06rem;
+  color: var(--text-primary);
+}
+
+.placeholder-empty p {
+  margin: 0;
+  max-width: 30rem;
 }
 
 .table-wrap {

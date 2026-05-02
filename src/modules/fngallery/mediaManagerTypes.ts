@@ -10,7 +10,7 @@ export interface MediaItem {
   kind: MediaKind;
   addedAt: number;
   addedAgoLabel: string;
-  thumbnailUrl: string;
+  thumbnailBitmap: ImageBitmap;
 }
 
 export type MediaViewMode = "list" | "grid";

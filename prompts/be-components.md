@@ -96,45 +96,6 @@ NOTE:
 
 # Task-2: Implement IndexedDb
 
-Update the existing class `src/webworker/db/WorkerIndexedDb.ts` to accomodate the
-db operations described here. Update the existing ops, keep the unused ones.
-
-Supported APIs:
-
-- List existing input media, output media
-- Upload a new media file (input only). Option to overwrite.
-- Delete a media file (input or output).
-- Clear all output media files.
-- Clear all input and output media files.
-
-For media files it will save the creation time (original), last updated, mime type, width, height, etc.
-
-# Task-3: Implement the IO Events Handler
-
-The class `IoEventsHandler.ts` handles C++ events triggered from webassembly code.
-It has a reference to the preview manager.
-
-- _BITMAP_CREATED_ Called when a node creates a new bitmap.
-- _BITMAP_DELETED_ Called when a bitmap is deleted
-- _BITMAP_FLUSHED_ Called after a bitmap is modified
-- _INPUT_MEDIA_UPDATED_ Called when an ImageData is loaded from db for an input node id.
-
-NOTE: There is already an existing implementation of this, update in the same file.
-The event `FILE_UPLOADED` can be deprecated, do not delete yet.
-
-# Task-4: Implement the IO related logic in Worker IO Manager
-
-In the class `WorkerIoManager.ts` (existing file) implements these apis with codes:
-
-- CREATE_INPUT
-- UPLOAD_MEDIA
-- PICK_MEDIA
-- CHANGE_MEDIA
-- CLEAR_MEDIA
-- DELETE_MEDIA
-
-Read about these scenarios above.
-
 # Guidelines
 
 You are an experienced senior developer and software architect with expertise in clean robust design.
@@ -144,3 +105,13 @@ and finally write clean readable code. For these components.
 
 - You will read only from `src/webworker`, `src/webworkerclient`, `src/types`. The
   remaining code are UI related and might not be relevant.
+
+#---------------------------------------------------------------------------------------
+
+Perform these tasks:
+
+- You will be updating the backend flow for these tasks, for that you need to read and update these files:
+- `src/types/ioApis.ts`
+- `src/webworker/db/WorkerIndexedDb.ts`
+- `src/webworker/WorkerIoManager.ts`
+- `src/webworkerclient/GraphIoManager.ts`

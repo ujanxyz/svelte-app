@@ -1,6 +1,6 @@
 import {
+  type RawWorkerResponse,
   type SecureMessage,
-  type WorkerResponse,
 } from "@/types/worker-message-types";
 
 // main.ts
@@ -29,7 +29,7 @@ class WebWorkerClient {
 
     // Create a promise that resolves when the worker says "IM_READY"
     this.readyPromise = new Promise((resolve) => {
-      const initHandler = (event: MessageEvent<WorkerResponse>) => {
+      const initHandler = (event: MessageEvent<RawWorkerResponse>) => {
         if (event.data.code === "_IAM_READY") {
           this.worker.removeEventListener("message", initHandler);
           resolve();
@@ -72,8 +72,8 @@ class WebWorkerClient {
   #setupListener(): void {
     this.worker.addEventListener(
       "message",
-      (event: MessageEvent<WorkerResponse>) => {
-        const {ack, ok: responseOk, code, reqcode, payload, error } = event.data as WorkerResponse;
+      (event: MessageEvent<RawWorkerResponse>) => {
+        const {ack, ok: responseOk, code, reqcode, payload, error } = event.data as RawWorkerResponse;
         if (
           ack === undefined ||
           responseOk === undefined ||

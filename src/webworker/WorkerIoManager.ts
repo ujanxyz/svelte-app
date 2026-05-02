@@ -1,4 +1,6 @@
+import type { ioApis } from "@/types/ioApis";
 import type { wa } from "@/types/wa";
+import type { MediaInfoMessage } from "@/types/worker-message-types";
 
 import { WorkerIndexedDb } from "./db";
 import { EventCodes, IoEventsHandler } from "./IoEventsHandler";
@@ -7,7 +9,8 @@ import { PreviewManager } from "./PreviewManager";
 type IoProcessResult = Record<string, any>;
 
 class WorkerIoManager {
-  private readonly cmdPrefix: string = "IO:";
+  public static readonly CMD_PREFIX = "IO:" as const;
+
   private readonly pipelineEvents: EventTarget;
   private readonly previewManager: PreviewManager;
   private readonly ioEventsHandler: IoEventsHandler;
@@ -24,11 +27,42 @@ class WorkerIoManager {
   }
 
   public async process(code: string, request: any): Promise<Error | IoProcessResult> {
-    if (!code.startsWith(this.cmdPrefix)) {
+    if (!code.startsWith(WorkerIoManager.CMD_PREFIX)) {
       throw new Error("Invalid code: " + code);
     }
-    const ioCmd: string = code.substring(this.cmdPrefix.length);
+    const ioCmd: string = code.substring(WorkerIoManager.CMD_PREFIX.length);
     switch (ioCmd) {
+
+      // ── Media manager apis ──────────────────────────────────────────-------
+      /**
+       * "uploadMedia": User uploads a media file (not yet linked to any node).
+       * Stores the file in IndexedDb under its original filename.
+       */
+      case "uploadMedia": {
+        const { file, overwrite } = request as { file: File; overwrite: boolean };
+        const { meta, thumbnail } = await this.indexedDb.uploadMedia(file, overwrite);
+        return { meta, thumbnail };
+      }
+
+      /**
+       * "listMedia": User opens the media manager or refreshes the media list.
+       * Returns the metadata and thumbnail for all media files stored in IndexedDb.
+       */
+      case "listMedia": {
+        const mediaEntries = await this.indexedDb.listMedia();
+        return { mediaEntries };
+      }
+
+      /**
+       * "deleteMedia": User deletes one or more media files from the media manager.
+       * Deletes the file from IndexedDb and clears the reference on any input node
+       * that was using the deleted file, triggering preview updates.
+       */
+      case "deleteMedia": {
+        const { ids } = request as { ids: string[] };
+        const { deletedIds } = await this.indexedDb.deleteMedia(ids);
+        return { deletedIds };
+      }
 
       // ── Legacy canvas registration ──────────────────────────────────────────
       case "REGISTER_CANVAS": {
@@ -59,85 +93,6 @@ class WorkerIoManager {
           this.previewManager.registerInputPreview(nodeId, canvas);
         }
         return { status: "OK", message: "Input node created", nodeId };
-      }
-
-      /**
-       * UPLOAD_MEDIA: User uploads a media file (not yet linked to any node).
-       * Stores the file in IndexedDb under its original filename.
-       */
-      case "UPLOAD_MEDIA": {
-        const { file, overwrite } = request as { file: File; overwrite?: boolean };
-        const meta = await this.indexedDb.uploadMedia(file, { overwrite: overwrite ?? false });
-        return { status: "OK", message: "Media uploaded", meta };
-      }
-
-      /**
-       * PICK_MEDIA: User picks an uploaded media file for a graph input node.
-       * Updates the node state and triggers INPUT_MEDIA_UPDATED.
-       */
-      case "PICK_MEDIA": {
-        const { nodeId, filename } = request as { nodeId: string; filename: string };
-        await this.#linkMediaToInputNode(nodeId, filename);
-        return { status: "OK", message: "Media picked", nodeId, filename };
-      }
-
-      /**
-       * CHANGE_MEDIA: User replaces the media file on an existing input node.
-       * Same backend steps as PICK_MEDIA.
-       */
-      case "CHANGE_MEDIA": {
-        const { nodeId, filename } = request as { nodeId: string; filename: string };
-        await this.#linkMediaToInputNode(nodeId, filename);
-        return { status: "OK", message: "Media changed", nodeId, filename };
-      }
-
-      /**
-       * CLEAR_MEDIA: User removes the media reference from an input node
-       * (does NOT delete the media file from db).
-       */
-      case "CLEAR_MEDIA": {
-        const { nodeId } = request as { nodeId: string };
-        this.#callCpp("clearInputNodeMedia", { nodeId });
-        this.#dispatchInputMediaUpdated(nodeId, null);
-        return { status: "OK", message: "Media cleared", nodeId };
-      }
-
-      /**
-       * DELETE_MEDIA: User deletes one or more media files from db.
-       * Clears the reference on any input node that was pointing to a deleted file.
-       */
-      case "DELETE_MEDIA": {
-        const { filenames } = request as { filenames: string[] };
-        const clearedNodes: string[] = [];
-        for (const filename of filenames) {
-          const affectedNodes = this.#callCpp("getInputNodesForMedia", { filename }) as {
-            nodeIds: string[];
-          };
-          for (const nodeId of affectedNodes.nodeIds ?? []) {
-            this.#callCpp("clearInputNodeMedia", { nodeId });
-            this.#dispatchInputMediaUpdated(nodeId, null);
-            clearedNodes.push(nodeId);
-          }
-          await this.indexedDb.deleteFile(filename);
-        }
-        return { status: "OK", message: "Media deleted", filenames, clearedNodes };
-      }
-
-      // ── Legacy file commands (kept for backward compat) ──────────────────────
-      case "SEND_FILE": {
-        const { file } = request as { file: File };
-        this.pipelineEvents.dispatchEvent(new CustomEvent(EventCodes.FILE_UPLOADED, { detail: { file } }));
-        const meta = await this.indexedDb.putFile(file);
-        return { status: "OK", message: "File received", meta };
-      }
-      case "LIST_FILES": {
-        const files = await this.indexedDb.listFiles();
-        return { status: "OK", message: "Files listed", files };
-      }
-      case "DELETE_FILE": {
-        const { filename } = request as { filename: string };
-        const deleted = await this.indexedDb.deleteFile(filename);
-        return { status: "OK", message: "File delete attempted", filename, deleted };
       }
 
       default:

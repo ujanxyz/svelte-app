@@ -9,11 +9,11 @@ import type {
 import FilePond from "svelte-filepond";
 
 interface Props {
-  onupload: (files: File[]) => Promise<void> | void;
+  onUpload: (file: File) => Promise<string>;
   disabled?: boolean;
 }
 
-const { onupload, disabled = false }: Props = $props();
+const { onUpload, disabled = false }: Props = $props();
 
 let pond: any;
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
@@ -30,6 +30,7 @@ async function processFile(
   error: (errorText: string) => void,
   progress: ProgressServerConfigFunction,
 ): Promise<void> {
+  console.log("In DropZone Processing file: ", file);
   try {
     const fileObj = file as File;
     if (!isSupportedMedia(fileObj)) {
@@ -42,9 +43,9 @@ async function processFile(
     }
 
     progress(false, 0, 100);
-    await onupload([fileObj]);
+    const fileId = await onUpload(fileObj) as string;
     progress(false, 100, 100);
-    load("done");
+    load(fileId);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Failed to upload";
     error(msg);
@@ -65,7 +66,7 @@ function openPicker(): void {
   <FilePond
     bind:this={pond}
     name="media"
-    server={server}
+    {server}
     allowMultiple={true}
     credits={false}
     allowRevert={false}

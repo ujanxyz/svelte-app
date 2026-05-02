@@ -1,6 +1,6 @@
 import {
   type SecureMessage,
-  type WorkerResponse,
+  type RawWorkerResponse,
 } from "@/types/worker-message-types";
 
 import { CppGraphBuilder } from "./CppGraphBuilder.js";
@@ -25,7 +25,7 @@ const postman = (function createPostman() {
   // Notify the main thread that the worker is ready. this reponse is special
   // as it is not a reply to an incoming message.
   function postImReady(): void {
-    const response: WorkerResponse = {
+    const response: RawWorkerResponse = {
       ack: -1n,
       ok: true,
       code: SysCodes.IAM_READY,
@@ -40,7 +40,7 @@ const postman = (function createPostman() {
     reqcode: string,
     payload: Record<string, any>,
   ): void {
-    const response: WorkerResponse = {
+    const response: RawWorkerResponse = {
       ack,
       ok: true,
       code: SysCodes.OK,
@@ -57,7 +57,7 @@ const postman = (function createPostman() {
     errcode: string,
     errmsg: string,
   ): void {
-    const response: WorkerResponse = {
+    const response: RawWorkerResponse = {
       ack,
       ok: false,
       code: errcode,
@@ -120,7 +120,7 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
           console.log(`[Worker] Rooundtrip (Seq: ${seq}, Code: ${code}): `, payload, response);
           postman.postResponse(seq, code, response!);
         }
-      } else if (code.startsWith("IO:")) {
+      } else if (code.startsWith(WorkerIoManager.CMD_PREFIX)) {
         const response = await ioManager!.process(code, payload);
         if (response instanceof Error) {
           const errmsg = (response as Error).message;

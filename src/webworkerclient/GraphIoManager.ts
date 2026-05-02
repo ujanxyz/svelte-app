@@ -1,3 +1,4 @@
+import type { ioApis } from "@/types/ioApis";
 import type { plinfo } from "@/types/plinfo";
 
 import { type WebWorkerClient } from "./WebWorkerClient";
@@ -20,11 +21,26 @@ interface StoredFileMeta {
 
 class GraphIoManager {
   private readonly client: WebWorkerClient;
+  /** @deprecated */
   private readonly previewPool: Map<string, RegistryEntry> = new Map();
 
   public constructor(client: WebWorkerClient) {
     this.client = client;
   }
+
+  public async uploadMedia(request: ioApis.Request<"uploadMedia">): Promise<ioApis.Response<"uploadMedia">> {
+    return await this.#invokeAsync<"uploadMedia">("uploadMedia", request);
+  }
+
+  public async listMedia(request: ioApis.Request<"listMedia">): Promise<ioApis.Response<"listMedia">> {
+    return await this.#invokeAsync<"listMedia">("listMedia", request);
+  }
+
+  public async deleteMedia(request: ioApis.Request<"deleteMedia">): Promise<ioApis.Response<"deleteMedia">> {
+    return await this.#invokeAsync<"deleteMedia">("deleteMedia", request);
+  }
+
+  //--------------------------------
 
   public async getOrCreatePreviewCanvas(slotId: plinfo.SlotId): Promise<HTMLCanvasElement> {
     const encodedId = `${slotId.parent}:${slotId.name}`;
@@ -57,28 +73,13 @@ class GraphIoManager {
     this.previewPool.delete(encodedId);
   }
 
-  public async uploadFile(file: File): Promise<void> {
-    const res = await this.client.send("IO:SEND_FILE", { file }, [], 5000);
-    console.log("File upload response: ", res);
-  }
-
-  public async listFiles(): Promise<StoredFileMeta[]> {
-    const res = await this.client.send("IO:LIST_FILES", {}, [], 5000);
-    if (!res.ok) {
-      throw new Error(res.error ?? "Failed to list files.");
+  async #invokeAsync<K extends ioApis.Names>(name: K, request: ioApis.Request<K>): Promise<ioApis.Response<K>> {
+      const { ok, code, payload, error } = await this.client.send(`IO:${name}`, request, []);
+      if (!ok) {
+        throw new Error(`${code}: ${error}`);
+      }
+      return payload! as ioApis.Response<K>;
     }
-
-    return (res.payload?.files as StoredFileMeta[] | undefined) ?? [];
-  }
-
-  public async deleteFile(filename: string): Promise<boolean> {
-    const res = await this.client.send("IO:DELETE_FILE", { filename }, [], 5000);
-    if (!res.ok) {
-      throw new Error(res.error ?? `Failed to delete ${filename}.`);
-    }
-
-    return (res.payload?.deleted as boolean | undefined) ?? false;
-  }
 };
 
 export { GraphIoManager };

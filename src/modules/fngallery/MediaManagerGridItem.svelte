@@ -17,6 +17,18 @@ const {
   onmenu,
 }: Props = $props();
 
+let canvas: HTMLCanvasElement;
+
+$effect(() => {
+  if (canvas && item.thumbnailBitmap) {
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(item.thumbnailBitmap, 0, 0, canvas.width, canvas.height);
+    }
+  }
+});
+
 function handleCheckboxToggle(ev: Event): void {
   const input = ev.currentTarget as HTMLInputElement;
   oncheck(item.id, input.checked);
@@ -33,7 +45,7 @@ function stop(ev: Event): void {
     <button class="icon danger" onclick={(ev) => { stop(ev); ondelete(item.id); }} title="Delete">DEL</button>
   </div>
 
-  <img src={item.thumbnailUrl} alt={item.displayName} loading="lazy" />
+  <canvas class="preview-canvas" bind:this={canvas} width="320" height="180" aria-label={item.displayName}></canvas>
 
   <div class="meta">
     <div class="title">{item.displayName}</div>
@@ -87,10 +99,9 @@ function stop(ev: Event): void {
   margin-bottom: 0.45rem;
 }
 
-img {
+.preview-canvas {
   width: 100%;
   aspect-ratio: 16 / 9;
-  object-fit: cover;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
 }

@@ -57,7 +57,7 @@ class PipelineBuilder {
     return await this.invokeAsync<"getResources">("getResources", request);
   }
 
-  private async invokeAsync<K extends apis.Names>(name: apis.Names, request: apis.Request<K>): Promise<apis.Response<K>> {
+  private async invokeAsync<K extends apis.Names>(name: K, request: apis.Request<K>): Promise<apis.Response<K>> {
     const { ok, code, payload, error } = await this.client.send(`GRAPH:${name}`, request, []);
     if (!ok) {
       throw new Error(`${code}: ${error}`);

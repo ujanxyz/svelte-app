@@ -17,6 +17,18 @@ const {
   onmenu,
 }: Props = $props();
 
+let canvas: HTMLCanvasElement;
+
+$effect(() => {
+  if (canvas && item.thumbnailBitmap) {
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(item.thumbnailBitmap, 0, 0, canvas.width, canvas.height);
+    }
+  }
+});
+
 function handleCheckboxToggle(ev: Event): void {
   const input = ev.currentTarget as HTMLInputElement;
   oncheck(item.id, input.checked);
@@ -30,7 +42,7 @@ function stop(ev: Event): void {
 <div class="row" class:selected={checked} role="button" tabindex="0" onclick={() => oncheck(item.id, !checked)} onkeydown={(ev) => ev.key === "Enter" && oncheck(item.id, !checked)}>
   <div class="cell cell-preview">
     <input type="checkbox" checked={checked} onchange={handleCheckboxToggle} onclick={stop} />
-    <img src={item.thumbnailUrl} alt={item.displayName} loading="lazy" />
+    <canvas class="preview-canvas" bind:this={canvas} width="96" height="54"></canvas>
   </div>
 
   <div class="cell cell-name">
@@ -91,10 +103,9 @@ function stop(ev: Event): void {
   padding-left: 0.6rem;
 }
 
-.cell-preview img {
+.preview-canvas {
   width: 96px;
   height: 54px;
-  object-fit: cover;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
 }

@@ -53,25 +53,7 @@ function processFile(
 		progress: ProgressServerConfigFunction,
 		abort: () => void
 	): void {
-	console.log("Processing file...", arguments);
-
-	const fileObj: File = file as File;
-
-	progress(false, 0, 100);
-	graphIo.uploadFile(fileObj)
-		.then(() => {
-			console.log("File uploaded successfully: ", fileObj);
-			progress(false, 100, 100);
-			load("f001");
-			const data: plstate.EncodedData = {
-				payload: JSON.stringify({ fname: fileObj.name }),
-			};
-			scheduleOndataUpdate(data);
-		})
-		.catch((e) => {
-			console.error("Error uploading file: ", e);
-			error("Error: " + e.message);
-		});
+	throw new Error("Deprecated flow - should not be calling processFile");
 }
 
 const server = {
