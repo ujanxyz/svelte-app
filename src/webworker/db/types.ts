@@ -1,13 +1,20 @@
 export type StoredFileKind = "binary" | "image";
+export type StoredFileCategory = "input" | "output";
 
 export interface StoredFileMeta {
   filename: string;
   mimeType: string;
   kind: StoredFileKind;
+  /** Whether this file is a graph input or a pipeline output. Defaults to "input". */
+  category: StoredFileCategory;
   size: number;
   lastModified: number;
   createdAt: number;
   updatedAt: number;
+  /** Pixel width, populated for image files. */
+  width?: number;
+  /** Pixel height, populated for image files. */
+  height?: number;
 }
 
 export interface StoredFileRecord extends StoredFileMeta {

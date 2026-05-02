@@ -155,6 +155,10 @@ export default function useMenusAndPopups() {
     }
   }
 
+  async function onMediaManager(): Promise<void> {
+    await popupService.mediaManagerModal();
+  }
+
   async function onpopupgallery(event: MouseEvent): Promise<void> {
     const clientXY: ClientXY = {
       x: event.clientX,
@@ -202,6 +206,7 @@ export default function useMenusAndPopups() {
     onselectioncontextmenu,
     onconnectend,
     // Custom app-declared handlers.
+    onMediaManager,
     onpopupgallery,
     ondatainspector,
     onsavelocalstorage,

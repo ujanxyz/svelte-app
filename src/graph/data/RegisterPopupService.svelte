@@ -25,6 +25,7 @@ async function _internalOpenContextMenu(
 
 <script lang="ts">
 import ManualInputEditor, { type ManualInputOverlayPayload } from "@/graph/data/ManualInputEditor.svelte";
+import MediaManager from "@/modules/fngallery/MediaManager.svelte";
 import { createOverlayController, type OverlayResult,overlayStatuses, useOverlayManager } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
@@ -43,14 +44,20 @@ import {
 type Ntype = plinfo.NodeInfo["ntype"];
 
 const overlayMgr = useOverlayManager();
+const mediaManager = createOverlayController<{}, void>(overlayMgr, renderMediaManager);
 const fnGallery = createOverlayController<FnGalleryPayload, fn.FunctionInfo | fn.GraphIoInfo>(overlayMgr, renderFnGallery);
 const manualInput = createOverlayController<ManualInputOverlayPayload, plstate.EncodedData>(overlayMgr, renderGraphInputEditor);
 
 registerGraphService("popupService", {
+  mediaManagerModal,
   nodeTemplateGallery,
   encodedDataEditor,
   ... _contextMenuApiImpls(overlayMgr),
 });
+
+async function mediaManagerModal(): Promise<void> {
+  await mediaManager.open({});
+}
 
 async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
   const result: OverlayResult<fn.FunctionInfo | fn.GraphIoInfo> = await fnGallery.open({ ntype: "IN" });
@@ -99,6 +106,10 @@ function _contextMenuApiImpls(overlayMgr: overlay2.OverlayManager) {
 </script>
 {#snippet renderCtxMenu()}
   <ctxmenu.CtxMenuLayer />
+{/snippet}
+
+{#snippet renderMediaManager()}
+  <MediaManager />
 {/snippet}
 
 {#snippet renderFnGallery()}

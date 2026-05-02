@@ -4,6 +4,7 @@ import {
   FileNameConflictError,
   FileNotFoundError,
   NotImageFileError,
+  type StoredFileCategory,
   type StoredFileKind,
   type StoredFileMeta,
   type StoredFileRecord,
@@ -42,12 +43,25 @@ class WorkerIndexedDb {
     this.idleCloseMs = options?.idleCloseMs ?? DEFAULT_IDLE_CLOSE_MS;
   }
 
-  public async putFile(file: File): Promise<StoredFileMeta> {
+  /**
+   * Store an input media file. Pass overwrite=true to replace an existing entry
+   * with the same filename instead of throwing.
+   */
+  public async uploadMedia(file: File, options?: { overwrite?: boolean }): Promise<StoredFileMeta> {
+    return await this.putFile(file, { category: "input", overwrite: options?.overwrite });
+  }
+
+  public async putFile(
+    file: File,
+    options?: { category?: StoredFileCategory; overwrite?: boolean },
+  ): Promise<StoredFileMeta> {
     const kind = inferKind(file.type);
     return await this.putBlob(file.name, file, {
       kind,
       mimeType: file.type,
       lastModified: file.lastModified,
+      category: options?.category ?? "input",
+      overwrite: options?.overwrite,
     });
   }
 
@@ -58,6 +72,10 @@ class WorkerIndexedDb {
       kind?: StoredFileKind;
       mimeType?: string;
       lastModified?: number;
+      category?: StoredFileCategory;
+      overwrite?: boolean;
+      width?: number;
+      height?: number;
     },
   ): Promise<StoredFileMeta> {
     if (!filename) {
@@ -66,7 +84,7 @@ class WorkerIndexedDb {
 
     const db = await this.getDb();
     const existing = await db.get(STORE_FILES, filename);
-    if (existing) {
+    if (existing && !options?.overwrite) {
       throw new FileNameConflictError(filename);
     }
 
@@ -77,13 +95,21 @@ class WorkerIndexedDb {
       blob,
       mimeType,
       kind: options?.kind ?? inferKind(mimeType),
+      category: options?.category ?? "input",
       size: blob.size,
       lastModified: options?.lastModified ?? now,
-      createdAt: now,
+      createdAt: existing?.createdAt ?? now,
       updatedAt: now,
+      width: options?.width,
+      height: options?.height,
     };
 
-    await db.add(STORE_FILES, record);
+    // Use put (upsert) when overwriting, add (strict insert) otherwise.
+    if (options?.overwrite) {
+      await db.put(STORE_FILES, record);
+    } else {
+      await db.add(STORE_FILES, record);
+    }
     return this.toMeta(record);
   }
 
@@ -93,6 +119,18 @@ class WorkerIndexedDb {
     return all
       .map((record) => this.toMeta(record))
       .sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+
+  /** List all input media files (category "input", or legacy records without a category). */
+  public async listInputMedia(): Promise<StoredFileMeta[]> {
+    const all = await this.listFiles();
+    return all.filter((f) => f.category === "input");
+  }
+
+  /** List all output media files produced by the pipeline. */
+  public async listOutputMedia(): Promise<StoredFileMeta[]> {
+    const all = await this.listFiles();
+    return all.filter((f) => f.category === "output");
   }
 
   public async hasFile(filename: string): Promise<boolean> {
@@ -134,6 +172,35 @@ class WorkerIndexedDb {
     return true;
   }
 
+  /** Delete all output media files produced by the pipeline. */
+  public async clearOutputMedia(): Promise<number> {
+    const db = await this.getDb();
+    const all = await db.getAll(STORE_FILES);
+    const outputs = all.filter((r) => r.category === "output");
+    await Promise.all(outputs.map((r) => db.delete(STORE_FILES, r.filename)));
+    return outputs.length;
+  }
+
+  /** Delete all input and output media files. */
+  public async clearAllMedia(): Promise<number> {
+    const db = await this.getDb();
+    const all = await db.getAll(STORE_FILES);
+    const tx = db.transaction(STORE_FILES, "readwrite");
+    await Promise.all(all.map((r) => tx.store.delete(r.filename)));
+    await tx.done;
+    return all.length;
+  }
+
+  /** Get the pixel data for an image file. */
+  public async getImageData(filename: string): Promise<ImageData> {
+    const bitmap = await this.getImageBitmap(filename);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    return ctx.getImageData(0, 0, canvas.width, canvas.height, { colorSpace: "srgb" });
+  }
+
   public close(): void {
     this.clearIdleTimer();
     if (this.dbPromise) {
@@ -171,10 +238,13 @@ class WorkerIndexedDb {
       filename: record.filename,
       mimeType: record.mimeType,
       kind: record.kind,
+      category: record.category ?? "input",
       size: record.size,
       lastModified: record.lastModified,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
+      width: record.width,
+      height: record.height,
     };
   }
 

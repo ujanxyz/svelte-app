@@ -6,3 +6,9 @@ declare module "*.svg" {
 }
 
 declare module "*.css";
+
+declare module "svelte-filepond" {
+  import type { SvelteComponentTyped } from "svelte";
+
+  export default class FilePond extends SvelteComponentTyped<Record<string, unknown>> {}
+}

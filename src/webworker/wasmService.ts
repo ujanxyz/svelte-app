@@ -74,6 +74,7 @@ class WasmService {
       ).toLocaleString();
     }
     console.log(infoObj);
+    console.log(mod);
   }
 
   #makeAbseilFlags(): string[] {

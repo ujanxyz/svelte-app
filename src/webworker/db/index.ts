@@ -2,6 +2,7 @@ export {
   FileNameConflictError,
   FileNotFoundError,
   NotImageFileError,
+  type StoredFileCategory,
   type StoredFileKind,
   type StoredFileMeta,
   type StoredFileRecord,

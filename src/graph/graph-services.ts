@@ -78,9 +78,11 @@ interface FlowGraphService {
 type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
 
 interface PopupService {
+  mediaManagerModal: () => Promise<void>;
   nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
   encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
       => Promise<StatusOr<plstate.EncodedData>>;
+
   // Context menu APIs.
   menuInPane: MenuFunction;
   menuInNode: MenuFunction;

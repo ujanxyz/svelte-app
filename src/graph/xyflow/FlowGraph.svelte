@@ -48,6 +48,8 @@ const {
   onedgecontextmenu,
   onselectioncontextmenu,
   onconnectend,
+  // Custom app-declared handlers.
+  onMediaManager,
   onpopupgallery,
   ondatainspector,
   onsavelocalstorage,
@@ -104,7 +106,7 @@ const {
     <ControlButton onclick={onpopupgallery}>
       <FunctionIcon />
     </ControlButton>
-    <ControlButton onclick={ondatainspector}>
+    <ControlButton onclick={onMediaManager}>
       <EyeIcon />
     </ControlButton>
     <ControlButton onclick={onplaypipeline}>
