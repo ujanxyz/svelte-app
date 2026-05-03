@@ -40,16 +40,19 @@ import {
   paneMenuItems, 
   selectionMenuItems,
 } from "./menuData";
+import ImageViewer from "@/modules/imgviewer/ImageViewer.svelte";
 
 type Ntype = plinfo.NodeInfo["ntype"];
 
 const overlayMgr = useOverlayManager();
 const mediaManager = createOverlayController<{}, void>(overlayMgr, renderMediaManager);
+const imageViewer = createOverlayController<{id: string}, void>(overlayMgr, renderImgViewer);
 const fnGallery = createOverlayController<FnGalleryPayload, fn.FunctionInfo | fn.GraphIoInfo>(overlayMgr, renderFnGallery);
 const manualInput = createOverlayController<ManualInputOverlayPayload, plstate.EncodedData>(overlayMgr, renderGraphInputEditor);
 
 registerGraphService("popupService", {
   mediaManagerModal,
+  imgViewerModal,
   nodeTemplateGallery,
   encodedDataEditor,
   ... _contextMenuApiImpls(overlayMgr),
@@ -57,6 +60,10 @@ registerGraphService("popupService", {
 
 async function mediaManagerModal(): Promise<void> {
   await mediaManager.open({});
+}
+
+async function imgViewerModal(id: string): Promise<void> {
+  await imageViewer.open({id});
 }
 
 async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
@@ -110,6 +117,10 @@ function _contextMenuApiImpls(overlayMgr: overlay2.OverlayManager) {
 
 {#snippet renderMediaManager()}
   <MediaManager />
+{/snippet}
+
+{#snippet renderImgViewer()}
+  <ImageViewer />
 {/snippet}
 
 {#snippet renderFnGallery()}

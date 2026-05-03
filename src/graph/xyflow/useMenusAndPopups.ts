@@ -23,6 +23,7 @@ export default function useMenusAndPopups() {
   const rawStoreService = useGraphService("rawStoreService");
   const ioService = useGraphService("ioService");
   const flowGraphService = useGraphService("flowGraphService");
+  const pipelineService = useGraphService("pipelineService");
   const popupService = useGraphService("popupService");
 
   async function onpaneclick({ event }: { event: MouseEvent }): Promise<void> {
@@ -181,7 +182,7 @@ export default function useMenusAndPopups() {
   }
 
   async function onplaypipeline(): Promise<void> {
-    await flowGraphService.playPipeline();
+    await pipelineService.playPipeline();
   }
 
   async function _internalOpenGallery(ntype: Ntype, position: XYPosition): Promise<void> {

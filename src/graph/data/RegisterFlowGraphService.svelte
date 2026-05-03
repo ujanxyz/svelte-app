@@ -11,7 +11,7 @@ import {
 } from "@xyflow/svelte";
 import { getContext } from "svelte";
 
-import type { ClientXY } from "@/overlay/types";
+import type { ClientXY } from "@/types/base";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
@@ -58,7 +58,6 @@ registerGraphService("flowGraphService", {
   setGraphInput,
   setSlotInput,
   // getGraphState,
-  playPipeline,
 });
 
 async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<void> {
@@ -254,15 +253,6 @@ async function setSlotInput(rawNodeId: number, slotName: string, encoded: string
     encodedData: { payload: encoded } as plstate.EncodedData,
   });
   await _internalUpdateSlotState(slotId);
-}
-
-async function playPipeline(): Promise<void> {
-  await pipeline.runPipeline({
-    build: true,
-    execute: true,
-  });
-  const resources = await pipeline.getResources({});
-  console.log("Resources after run:", resources);
 }
 
 function _getClientXY(event: MouseEvent | TouchEvent): ClientXY {

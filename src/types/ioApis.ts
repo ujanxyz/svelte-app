@@ -28,6 +28,27 @@ export namespace ioApis {
         deletedIds: string[];
       };
     },
+
+    getMediaData: {
+      request: {
+        id: string;
+      };
+      response: {
+        meta: StoredMediaMeta;
+        bitmap: ImageBitmap;
+      };
+    },
+
+    // Stage media as bitmaps for input nodes prior to execution.
+    stageMedia: {
+      request: {
+        ids: string[];
+      };
+      response: {
+        stagedBitmaps: ImageBitmap[];
+      };
+    },
+
   };
 
   export type Names = keyof ApiDict;

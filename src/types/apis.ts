@@ -118,13 +118,17 @@ export namespace apis {
         encodedData: plstate.EncodedData | null;
       };
       response: VoidType;
-    }
+    };
+
+    buildPipeline: {
+      request: VoidType;
+      response: {
+        assetInfos: any[];
+      };
+    };
 
     runPipeline: {
-      request: {
-        build: boolean;
-        execute: boolean;
-      };
+      request: VoidType;
       response: {
         runResult: plstate.GraphRunOutput[];
       };

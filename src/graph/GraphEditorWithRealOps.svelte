@@ -5,6 +5,7 @@ import ManageGraphIO from "./data/ManageGraphIO.svelte";
 import ManageGraphUpdates from "./data/ManageGraphUpdates.svelte";
 import RegisterFlowGraphService from "./data/RegisterFlowGraphService.svelte";
 import RegisterIoService from "./data/RegisterIoService.svelte";
+import RegisterPipelineService from "./data/RegisterPipelineService.svelte";
 import RegisterPopupService from "./data/RegisterPopupService.svelte";
 import RegisterRawStoreService from "./data/RegisterRawStoreService.svelte";
 import RegisterReactiveService from "./data/RegisterReactiveService.svelte";
@@ -21,6 +22,7 @@ import FlowGraphWrapper from "./xyflow/FlowGraphWrapper.svelte";
   <RegisterReactiveService />
   <RegisterIoService />
   <RegisterFlowGraphService />
+  <RegisterPipelineService />
   <RegisterPopupService />
 {/snippet}
 

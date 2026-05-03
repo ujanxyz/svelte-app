@@ -49,6 +49,10 @@ class PipelineBuilder {
     return await this.invokeAsync<"setEncodedData">("setEncodedData", request);
   }
 
+  public async buildPipeline(request: apis.Request<"buildPipeline">): Promise<apis.Response<"buildPipeline">> {
+    return await this.invokeAsync<"buildPipeline">("buildPipeline", request);
+  }
+
   public async runPipeline(request: apis.Request<"runPipeline">): Promise<apis.Response<"runPipeline">> {
     return await this.invokeAsync<"runPipeline">("runPipeline", request);
   }

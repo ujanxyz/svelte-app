@@ -1,3 +1,5 @@
+import { computeLetterbox } from "@/utils/canvasUtils";
+
 /**
  * Manages a collection of preview canvases (OffscreenCanvas) and associated
  * graphic data (ImageData or raw bitmap). When graphic data is updated, all
@@ -198,22 +200,4 @@ class PreviewManager {
   }
 }
 
-/**
- * Compute letterbox parameters: fit a graphic of size (gw x gh) into a canvas
- * of size (cw x ch), preserving aspect ratio, centered, with black bars.
- */
-function computeLetterbox(
-  cw: number,
-  ch: number,
-  gw: number,
-  gh: number,
-): { dx: number; dy: number; dw: number; dh: number } {
-  const scale = Math.min(cw / gw, ch / gh);
-  const dw = Math.round(gw * scale);
-  const dh = Math.round(gh * scale);
-  const dx = Math.round((cw - dw) / 2);
-  const dy = Math.round((ch - dh) / 2);
-  return { dx, dy, dw, dh };
-}
-
-export { type GraphicData,PreviewManager };
+export { type GraphicData, PreviewManager };

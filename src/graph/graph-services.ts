@@ -72,6 +72,9 @@ interface FlowGraphService {
   assignGraph: (newNodes: Node[], newEdges: Edge[]) => void;
   setGraphInput: (rawNodeId: number, encoded: string) => Promise<void>;
   setSlotInput: (rawNodeId: number, slotName: string, encoded: string) => Promise<void>;
+}
+
+interface PipelineService {
   playPipeline: () => Promise<void>;
 }
 
@@ -79,6 +82,7 @@ type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
 
 interface PopupService {
   mediaManagerModal: () => Promise<void>;
+  imgViewerModal: (id: string) => Promise<void>;
   nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
   encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
       => Promise<StatusOr<plstate.EncodedData>>;
@@ -93,10 +97,11 @@ interface PopupService {
 
 export interface GraphServices {
   rawStoreService?: RawStoreService;
+  reactiveService?: ReactiveService;
   ioService?: IoService;
   flowGraphService?: FlowGraphService;
   popupService?: PopupService;
-  reactiveService?: ReactiveService;
+  pipelineService?: PipelineService;
 }
 
 const graphContext = createReactiveContext<GraphServices>(

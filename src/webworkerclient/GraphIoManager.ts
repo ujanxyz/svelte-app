@@ -40,6 +40,10 @@ class GraphIoManager {
     return await this.#invokeAsync<"deleteMedia">("deleteMedia", request);
   }
 
+  public async getMediaData(request: ioApis.Request<"getMediaData">): Promise<ioApis.Response<"getMediaData">> {
+    return await this.#invokeAsync<"getMediaData">("getMediaData", request);
+  }
+
   //--------------------------------
 
   public async getOrCreatePreviewCanvas(slotId: plinfo.SlotId): Promise<HTMLCanvasElement> {

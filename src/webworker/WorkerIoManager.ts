@@ -64,6 +64,19 @@ class WorkerIoManager {
         return { deletedIds };
       }
 
+      /**
+       * "getMediaData": User opens the image viewer for a media file. Returns the
+       * full-resolution bitmap for the file, which the image viewer will draw at its
+       * native resolution and provide zooming/panning.
+       */
+      case "getMediaData": {
+        const { id } = request as { id: string };
+        const blob = await this.indexedDb.getMediaBlob(id);
+        const bitmap = await createImageBitmap(blob);
+        const meta = await this.indexedDb.getMediaMeta(id);
+        return { meta, bitmap };
+      }
+
       // ── Legacy canvas registration ──────────────────────────────────────────
       case "REGISTER_CANVAS": {
         const { nodeId, slotName, canvas } = request as {
