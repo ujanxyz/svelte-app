@@ -7,6 +7,7 @@ import type { xy } from "@/types/xy";
 import MyHandle from "./MyHandle.svelte";
 import { setNodeContextOps } from "./nodeContextOps";
 import XYNodeTopBar, { type ActionHandler } from "./XYNodeTopBar.svelte";
+import type { plinfo } from "@/types/plinfo";
 
 const {
   data: baseNodeData,
@@ -27,6 +28,7 @@ const nodeState = $derived(nodeOps.reactiveNodeState()) as plstate.NodeState;
 
 // The preview canvas is attached to this container div.
 let contentDiv: HTMLDivElement;
+let canvasRef: HTMLCanvasElement;
 
 let refDataButton: HTMLButtonElement;
 
@@ -38,14 +40,7 @@ const actionHandler: ActionHandler = {
   },
 
   onDeleteSelf: async function (): Promise<void> {
-    await nodeOps.getPreviewCanvas(slotInfo).then((canvas) => {
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }).catch((err) => {
-      console.error("Error clearing preview canvas: ", err);
-    });
+    throw new Error("Delete action not implemented for GraphIONode yet");
   }
 };
 
@@ -58,17 +53,16 @@ async function handlePaneClick(ev: MouseEvent): Promise<void> {
 
 onMount(() => {
   if (graphIONodeData.slotInfo.dtype !== "bitmap") return;
-  let previewCanvas: HTMLCanvasElement | null = null;
-  nodeOps.getPreviewCanvas(slotInfo).then((canvas) => {
-    previewCanvas = canvas;
-    contentDiv.appendChild(previewCanvas);
-  }).catch((err) => {
-    console.error("Error getting preview canvas: ", err);
-  });
+  let registrationKey: string;
+  canvasRef.width = 120;
+  canvasRef.height = 120;
+  nodeOps.registerPreview(slotInfo, canvasRef).then((regKey: string) => {
+    registrationKey = regKey;
+  }).catch((err) => console.error(err));
 
   return () => {
-    if (previewCanvas) {
-      contentDiv.removeChild(previewCanvas);
+    if (registrationKey) {
+      nodeOps.unregisterPreview(registrationKey).catch((err) => console.error(err));
     }
   };
 });
@@ -79,6 +73,7 @@ onMount(() => {
   <span>{nodeState.label}</span>
 </div>
 <div class="content" bind:this={contentDiv}>
+  <canvas bind:this={canvasRef}></canvas>
   <button onclick={handlePaneClick} bind:this={refDataButton}>
     {nodeState.encodedData?.payload ?? "n/a"}
   </button>

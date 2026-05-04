@@ -34,3 +34,20 @@ export function computeFitScale(
 ): number {
   return Math.min(cw / gw, ch / gh);
 }
+
+/**
+ * Creates an ImageData object from a Blob (e.g. from a media asset).
+ *
+ * @param blob The Blob representing the image data.
+ * @returns A Promise that resolves to an ImageData object.
+ */
+export async function makeImageDataFromBlob(blob: Blob): Promise<ImageData> {
+  const bitmap = await createImageBitmap(blob);
+  const { width, height } = bitmap;
+  const offscreen = new OffscreenCanvas(width, height);
+  const ctx = offscreen.getContext("2d") as OffscreenCanvasRenderingContext2D;
+  ctx.drawImage(bitmap, 0, 0);
+  const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
+  bitmap.close();
+  return imageData;
+}

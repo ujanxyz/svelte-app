@@ -52,4 +52,11 @@ export namespace plinfo {
     type: "UNKNOWN" | "BITMAP";
     bitmap: BitmapInfo | null;
   };
+
+  export interface AssetInfo {
+    slotId: SlotId;
+    assetType: "UNKNOWN" | "GRAPHIN" | "MANUAL" | "ARTIFACT" | "GRAPHOUT";
+    dtype: string;
+    assetUri: string | null;
+  };
 }

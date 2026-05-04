@@ -16,6 +16,15 @@ class WasmService {
     return WasmService.instance;
   }
 
+  public getAssetStaging(): wa.AssetStagingInterface {
+    const assetStaging = this.wasmModule?.assetStaging;
+    if (!assetStaging) {
+      throw new Error("Asset staging API is not available on the loaded WASM module");
+    }
+    console.log(this.wasmModule!.assetStaging);
+    return assetStaging;
+  }
+
   // Pre-requisite: Loading is complete.
   public newGraphEngineApi(): wa.ApiInstance {
     if (!this.wasmModule) {

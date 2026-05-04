@@ -1,6 +1,9 @@
-import type { StoredMediaMeta } from "./worker-message-types";
+import type { plinfo } from "./plinfo";
+import type { AssetSummary, AssetType, StoredMediaMeta } from "./worker-message-types";
 
 export namespace ioApis {
+  interface VoidType {};
+
   export interface ApiDict {
     uploadMedia: {
       request: {
@@ -39,14 +42,38 @@ export namespace ioApis {
       };
     },
 
-    // Stage media as bitmaps for input nodes prior to execution.
-    stageMedia: {
+    listAssets: {
       request: {
-        ids: string[];
+        assetType: AssetType;
       };
       response: {
-        stagedBitmaps: ImageBitmap[];
+        assetEntries: { summary: AssetSummary; thumbnail: ImageBitmap }[];
       };
+    },
+
+    stageAssets: {
+      request: {
+        isPostRun: boolean;
+        assetInfos: plinfo.AssetInfo[];
+      };
+      response: {};
+    },
+
+    registerPreview: {
+      request: {
+        slotId: plinfo.SlotId;
+        offscreen: OffscreenCanvas;
+      };
+      response: {
+        regKey: string;
+      };
+    },
+
+    unRegisterPreview: {
+      request: {
+        regKey: string;
+      };
+      response: VoidType;
     },
 
   };

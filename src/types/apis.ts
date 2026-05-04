@@ -123,7 +123,7 @@ export namespace apis {
     buildPipeline: {
       request: VoidType;
       response: {
-        assetInfos: any[];
+        assetInfos: plinfo.AssetInfo[];
       };
     };
 

@@ -92,19 +92,81 @@ globalThis.pipelineEvents = new EventTarget();
 
 console.log("From pre_steps.js: ", Module);
 
+Module.assetStaging = (function() {
+    /**
+     * @typedef {object} StagedImageEntry
+     * @property {string} assetUri
+     * @property {ImageData} bitmap
+     */
 
-Module.bitmapStaging = (function() {
-    class BitmapStaging {
+    /**
+     * Temporary in-worker staging for mutable bitmaps that are prepared for WASM input.
+     * Entries are keyed by slot id and store both the source asset URI and ImageData.
+     */
+    class AssetStaging {
         constructor() {
+            /** @type {Map<string, StagedImageEntry>} */
+            this._entriesBySlot = new Map();
         }
 
-        addBitmap(nodeId, bitmapInfo, data) {
-            console.log("BitmapStaging :: addBitmap called");
+        /**
+         * Stage a bitmap (ImageData) for a specific slot.
+         *
+         * @param {string} slotIdStr A string id specifying the expected consuming slot.
+         * @param {string} assetUri The URI of the backing asset.
+         * @param {ImageData} bitmap The ImageData to be staged.
+         * @returns {void}
+         */
+        stageImageData(slotIdStr, assetUri, bitmap) {
+            if (typeof slotIdStr !== "string" || slotIdStr.trim() === "") {
+                throw new Error("stageImageData: slotIdStr must be a non-empty string");
+            }
+            if (typeof assetUri !== "string" || assetUri.trim() === "") {
+                throw new Error("stageImageData: assetUri must be a non-empty string");
+            }
+            if (!(bitmap instanceof ImageData)) {
+                throw new Error("stageImageData: bitmap must be an ImageData instance");
+            }
+
+            this._entriesBySlot.set(slotIdStr, { assetUri, bitmap });
         }
 
+        /**
+         * Release the bitmap staged for the slot and verify it came from the expected asset URI.
+         *
+         * @param {string} slotIdStr A string id specifying the expected consuming slot.
+         * @param {string} assetUri The URI of the backing asset expected for this slot.
+         * @returns {ImageData | null} Released image when found+verified, else null when no slot is staged.
+         */
+        releaseImageData(slotIdStr, assetUri) {
+            const entry = this._entriesBySlot.get(slotIdStr);
+            if (!entry) {
+                return null;
+            }
+
+            if (entry.assetUri !== assetUri) {
+                throw new Error(
+                    `releaseImageData: asset URI mismatch for slot '${slotIdStr}'. ` +
+                    `Expected '${entry.assetUri}', got '${assetUri}'.`,
+                );
+            }
+
+            this._entriesBySlot.delete(slotIdStr);
+            console.log("[Pre-js]: Released staged bitmap for slot:", slotIdStr, " with asset URI: ", assetUri);
+            return entry.bitmap;
+        }
+
+        /**
+         * Clear all staged assets, e.g. on graph reset or worker shutdown.
+         *
+         * @returns {void}
+         */
+        clearAssets() {
+            this._entriesBySlot.clear();
+        }
     };
-    console.log("BitmapStaging called");
-    return new BitmapStaging();
+
+    return new AssetStaging();
 })();// end include: ujcore/wasm/pre_steps.js
 
 
@@ -6492,12 +6554,14 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
-function JsOnCreateBitmap(handle,pixelsData) { const target = Emval.toValue(handle); const {id, width, height, numBytes} = target; const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CREATED", { detail: { ... target, uint8arr } })); return ptr; }
-JsOnCreateBitmap.sig = 'iii';
-function JsOnDestroyBitmap(idStr,pixelsData) { globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_DELETED", { detail: { id: UTF8ToString(idStr) } })); Module._free(pixelsData); }
+function JsOnCreateBitmap(handle) { const target = Emval.toValue(handle); const {id, width, height, numBytes} = target; const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CREATED", { detail: { ... target, uint8arr } })); return ptr; }
+JsOnCreateBitmap.sig = 'ii';
+function JsOnDestroyBitmap(idStr,pixelData) { globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_DELETED", { detail: { id: UTF8ToString(idStr) } })); Module._free(pixelData); }
 JsOnDestroyBitmap.sig = 'vii';
 function JsOnFlushBitmap(idStr) { globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_FLUSHED", { detail: { id: UTF8ToString(idStr) } })); }
 JsOnFlushBitmap.sig = 'vi';
+function JsReleaseStagedBitmap(slotIdStr,assetUri) { const jSlotIdStr = UTF8ToString(slotIdStr); const jAssetUri = UTF8ToString(assetUri); console.log("[JsReleaseStagedBitmap] called with slotId: ", jSlotIdStr, " and assetUri: ", jAssetUri); const imageData = Module.assetStaging.releaseImageData(jSlotIdStr, jAssetUri); console.log("[JsReleaseStagedBitmap] got imageData: ", imageData); if (!imageData) { console.warn("[JsReleaseStagedBitmap] No staged bitmap found for slot: ", jSlotIdStr, " with asset URI: ", jAssetUri); return null; } const { width, height, data, colorSpace, pixelFormat } = imageData; if (colorSpace !== "srgb" || pixelFormat !== "rgba-unorm8") { console.error("[JsBitmapPool] Unsupported image data format: ", colorSpace, pixelFormat); return null; } const { byteLength, byteOffset } = data; const numBytes = width * height * 4; if (byteLength !== numBytes) { console.error("[JsBitmapPool] Mismatch in expected byte length: ", byteLength, " vs calculated: ", numBytes); return null; } const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); uint8arr.set(imageData.data); console.log("[JsReleaseStagedBitmap] Allocated WASM memory at ptr: ", ptr, " for byteLength: ", byteLength, ", uint8arr: ", uint8arr); const target = { id: jSlotIdStr, width, height, numBytes, }; console.log("[JsReleaseStagedBitmap] checkpt:", target); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CREATED", { detail: { ... target, uint8arr } })); const retValue = { width, height, numBytes, bytesPerPixel: 4, dataPtr: ptr, }; console.log("[JsReleaseStagedBitmap] returning : ", retValue); return Emval.toHandle(retValue); }
+JsReleaseStagedBitmap.sig = 'iii';
 
 // Imports from the Wasm binary.
 var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
@@ -6573,6 +6637,8 @@ var wasmImports = {
   JsOnDestroyBitmap,
   /** @export */
   JsOnFlushBitmap,
+  /** @export */
+  JsReleaseStagedBitmap,
   /** @export */
   _embind_register_bigint: __embind_register_bigint,
   /** @export */

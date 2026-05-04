@@ -68,14 +68,19 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
       await flowService!.setSlotInput(rawNodeId, slotInfo.name, data.payload);
     },
 
-    getPreviewCanvas: async function(slotInfo: plinfo.SlotInfo): Promise<HTMLCanvasElement> {
+    registerPreview: async function (slotInfo: plinfo.SlotInfo, onscreen: HTMLCanvasElement): Promise<string> {
       if (slotInfo.dtype !== "bitmap") {
         throw new Error("Previews are only supported for bitmap data");
       }
       const slotId: plinfo.SlotId = { parent: rawNodeId, name: slotInfo.name };
-      return await graphIo.getOrCreatePreviewCanvas(slotId);
-    }
+      const offscreen = onscreen.transferControlToOffscreen() as OffscreenCanvas;
+      const { regKey } = await graphIo.registerPreview({ slotId, offscreen });
+      return regKey;
+    },
 
+    unregisterPreview: async function (regKey: string): Promise<void> {
+      await graphIo.unRegisterPreview({ regKey });
+    },
   };
 }
 

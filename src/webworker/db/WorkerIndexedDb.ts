@@ -1,23 +1,23 @@
-import { type DBSchema, type IDBPDatabase, openDB } from "idb";
+import { type DBSchema, type IDBPDatabase,openDB } from "idb";
 
-import type { StoredArtifactMeta, StoredMediaMeta } from "@/types/worker-message-types";
+import {
+  type AssetSummary,
+  AssetType,
+  type StoredArtifactMeta,
+  type StoredMediaMeta,
+} from "@/types/worker-message-types";
 import { sha256Hex } from "@/utils/hash";
 
 import {
   FileNameConflictError,
   FileNotFoundError,
-  NotImageFileError,
-  type StoredFileCategory,
-  type StoredFileKind,
-  type StoredFileMeta,
-  type StoredFileRecord,
 } from "./types";
 
 const DB_NAME = "WorkerFileStorage";
-const DB_VERSION = 3;
-const STORE_FILES = "files";
+const DB_VERSION = 5;
 const STORE_MEDIA = "media";
 const STORE_ARTIFACTS = "artifacts";
+const MEDIA_STORE_SCHEME = "idb" as const;
 const DEFAULT_IDLE_CLOSE_MS = 60_000;
 
 export interface StoredMediaRecord extends StoredMediaMeta {
@@ -31,11 +31,6 @@ export interface StoredArtifactRecord extends StoredArtifactMeta {
 }
 
 interface WorkerFileDbSchema extends DBSchema {
-  [STORE_FILES]: {
-    key: string;
-    value: StoredFileRecord;
-  };
-
   [STORE_MEDIA]: {
     key: string;
     value: StoredMediaRecord;
@@ -49,10 +44,6 @@ interface WorkerFileDbSchema extends DBSchema {
 
 interface WorkerFileStoreOptions {
   idleCloseMs?: number;
-}
-
-function inferKind(mimeType: string): StoredFileKind {
-  return mimeType.startsWith("image/") ? "image" : "binary";
 }
 
 function inferMediaKind(mimeType: string): "image" | "video" {
@@ -95,9 +86,9 @@ class WorkerIndexedDb {
       throw new Error("Failed to create thumbnail for the uploaded media.");
     }
 
-    const id = await this.#computeMediaId(file);
+    const fileId = await this.#computeMediaId(file);
     const db = await this.getDb();
-    const existing = await db.get(STORE_MEDIA, id);
+    const existing = await db.get(STORE_MEDIA, fileId);
     if (existing && !overwrite) {
       throw new FileNameConflictError(file.name);
     }
@@ -109,7 +100,7 @@ class WorkerIndexedDb {
       kind === "image" ? await this.getImageDimensionSafe(file) : undefined;
 
     const record: StoredMediaRecord = {
-      id,
+      id: fileId,
       filename: file.name,
       mimeType,
       kind,
@@ -175,6 +166,29 @@ class WorkerIndexedDb {
       throw new FileNotFoundError(id);
     }
     return record.blob;
+  }
+
+  public async listAssets(assetType: AssetType): Promise<Array<{ summary: AssetSummary; thumbnail: ImageBitmap }>> {
+    if (assetType === AssetType.MEDIA) {
+      const db = await this.getDb();
+      const all = await db.getAll(STORE_MEDIA);
+      return all
+        .map((record) => ({
+          summary: {
+            assetType: AssetType.MEDIA,
+            uri: this.toMediaUri(record.id),
+          },
+          thumbnail: record.thumbnail,
+        }))
+        .sort((a, b) => b.summary.uri.localeCompare(a.summary.uri));
+    }
+
+    if (assetType === AssetType.ARTIFACT) {
+      // TODO: Read from STORE_ARTIFACTS and return artifact thumbnails + URIs.
+      return [];
+    }
+
+    throw new Error(`Unsupported asset type: ${assetType}`);
   }
 
   public async clearMedia(): Promise<number> {
@@ -250,48 +264,12 @@ class WorkerIndexedDb {
 
   //-- (end) Add new sets of APIs here --
 
-  public async hasFile(filename: string): Promise<boolean> {
-    const db = await this.getDb();
-    const key = await db.getKey(STORE_FILES, filename);
-    return key !== undefined;
-  }
-
-  public async getImageBitmap(
-    filename: string,
-    options?: ImageBitmapOptions,
-  ): Promise<ImageBitmap> {
-    const record = await this.getRecordOrThrow(filename);
-    if (record.kind !== "image" && !record.mimeType.startsWith("image/")) {
-      throw new NotImageFileError(filename, record.mimeType);
-    }
-    return await createImageBitmap(record.blob, options);
-  }
-
-  /** Get the pixel data for an image file. */
-  public async getImageData(filename: string): Promise<ImageData> {
-    const bitmap = await this.getImageBitmap(filename);
-    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-    const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
-    ctx.drawImage(bitmap, 0, 0);
-    bitmap.close();
-    return ctx.getImageData(0, 0, canvas.width, canvas.height, { colorSpace: "srgb" });
-  }
-
   public close(): void {
     this.clearIdleTimer();
     if (this.dbPromise) {
       void this.dbPromise.then((db) => db.close());
       this.dbPromise = null;
     }
-  }
-
-  private async getRecordOrThrow(filename: string): Promise<StoredFileRecord> {
-    const db = await this.getDb();
-    const record = await db.get(STORE_FILES, filename);
-    if (!record) {
-      throw new FileNotFoundError(filename);
-    }
-    return record;
   }
 
   private async getMediaRecordOrThrow(id: string): Promise<StoredMediaRecord> {
@@ -309,8 +287,10 @@ class WorkerIndexedDb {
     if (!this.dbPromise) {
       this.dbPromise = openDB<WorkerFileDbSchema>(DB_NAME, DB_VERSION, {
         upgrade(db, oldVersion) {
-          if (!db.objectStoreNames.contains(STORE_FILES)) {
-            db.createObjectStore(STORE_FILES, { keyPath: "filename" });
+          const rawDb = db as any;
+
+          if (rawDb.objectStoreNames.contains("files")) {
+            rawDb.deleteObjectStore("files");
           }
 
           if (oldVersion < 3 && db.objectStoreNames.contains(STORE_MEDIA)) {
@@ -323,6 +303,10 @@ class WorkerIndexedDb {
 
           if (!db.objectStoreNames.contains(STORE_ARTIFACTS)) {
             db.createObjectStore(STORE_ARTIFACTS, { autoIncrement: true });
+          }
+
+          if (rawDb.objectStoreNames.contains("outputs")) {
+            rawDb.deleteObjectStore("outputs");
           }
         },
       });
@@ -342,6 +326,10 @@ class WorkerIndexedDb {
       updatedAt: record.updatedAt,
       dimension: record.dimension,
     };
+  }
+
+  private toMediaUri(id: string): string {
+    return `${MEDIA_STORE_SCHEME}:/${STORE_MEDIA}/${id}`;
   }
 
   private toArtifactMeta(record: StoredArtifactRecord): StoredArtifactMeta {
@@ -412,21 +400,6 @@ class WorkerIndexedDb {
     ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
 
     return canvas.transferToImageBitmap();
-  }
-
-  private toMeta(record: StoredFileRecord): StoredFileMeta {
-    return {
-      filename: record.filename,
-      mimeType: record.mimeType,
-      kind: record.kind,
-      category: record.category ?? "input",
-      size: record.size,
-      lastModified: record.lastModified,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-      width: record.width,
-      height: record.height,
-    };
   }
 
   private bumpIdleTimer(): void {

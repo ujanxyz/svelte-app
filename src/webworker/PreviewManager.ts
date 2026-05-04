@@ -1,14 +1,12 @@
 import { computeLetterbox } from "@/utils/canvasUtils";
+import { generateShortId } from "@/utils/idUtils";
 
 /**
  * Manages a collection of preview canvases (OffscreenCanvas) and associated
  * graphic data (ImageData or raw bitmap). When graphic data is updated, all
  * registered previews for the matching key are redrawn using letterboxing.
  *
- * Key formats:
- *   - Input node:  /$in/<node_id>
- *   - Output node: /$out/<node_id>
- *   - Slot:        /$slot/<node_id>:<slot_name>
+ * Key format: `${nodeId}:${slotName}` for slot previews, `${nodeId}` for input node previews.
  *
  * A graphic and its matching preview can be registered in any order. On first
  * insertion, if a match immediately occurs, the preview is updated at once.
@@ -18,56 +16,65 @@ type GraphicData =
   | { kind: "imagedata"; imageData: ImageData }
   | { kind: "raw"; uint8arr: Uint8ClampedArray; width: number; height: number };
 
+interface PreviewRegistration {
+  registrationKey: string;
+  canvas: OffscreenCanvas;
+}
+
+/**
+ * This class is used by WorkerIoManager to manage preview canvases and their associated graphics.
+ */
 class PreviewManager {
-  private readonly previews: Map<string, OffscreenCanvas[]> = new Map();
-  private readonly graphics: Map<string, GraphicData> = new Map();
-
-  // ─── Key helpers ──────────────────────────────────────────────────────────
-
-  static inputKey(nodeId: string): string {
-    return `/$in/${nodeId}`;
-  }
-
-  static outputKey(nodeId: string): string {
-    return `/$out/${nodeId}`;
-  }
-
-  static slotKey(nodeId: string, slotName: string): string {
-    return `/$slot/${nodeId}:${slotName}`;
-  }
+  private readonly previewsByAssetKey: Map<string, PreviewRegistration[]> = new Map();
+  private readonly assetKeyByRegistrationKey: Map<string, string> = new Map();
+  private readonly graphics: Map<string /* assetKey */, GraphicData> = new Map();
 
   // ─── Preview registration ─────────────────────────────────────────────────
 
-  /** Register a preview canvas against an arbitrary key. */
-  registerPreview(key: string, canvas: OffscreenCanvas): void {
-    const list = this.previews.get(key);
+  /**
+   * Register a preview canvas against an asset key.
+   * Returns a registration key for later targeted unregister.
+   */
+  registerPreview(assetKey: string, canvas: OffscreenCanvas): string {
+    const registrationKey = generateShortId("preview", 12);
+    const list = this.previewsByAssetKey.get(assetKey);
+    const registration: PreviewRegistration = { registrationKey, canvas };
     if (list) {
-      list.push(canvas);
+      list.push(registration);
     } else {
-      this.previews.set(key, [canvas]);
+      this.previewsByAssetKey.set(assetKey, [registration]);
     }
+    this.assetKeyByRegistrationKey.set(registrationKey, assetKey);
+
     // Draw immediately if graphic is already available; otherwise show a cross.
-    const graphic = this.graphics.get(key);
+    const graphic = this.graphics.get(assetKey);
     if (graphic) {
       this.#drawOnCanvas(canvas, graphic);
     } else {
-      this.#drawCross(canvas);
+      this.#drawCross(canvas, assetKey);
     }
+
+    return registrationKey;
   }
 
-  /** Register a preview canvas against a graph input node. */
-  registerInputPreview(nodeId: string, canvas: OffscreenCanvas): void {
-    this.registerPreview(PreviewManager.inputKey(nodeId), canvas);
-  }
+  /** Remove exactly one preview registration by registration key. */
+  unregister(registrationKey: string): void {
+    const assetKey = this.assetKeyByRegistrationKey.get(registrationKey);
+    if (!assetKey) return;
 
-  /** Register a preview canvas against a graph output node. */
-  registerOutputPreview(nodeId: string, canvas: OffscreenCanvas): void {
-    this.registerPreview(PreviewManager.outputKey(nodeId), canvas);
-  }
+    const list = this.previewsByAssetKey.get(assetKey);
+    if (!list) {
+      this.assetKeyByRegistrationKey.delete(registrationKey);
+      return;
+    }
 
-  /** Remove all preview canvases registered for a key. */
-  unregister(key: string): void {
-    this.previews.delete(key);
+    const next = list.filter((entry) => entry.registrationKey !== registrationKey);
+    if (next.length > 0) {
+      this.previewsByAssetKey.set(assetKey, next);
+    } else {
+      this.previewsByAssetKey.delete(assetKey);
+    }
+    this.assetKeyByRegistrationKey.delete(registrationKey);
   }
 
   // ─── Graphic updates ──────────────────────────────────────────────────────
@@ -76,28 +83,28 @@ class PreviewManager {
    * Set or update the graphic for a key and redraw all matching previews.
    * Pass null to clear the graphic (previews will show a cross).
    */
-  setGraphicForKey(key: string, graphic: GraphicData | null): void {
+  setGraphicForKey(assetKey: string, graphic: GraphicData | null): void {
     if (graphic) {
-      this.graphics.set(key, graphic);
-      this.#syncToPreviews(key);
+      this.graphics.set(assetKey, graphic);
+      this.#syncToPreviews(assetKey);
     } else {
-      this.graphics.delete(key);
-      this.#syncCrossToPreviews(key);
+      this.graphics.delete(assetKey);
+      this.#syncCrossToPreviews(assetKey);
     }
   }
 
   /** Remove the graphic for a key and redraw matching previews with a cross. */
-  removeGraphic(key: string): void {
-    this.graphics.delete(key);
-    this.#syncCrossToPreviews(key);
+  removeGraphic(assetKey: string): void {
+    this.graphics.delete(assetKey);
+    this.#syncCrossToPreviews(assetKey);
   }
 
   /**
    * Re-render previews for a key using current graphic data. Call this after
    * an in-place bitmap update from C++/WASM (e.g. on BITMAP_FLUSHED).
    */
-  syncPreviewsForKey(key: string): void {
-    this.#syncToPreviews(key);
+  syncPreviewsForKey(assetKey: string): void {
+    this.#syncToPreviews(assetKey);
   }
 
   // ─── Convenience notify methods ───────────────────────────────────────────
@@ -113,8 +120,8 @@ class PreviewManager {
     width: number,
     height: number,
   ): void {
-    const key = PreviewManager.slotKey(nodeId, slotName);
-    this.setGraphicForKey(key, { kind: "raw", uint8arr, width, height });
+    const assetKey = `${nodeId}:${slotName}`;
+    this.setGraphicForKey(assetKey, { kind: "raw", uint8arr, width, height });
   }
 
   /**
@@ -122,31 +129,31 @@ class PreviewManager {
    * Pass null imageData to indicate an empty input (previews will show a cross).
    */
   notifyInputMediaUpdated(nodeId: string, imageData: ImageData | null): void {
-    const key = PreviewManager.inputKey(nodeId);
+    const assetKey = nodeId;
     if (imageData) {
-      this.setGraphicForKey(key, { kind: "imagedata", imageData });
+      this.setGraphicForKey(assetKey, { kind: "imagedata", imageData });
     } else {
-      this.removeGraphic(key);
+      this.removeGraphic(assetKey);
     }
   }
 
   // ─── Private rendering helpers ────────────────────────────────────────────
 
-  #syncToPreviews(key: string): void {
-    const canvases = this.previews.get(key);
-    if (!canvases?.length) return;
-    const graphic = this.graphics.get(key);
+  #syncToPreviews(assetKey: string): void {
+    const registrations = this.previewsByAssetKey.get(assetKey);
+    if (!registrations?.length) return;
+    const graphic = this.graphics.get(assetKey);
     if (!graphic) return;
-    for (const canvas of canvases) {
-      this.#drawOnCanvas(canvas, graphic);
+    for (const registration of registrations) {
+      this.#drawOnCanvas(registration.canvas, graphic);
     }
   }
 
-  #syncCrossToPreviews(key: string): void {
-    const canvases = this.previews.get(key);
-    if (!canvases?.length) return;
-    for (const canvas of canvases) {
-      this.#drawCross(canvas);
+  #syncCrossToPreviews(assetKey: string): void {
+    const registrations = this.previewsByAssetKey.get(assetKey);
+    if (!registrations?.length) return;
+    for (const registration of registrations) {
+      this.#drawCross(registration.canvas, assetKey);
     }
   }
 
@@ -181,7 +188,7 @@ class PreviewManager {
     ctx.drawImage(tmp, dx, dy, dw, dh);
   }
 
-  #drawCross(canvas: OffscreenCanvas): void {
+  #drawCross(canvas: OffscreenCanvas, assetKey: string): void {
     const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
     const { width: cw, height: ch } = canvas;
 
@@ -197,6 +204,13 @@ class PreviewManager {
     ctx.moveTo(cw, 0);
     ctx.lineTo(0, ch);
     ctx.stroke();
+
+    // Write the `assetKey` in the center for debugging (optional).
+    ctx.fillStyle = "#555";
+    ctx.font = `${Math.max(12, Math.round(cw * 0.08))}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(assetKey, cw / 2, ch / 2);
   }
 }
 

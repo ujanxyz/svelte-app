@@ -20,11 +20,15 @@ export interface MediaInfoMessage {
 //-----------------------------------------------------
 // Used
 
-interface WorkerResponseInClient {
-  ok: boolean
-  code: string;
-  payload?: Record<string, any>;
-  error?: string;
+export enum AssetType {
+  MEDIA = "media",
+  ARTIFACT = "artifact",
+}
+
+// Non-persisted cross-store summary for compact asset list APIs.
+export interface AssetSummary {
+  assetType: AssetType;
+  uri: string;
 }
 
 export interface StoredMediaMeta {

@@ -15,8 +15,9 @@ function _createPipelineService() {
 
   async function playPipeline(): Promise<void> {
     console.log("Playing pipeline...");
-    const assetInfosResp = await pipeline.buildPipeline({});
-    console.log("Pipeline built with assets:", assetInfosResp.assetInfos);
+    const { assetInfos } = await pipeline.buildPipeline({});
+    console.log("[DONE] buildPipeline done, asset infos:", assetInfos);
+    await io.stageAssets({ isPostRun: false, assetInfos });
 
     await pipeline.runPipeline({});
     const resources = await pipeline.getResources({});

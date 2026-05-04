@@ -1,11 +1,13 @@
 import {
-  type SecureMessage,
   type RawWorkerResponse,
+  type SecureMessage,
 } from "@/types/worker-message-types";
 
-import { CppGraphBuilder } from "./CppGraphBuilder.js";
-import wasmService from "./wasmService.js";
-import { WorkerIoManager } from "./WorkerIoManager.js";
+import { CppGraphBuilder } from "./CppGraphBuilder";
+import { WorkerIndexedDb } from "./db/index";
+import { ExecutionManager } from "./ExecutionManager";
+import wasmService from "./wasmService";
+import { WorkerIoManager } from "./WorkerIoManager";
 
 const SysCodes = Object.freeze({
   OK: "_OK",
@@ -17,6 +19,7 @@ const SysCodes = Object.freeze({
   APP_ERROR: "_APP_ERROR",
 });
 
+let execManager: ExecutionManager | null = null;
 let graphBuilder: CppGraphBuilder | null = null;
 let ioManager: WorkerIoManager | null = null;
 
@@ -76,9 +79,13 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
   let expectedSeq: bigint = 0n;
 
   function markHandlerReady() {
+    const assetStaging = wasmService.getAssetStaging();
+    const indexedDb = new WorkerIndexedDb({ idleCloseMs: 60_000 });
+
     const graph = wasmService.newGraphEngineApi();
+    execManager = new ExecutionManager(indexedDb, assetStaging);
     graphBuilder = new CppGraphBuilder(graph, "GRAPH:");
-    ioManager = new WorkerIoManager((globalThis as any).pipelineEvents as EventTarget);
+    ioManager = new WorkerIoManager(execManager!, indexedDb, (globalThis as any).pipelineEvents as EventTarget);
     isThisWorkerReady = true;
     postman.postImReady();
   }

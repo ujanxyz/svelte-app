@@ -1,9 +1,8 @@
 import type { ioApis } from "@/types/ioApis";
-import type { wa } from "@/types/wa";
-import type { MediaInfoMessage } from "@/types/worker-message-types";
 
-import { WorkerIndexedDb } from "./db";
-import { EventCodes, IoEventsHandler } from "./IoEventsHandler";
+import { type WorkerIndexedDb } from "./db";
+import type { ExecutionManager } from "./ExecutionManager";
+import { IoEventsHandler } from "./IoEventsHandler";
 import { PreviewManager } from "./PreviewManager";
 
 type IoProcessResult = Record<string, any>;
@@ -11,19 +10,17 @@ type IoProcessResult = Record<string, any>;
 class WorkerIoManager {
   public static readonly CMD_PREFIX = "IO:" as const;
 
-  private readonly pipelineEvents: EventTarget;
+  private readonly exManager: ExecutionManager;
+  private readonly indexedDb: WorkerIndexedDb;
   private readonly previewManager: PreviewManager;
   private readonly ioEventsHandler: IoEventsHandler;
-  private readonly indexedDb: WorkerIndexedDb;
-  private readonly graph: wa.ApiInstance | null;
 
-  public constructor(pipelineEvents: EventTarget, graph?: wa.ApiInstance) {
-    this.pipelineEvents = pipelineEvents;
-    this.graph = graph ?? null;
+  public constructor(exManager: ExecutionManager, indexedDb: WorkerIndexedDb, pipelineEvents: EventTarget) {
+    this.exManager = exManager;
+    this.indexedDb = indexedDb;
     this.previewManager = new PreviewManager();
     this.ioEventsHandler = new IoEventsHandler(this.previewManager);
     this.ioEventsHandler.setUpListeners(pipelineEvents);
-    this.indexedDb = new WorkerIndexedDb({ idleCloseMs: 60_000 });
   }
 
   public async process(code: string, request: any): Promise<Error | IoProcessResult> {
@@ -77,77 +74,61 @@ class WorkerIoManager {
         return { meta, bitmap };
       }
 
-      // ── Legacy canvas registration ──────────────────────────────────────────
-      case "REGISTER_CANVAS": {
-        const { nodeId, slotName, canvas } = request as {
-          nodeId: string;
-          slotName: string;
-          canvas: OffscreenCanvas;
-        };
-        const key = PreviewManager.slotKey(nodeId, slotName);
-        this.ioEventsHandler.registerPreview(key, canvas);
-        return { status: "OK", message: "Canvas registered", key };
+      /**
+       * "listAssets": List compact asset summaries + thumbnails for one asset
+       * type. Currently media is implemented; artifacts/outputs are stubs.
+       */
+      case "listAssets": {
+        const { assetType } = request as ioApis.Request<"listAssets">;
+        const assetEntries = await this.indexedDb.listAssets(assetType);
+        return { assetEntries };
       }
-
-      // ── Graph editing commands ───────────────────────────────────────────────
 
       /**
-       * CREATE_INPUT: User adds a graph input node.
-       * Creates an empty media entry in C++ state and optionally registers a
-       * preview canvas.
+       * Stage assets prior to execution: create the full-resolution bitmaps for
+       * input nodes to consume during execution.
        */
-      case "CREATE_INPUT": {
-        const { nodeId, canvas } = request as {
-          nodeId: string;
-          canvas?: OffscreenCanvas;
-        };
-        this.#callCpp("createInputNode", { nodeId });
-        if (canvas) {
-          this.previewManager.registerInputPreview(nodeId, canvas);
+      case "stageAssets": {
+        const { isPostRun, assetInfos } = request as ioApis.Request<"stageAssets">;
+        console.log("Staging assets: ", { isPostRun, assetInfos });
+        if (isPostRun) {
+          await this.exManager.stagePostRunAssets(assetInfos);
+        } else {
+          await this.exManager.stagePreRunAssets(assetInfos);
         }
-        return { status: "OK", message: "Input node created", nodeId };
+        return {};
       }
+
+      /**
+       * "registerPreview": Register an offscreen canvas for a node's preview.
+       * The worker will draw the preview directly onto the offscreen canvas whenever
+       * the node's graphic data is updated.
+       * The returnd id is later used to deregister the preview and free up resources
+       * when the UI is unmounted.
+       */
+      case "registerPreview": {
+        const { slotId, offscreen } = request as ioApis.Request<"registerPreview">;
+        const assetKey = `${String(slotId.parent)}:${slotId.name}`;
+        const regKey = this.previewManager.registerPreview(assetKey, offscreen);
+        return { regKey } as ioApis.Response<"registerPreview">;
+      }
+
+      /**
+       * "unRegisterPreview": Unregister a previously registered preview using its registration key.
+       * This should be called before the preview UI is unmounted.
+       */
+      case "unRegisterPreview": {
+        const { regKey } = request as ioApis.Request<"unRegisterPreview">;
+        this.previewManager.unregister(regKey);
+        return {} as ioApis.Response<"unRegisterPreview">;
+      }
+
+
+      // ── Graph editing commands ───────────────────────────────────────────────
 
       default:
         throw new Error("Unknown IO command: " + ioCmd);
     }
-  }
-
-  // ─── Private helpers ────────────────────────────────────────────────────────
-
-  /**
-   * Update C++ node state to reference a new media file, then load the file
-   * from IndexedDb and dispatch INPUT_MEDIA_UPDATED so previews refresh.
-   */
-  async #linkMediaToInputNode(nodeId: string, filename: string): Promise<void> {
-    this.#callCpp("setInputNodeMedia", { nodeId, filename });
-    const imageData = await this.indexedDb.getImageData(filename);
-    this.#dispatchInputMediaUpdated(nodeId, imageData);
-  }
-
-  #dispatchInputMediaUpdated(nodeId: string, imageData: ImageData | null): void {
-    this.pipelineEvents.dispatchEvent(
-      new CustomEvent(EventCodes.INPUT_MEDIA_UPDATED, { detail: { nodeId, imageData } }),
-    );
-  }
-
-  /**
-   * Call a C++ API by name. Returns the response data on success.
-   * Throws if the C++ API is unavailable or returns an error status.
-   */
-  #callCpp(apiName: string, request: any): Record<string, any> {
-    if (!this.graph) {
-      throw new Error(`C++ graph not available (API: ${apiName})`);
-    }
-    const fn = this.graph[apiName];
-    if (typeof fn !== "function") {
-      throw new Error(`C++ API not found: ${apiName}`);
-    }
-    const response = fn.bind(this.graph)(request) as wa.ApiResponse;
-    if (!response.ok) {
-      throw new Error(`C++ error [${apiName}]: ${response.status}`);
-    }
-    return response.data;
   }
 }
 
