@@ -1,5 +1,4 @@
 <script lang="ts">
-import "./app.css";
 import "./styles/index.css";
 
 import MemLogger from "@/modules/memlogging/MemLogger.svelte";

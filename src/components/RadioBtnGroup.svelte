@@ -11,7 +11,7 @@ const { group }: Props = $props();
 const name = group ?? "radio_" + newRandomId();
 </script>
 
-<div class="radio-group txt-sm-strong">
+<div class="radio-group">
   <label class="radio-item">
     <input type="radio" {name} value="1" checked />
     <span class="radio-ui">Opt 1</span>

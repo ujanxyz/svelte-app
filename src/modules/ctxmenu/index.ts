@@ -1,5 +1,4 @@
 export { default as CtxMenuLayer } from "./CtxMenuLayer.svelte";
-export { ctxMenuIconByCode } from "./icons";
 export { openCtxMenu } from "./openCtxMenu";
 export type {
   CtxMenuBaseItem,

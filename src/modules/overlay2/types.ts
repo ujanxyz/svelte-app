@@ -1,5 +1,5 @@
 import type { Snippet } from "svelte";
-import type { Subscriber, Unsubscriber } from "svelte/store";
+import type { Readable, Subscriber, Unsubscriber } from "svelte/store";
 
 import { type overlayStatuses } from "./constants";
 
@@ -37,17 +37,20 @@ export interface OverlayRequest<TPayload, TResult> {
   render: Snippet<[]>;
 }
 
+export interface OverlayTranslate {
+  dx: number;
+  dy: number;
+}
+
 export interface OverlayEntry<TPayload = unknown, TResult = unknown> {
   id: string;
   payload: TPayload;
   options: OverlayOptions;
   render: Snippet<[]>;
+  translate: Readable<OverlayTranslate>;
+  setTranslate: (dx: number, dy: number) => void;
   resolve: (value: TResult) => void;
   reject: (reason: unknown) => void;
-
-  // TODO: Support moving the overlay (for drag, or repositioning on window resize).
-  // getTranslate(): { dx: number; dy: number };
-  // setTranslate(dx: number, dy: number);
 }
 
 export interface OverlayHandle<TResult> {
@@ -82,6 +85,7 @@ export interface OverlayInstance<TPayload = unknown, TResult = unknown> {
   payload: TPayload;
   options: OverlayOptions;
   manager: OverlayManager;
+  setTranslate: (dx: number, dy: number) => void;
   settle: (value: TResult) => void;
   abort: (status?: OverlayAbortStatus) => void;
 }

@@ -16,6 +16,7 @@ const mockInstance: OverlayInstance<any, any> = {
   payload: undefined,
   options: { ...defaultOverlayOptions },
   manager: undefined as any,
+  setTranslate: () => {},
   settle: () => {},
   abort: () => {},
 };

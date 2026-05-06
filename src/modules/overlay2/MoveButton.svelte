@@ -1,50 +1,54 @@
 <script lang="ts">
-import { onMount, type Snippet } from "svelte";
+import { onMount } from "svelte";
+
+import { getAppIcon } from "@/utils/appIcons";
 
 import { useOverlayInstance } from "./useOverlayInstance";
 
 interface Props {
-  children: Snippet;
-  width: number;
-  height: number;
+  size: number;
 }
 
-const { children, width, height }: Props = $props();
+const { size }: Props = $props();
 
-const overlay2Instance = useOverlayInstance<{}, unknown>();
+const overlay = useOverlayInstance<unknown, unknown>();
 
 let containerBtn: HTMLButtonElement;
 let capturedPtrId: number | undefined;
-let dragOffset: { x: number; y: number } | null = null;
+let dragStartClient: { x: number; y: number } | null = null;
+let currentTranslate = { dx: 0, dy: 0 };
+let startTranslate = { dx: 0, dy: 0 };
 
 function onPointerDown(ev: PointerEvent) {
   ev.preventDefault();
-  ev.stopPropagation();
   capturedPtrId = ev.pointerId;
   containerBtn.setPointerCapture(ev.pointerId);
-  console.log("payload ...", overlay2Instance.payload);
-  const { dx: priorDx, dy: priorDy } = overlay2Instance.payload as {dx: number, dy: number};
-  dragOffset = { x: ev.clientX - priorDx, y: ev.clientY - priorDy };
+  dragStartClient = { x: ev.clientX, y: ev.clientY };
+  startTranslate = { ...currentTranslate };
 }
 
 function onPointerUp(ev: PointerEvent) {
-  if (!dragOffset) return;
+  if (!dragStartClient) return;
   ev.preventDefault();
   containerBtn?.releasePointerCapture(ev.pointerId);
-  dragOffset = null;
+  dragStartClient = null;
 }
 
 function onPointerMove(ev: PointerEvent) {
-  if (!dragOffset) return;
+  if (!dragStartClient) return;
   ev.preventDefault();
-  // overlay.setTranslate(ev.clientX - dragOffset.x, ev.clientY - dragOffset.y);
+  currentTranslate = {
+    dx: startTranslate.dx + ev.clientX - dragStartClient.x,
+    dy: startTranslate.dy + ev.clientY - dragStartClient.y,
+  };
+  overlay.setTranslate(currentTranslate.dx, currentTranslate.dy);
 }
 
 function onClick(ev: MouseEvent) {
-  console.log("Mouse clicked on the button ...");
   ev.preventDefault();
-  ev.stopPropagation();
 }
+
+const MoveIcon = getAppIcon("dots-six");
 
 onMount(() => {
   return () => {
@@ -58,23 +62,28 @@ onMount(() => {
 <button
   bind:this={containerBtn}
   class="dragbtn"
-  style:width={`${width}px`}
-  style:height={`${height}px`}
+  style:width={`${size}px`}
+  style:height={`${size}px`}
   onpointerdown={onPointerDown}
   onpointermove={onPointerMove}
   onpointerup={onPointerUp}
+  onpointercancel={onPointerUp}
   onclick={onClick}
   data-kind="move-handle"
 >
-  {@render children()}
+  <MoveIcon {size}/>
 </button>
 
 <style>
 .dragbtn {
-  --line-color: #ffffff;
+  color: #ffffff;
   background-color: transparent;
   margin: 0 8px;
   cursor: grab;
   user-select: none;
+}
+
+.dragbtn:active {
+  cursor: grabbing;
 }
 </style>

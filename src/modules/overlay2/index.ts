@@ -17,6 +17,7 @@ export type {
   OverlayResult,
   OverlayStatus,
   OverlaySuccess,
+  OverlayTranslate,
 } from "./types";
 export { useOverlayInstance } from "./useOverlayInstance";
 export { useOverlayManager } from "./useOverlayManager";

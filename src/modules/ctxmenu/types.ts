@@ -2,7 +2,7 @@ import type { OverlayOptions, OverlayResult } from "@/modules/overlay2/types";
 
 export interface CtxMenuBaseItem {
   label: string;
-  icon?: CtxMenuIconCode;
+  icon?: string;
   shortcut?: string;
   disabled?: boolean;
 }

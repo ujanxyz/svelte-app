@@ -6554,14 +6554,14 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
-function JsOnCreateBitmap(handle) { const target = Emval.toValue(handle); const {id, width, height, numBytes} = target; const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CREATED", { detail: { ... target, uint8arr } })); return ptr; }
+function JsOnCreateBitmap(handle) { const target = Emval.toValue(handle); const {width, height, numBytes} = target; const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); const newImgData = new ImageData(uint8arr, width, height, { colorSpace: "srgb", pixelFormat: "rgba-unorm8" }); const retValue = { dataPtr: ptr, imageData: newImgData, }; return Emval.toHandle(retValue); }
 JsOnCreateBitmap.sig = 'ii';
-function JsOnDestroyBitmap(idStr,pixelData) { globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_DELETED", { detail: { id: UTF8ToString(idStr) } })); Module._free(pixelData); }
-JsOnDestroyBitmap.sig = 'vii';
-function JsOnFlushBitmap(idStr) { globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_FLUSHED", { detail: { id: UTF8ToString(idStr) } })); }
-JsOnFlushBitmap.sig = 'vi';
-function JsReleaseStagedBitmap(slotIdStr,assetUri) { const jSlotIdStr = UTF8ToString(slotIdStr); const jAssetUri = UTF8ToString(assetUri); console.log("[JsReleaseStagedBitmap] called with slotId: ", jSlotIdStr, " and assetUri: ", jAssetUri); const imageData = Module.assetStaging.releaseImageData(jSlotIdStr, jAssetUri); console.log("[JsReleaseStagedBitmap] got imageData: ", imageData); if (!imageData) { console.warn("[JsReleaseStagedBitmap] No staged bitmap found for slot: ", jSlotIdStr, " with asset URI: ", jAssetUri); return null; } const { width, height, data, colorSpace, pixelFormat } = imageData; if (colorSpace !== "srgb" || pixelFormat !== "rgba-unorm8") { console.error("[JsBitmapPool] Unsupported image data format: ", colorSpace, pixelFormat); return null; } const { byteLength, byteOffset } = data; const numBytes = width * height * 4; if (byteLength !== numBytes) { console.error("[JsBitmapPool] Mismatch in expected byte length: ", byteLength, " vs calculated: ", numBytes); return null; } const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); uint8arr.set(imageData.data); console.log("[JsReleaseStagedBitmap] Allocated WASM memory at ptr: ", ptr, " for byteLength: ", byteLength, ", uint8arr: ", uint8arr); const target = { id: jSlotIdStr, width, height, numBytes, }; console.log("[JsReleaseStagedBitmap] checkpt:", target); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CREATED", { detail: { ... target, uint8arr } })); const retValue = { width, height, numBytes, bytesPerPixel: 4, dataPtr: ptr, }; console.log("[JsReleaseStagedBitmap] returning : ", retValue); return Emval.toHandle(retValue); }
+function JsReleaseStagedBitmap(slotIdStr,assetUri) { const jSlotIdStr = UTF8ToString(slotIdStr); const jAssetUri = UTF8ToString(assetUri); const imageData = Module.assetStaging.releaseImageData(jSlotIdStr, jAssetUri); if (!imageData) { console.warn("[JsBitmapPool] No staged bitmap found for slot: ", jSlotIdStr, " with asset URI: ", jAssetUri); return null; } const { width, height, data, colorSpace, pixelFormat } = imageData; if (colorSpace !== "srgb" || pixelFormat !== "rgba-unorm8") { console.error("[JsBitmapPool] Unsupported image data format: ", colorSpace, pixelFormat); return null; } const { byteLength, byteOffset } = data; const numBytes = width * height * 4; if (byteLength !== numBytes) { console.error("[JsBitmapPool] Mismatch in expected byte length: ", byteLength, " vs calculated: ", numBytes); return null; } const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); uint8arr.set(imageData.data); const newImgData = new ImageData(uint8arr, width, height, { colorSpace, pixelFormat }); const retValue = { width, height, dataPtr: ptr, imageData: newImgData, }; console.log("[JsBitmapPool] returning : ", retValue); return Emval.toHandle(retValue); }
 JsReleaseStagedBitmap.sig = 'iii';
+function JsOnCaptureBitmap(slotIdStr,imageData) { const jSlotIdStr = UTF8ToString(slotIdStr); const jImageData = Emval.toValue(imageData); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CAPTURED", { detail: { assetKey: jSlotIdStr, imageData: jImageData } })); }
+JsOnCaptureBitmap.sig = 'vii';
+function JsOnDestroyBitmap(pixelData) { Module._free(pixelData); }
+JsOnDestroyBitmap.sig = 'vi';
 
 // Imports from the Wasm binary.
 var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
@@ -6632,11 +6632,11 @@ function assignWasmExports(wasmExports) {
 
 var wasmImports = {
   /** @export */
+  JsOnCaptureBitmap,
+  /** @export */
   JsOnCreateBitmap,
   /** @export */
   JsOnDestroyBitmap,
-  /** @export */
-  JsOnFlushBitmap,
   /** @export */
   JsReleaseStagedBitmap,
   /** @export */

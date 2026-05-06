@@ -77,10 +77,6 @@ class WorkerIndexedDb {
     file: File,
     overwrite: boolean = false,
   ): Promise<{ meta: StoredMediaMeta, thumbnail: ImageBitmap }> {
-    if (!file?.name) {
-      throw new Error("file.name must be non-empty.");
-    }
-
     const thumbnail: ImageBitmap | null = await this.#createThumbnailFromBlob(file);
     if (!thumbnail) {
       throw new Error("Failed to create thumbnail for the uploaded media.");
@@ -265,7 +261,7 @@ class WorkerIndexedDb {
   //-- (end) Add new sets of APIs here --
 
   public close(): void {
-    this.clearIdleTimer();
+    this.#clearIdleTimer();
     if (this.dbPromise) {
       void this.dbPromise.then((db) => db.close());
       this.dbPromise = null;
@@ -282,7 +278,7 @@ class WorkerIndexedDb {
   }
 
   private async getDb(): Promise<IDBPDatabase<WorkerFileDbSchema>> {
-    this.bumpIdleTimer();
+    this.#bumpIdleTimer();
 
     if (!this.dbPromise) {
       this.dbPromise = openDB<WorkerFileDbSchema>(DB_NAME, DB_VERSION, {
@@ -392,8 +388,8 @@ class WorkerIndexedDb {
   #createThumbnailFromBitmap(source: ImageBitmap): ImageBitmap {
     const maxEdge = 160;
     const scale = Math.min(1, maxEdge / Math.max(source.width, source.height));
-    const targetWidth = Math.max(1, Math.round(source.width * scale));
-    const targetHeight = Math.max(1, Math.round(source.height * scale));
+    const targetWidth = Math.max(1, Math.round(source.width * scale)|0);
+    const targetHeight = Math.max(1, Math.round(source.height * scale)|0);
 
     const canvas = new OffscreenCanvas(targetWidth, targetHeight);
     const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
@@ -402,14 +398,14 @@ class WorkerIndexedDb {
     return canvas.transferToImageBitmap();
   }
 
-  private bumpIdleTimer(): void {
-    this.clearIdleTimer();
+  #bumpIdleTimer(): void {
+    this.#clearIdleTimer();
     this.idleTimer = setTimeout(() => {
       this.close();
     }, this.idleCloseMs);
   }
 
-  private clearIdleTimer(): void {
+  #clearIdleTimer(): void {
     if (this.idleTimer !== null) {
       clearTimeout(this.idleTimer);
       this.idleTimer = null;

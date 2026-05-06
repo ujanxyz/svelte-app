@@ -16,63 +16,62 @@ Features:
 - `createOverlayManager()`: creates an isolated overlay manager instance.
 - `createOverlayController(manager, render)`: creates a typed overlay controller in plain TypeScript.
 - `useOverlayController(render)`: creates a typed overlay controller from the nearest `OverlayRoot`.
-- `useOverlayInstance()`: accesses the current overlay payload and close controls from inside overlay content.
+- `useOverlayInstance()`: accesses the current overlay payload, close controls, and overlay translate controls from inside overlay content.
 - `overlayStatuses`: typed status constants for async results.
 
 ## Example
 
 ```svelte
 <script lang="ts">
-	import Dialog from "./Dialog.svelte";
-	import {
-		OverlayRoot,
-		overlayStatuses,
-		useOverlayController,
-	} from "@/overlay2";
+import Dialog from "./Dialog.svelte";
+import { OverlayRoot, overlayStatuses, useOverlayController } from "@/overlay2";
 
-	interface ConfirmPayload {
-		title: string;
-	}
+interface ConfirmPayload {
+  title: string;
+}
 
-	const confirmDialog = useOverlayController<ConfirmPayload, boolean>(renderDialog);
+const confirmDialog = useOverlayController<ConfirmPayload, boolean>(
+  renderDialog,
+);
 
-	async function askForConfirmation() {
-		const result = await confirmDialog.open({ title: "Delete file?" });
-		if (result.status === overlayStatuses.OK) {
-			console.log("confirmed", result.value);
-			return;
-		}
+async function askForConfirmation() {
+  const result = await confirmDialog.open({ title: "Delete file?" });
+  if (result.status === overlayStatuses.OK) {
+    console.log("confirmed", result.value);
+    return;
+  }
 
-		console.log("closed", result.status, result.reason);
-	}
+  console.log("closed", result.status, result.reason);
+}
 </script>
 
 <OverlayRoot>
-	<button onclick={askForConfirmation}>Open dialog</button>
+  <button onclick={askForConfirmation}>Open dialog</button>
 </OverlayRoot>
 
 {#snippet renderDialog()}
-	<Dialog />
+  <Dialog />
 {/snippet}
 ```
 
 ```svelte
 <script lang="ts">
-	import { overlayStatuses, useOverlayInstance } from "@/overlay2";
+import { overlayStatuses, useOverlayInstance } from "@/overlay2";
 
-	interface ConfirmPayload {
-		title: string;
-	}
+interface ConfirmPayload {
+  title: string;
+}
 
-	const overlay = useOverlayInstance<ConfirmPayload, boolean>();
+const overlay = useOverlayInstance<ConfirmPayload, boolean>();
 </script>
 
 <div class="dialog-shell">
-	<div class="dialog-card">
-		<h2>{overlay.payload.title}</h2>
-		<button onclick={() => overlay.settle(true)}>Confirm</button>
-		<button onclick={() => overlay.abort(overlayStatuses.ABORTED)}>Cancel</button>
-	</div>
+  <div class="dialog-card">
+    <h2>{overlay.payload.title}</h2>
+    <button onclick={() => overlay.settle(true)}>Confirm</button>
+    <button onclick={() => overlay.abort(overlayStatuses.ABORTED)}
+      >Cancel</button>
+  </div>
 </div>
 ```
 

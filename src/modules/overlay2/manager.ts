@@ -46,7 +46,7 @@ class OverlayManagerImpl implements OverlayManager {
     request: OverlayRequest<TPayload, TResult>,
   ): OverlayHandle<TResult> {
     const id = crypto.randomUUID();
-    console.log("Opening overlay with ID:", id, "and payload:", request.payload);
+    const translate = writable({ dx: 0, dy: 0 });
 
     let settleCurrent!: (value: TResult) => void;
     let abortCurrent!: (reason: unknown) => void;
@@ -66,6 +66,10 @@ class OverlayManagerImpl implements OverlayManager {
           payload: request.payload,
           options: request.options,
           render: request.render,
+          translate,
+          setTranslate: (dx: number, dy: number) => {
+            translate.set({ dx, dy });
+          },
           resolve: settleCurrent as (value: unknown) => void,
           reject: abortCurrent,
         },

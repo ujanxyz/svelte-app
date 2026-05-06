@@ -3,8 +3,8 @@ import CaretRightIcon from "phosphor-svelte/lib/CaretRightIcon";
 import { onMount, tick } from "svelte";
 
 import { useOverlayInstance } from "@/modules/overlay2";
+import { getAppIcon } from "@/utils/appIcons";
 
-import { ctxMenuIconByCode } from "./icons";
 import type {
   CtxMenuItem,
   CtxMenuLeafItem,
@@ -379,7 +379,7 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
         >
           <span class="left">
             {#if item.icon}
-              {@const Icon = ctxMenuIconByCode[item.icon]}
+              {@const Icon = getAppIcon(item.icon)}
               <Icon size={14} weight="bold" />
             {:else}
               <span class="icon-placeholder"></span>
@@ -423,7 +423,7 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
         >
           <span class="left">
             {#if item.icon}
-              {@const Icon = ctxMenuIconByCode[item.icon]}
+              {@const Icon = getAppIcon(item.icon)}
               <Icon size={14} weight="bold" />
             {:else}
               <span class="icon-placeholder"></span>

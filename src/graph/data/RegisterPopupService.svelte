@@ -24,14 +24,15 @@ async function _internalOpenContextMenu(
 </script>
 
 <script lang="ts">
+import FnGalleryV2, { type FnGalleryPayload } from "@/features/func-gallery/FnGalleryV2.svelte";
+import MediaManager from "@/features/media-manager/MediaManager.svelte";
 import ManualInputEditor, { type ManualInputOverlayPayload } from "@/graph/data/ManualInputEditor.svelte";
-import MediaManager from "@/modules/fngallery/MediaManager.svelte";
+import ImageViewer from "@/modules/imgviewer/ImageViewer.svelte";
 import { createOverlayController, type OverlayResult,overlayStatuses, useOverlayManager } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
 import type { plstate } from "@/types/plstate";
 
-import FnGalleryV2, { type FnGalleryPayload } from "../../modules/fngallery/FnGalleryV2.svelte";
 import { registerGraphService } from "../graph-services";
 import {
   connEndMenuItems,
@@ -40,7 +41,6 @@ import {
   paneMenuItems, 
   selectionMenuItems,
 } from "./menuData";
-import ImageViewer from "@/modules/imgviewer/ImageViewer.svelte";
 
 type Ntype = plinfo.NodeInfo["ntype"];
 

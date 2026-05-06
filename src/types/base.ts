@@ -8,3 +8,8 @@ export interface ClientXY {
   x: number;
   y: number;
 }
+
+export interface IDimension {
+  width: number;
+  height: number;
+}

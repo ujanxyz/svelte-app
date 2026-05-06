@@ -1,5 +1,5 @@
 <script lang="ts">
-import { setContext } from "svelte";
+import { onMount, setContext } from "svelte";
 
 import { OVERLAY_INSTANCE_CONTEXT } from "./constants";
 import type {
@@ -7,6 +7,7 @@ import type {
   OverlayEntry,
   OverlayInstance,
   OverlayManager,
+  OverlayTranslate,
 } from "./types";
 
 interface Props {
@@ -19,12 +20,17 @@ interface Props {
 
 const { entry, manager, index, baseZIndex, isTopmost }: Props = $props();
 
+let translate = $state.raw<OverlayTranslate>({ dx: 0, dy: 0 });
+
 /* svelte-ignore state_referenced_locally */
 const overlayInstance: OverlayInstance = {
   id: entry.id,
   payload: entry.payload,
   options: entry.options,
   manager,
+  setTranslate: (nextDx: number, nextDy: number) => {
+    entry.setTranslate(nextDx, nextDy);
+  },
   settle: (value) => {
     manager.settle(entry.id, value);
   },
@@ -34,6 +40,12 @@ const overlayInstance: OverlayInstance = {
 };
 
 setContext(OVERLAY_INSTANCE_CONTEXT, overlayInstance);
+
+onMount(() => {
+  return entry.translate.subscribe((next) => {
+    translate = next;
+  });
+});
 
 function handleBackdropDismiss(): void {
   manager.abort(entry.id);
@@ -54,8 +66,10 @@ function handleBackdropDismiss(): void {
     ></button>
   {/if}
 
-  <div class="overlay-content" data-debug-name="OverlayLayer.content">
-    {@render entry.render()}
+  <div class="overlay-viewport" style:transform={`translate(${translate.dx}px, ${translate.dy}px)`}>
+    <div class="overlay-content" data-debug-name="OverlayLayer.content">
+      {@render entry.render()}
+    </div>
   </div>
 </div>
 
@@ -78,13 +92,18 @@ function handleBackdropDismiss(): void {
   z-index: 0;
 }
 
+.overlay-viewport {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .overlay-content {
-  /* Do not create a full-screen hitbox above the backdrop. */
   display: contents;
 }
 
 :global(.overlay-content > *) {
-  /* position: fixed is crucial to capture clicks within the overlay content */
   position: fixed !important;
   pointer-events: auto;
   z-index: 1;

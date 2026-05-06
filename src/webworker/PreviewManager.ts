@@ -1,4 +1,4 @@
-import { computeLetterbox } from "@/utils/canvasUtils";
+import { drawEmptyCanvas, drawImageDataLetterboxed } from "@/utils/canvasUtils";
 import { generateShortId } from "@/utils/idUtils";
 
 /**
@@ -12,10 +12,6 @@ import { generateShortId } from "@/utils/idUtils";
  * insertion, if a match immediately occurs, the preview is updated at once.
  */
 
-type GraphicData =
-  | { kind: "imagedata"; imageData: ImageData }
-  | { kind: "raw"; uint8arr: Uint8ClampedArray; width: number; height: number };
-
 interface PreviewRegistration {
   registrationKey: string;
   canvas: OffscreenCanvas;
@@ -27,7 +23,7 @@ interface PreviewRegistration {
 class PreviewManager {
   private readonly previewsByAssetKey: Map<string, PreviewRegistration[]> = new Map();
   private readonly assetKeyByRegistrationKey: Map<string, string> = new Map();
-  private readonly graphics: Map<string /* assetKey */, GraphicData> = new Map();
+  private readonly graphics: Map<string /* assetKey */, ImageData> = new Map();
 
   // ─── Preview registration ─────────────────────────────────────────────────
 
@@ -47,11 +43,11 @@ class PreviewManager {
     this.assetKeyByRegistrationKey.set(registrationKey, assetKey);
 
     // Draw immediately if graphic is already available; otherwise show a cross.
-    const graphic = this.graphics.get(assetKey);
-    if (graphic) {
-      this.#drawOnCanvas(canvas, graphic);
+    const imageData = this.graphics.get(assetKey);
+    if (imageData) {
+      drawImageDataLetterboxed(imageData, canvas);
     } else {
-      this.#drawCross(canvas, assetKey);
+      drawEmptyCanvas(canvas, assetKey);
     }
 
     return registrationKey;
@@ -83,9 +79,9 @@ class PreviewManager {
    * Set or update the graphic for a key and redraw all matching previews.
    * Pass null to clear the graphic (previews will show a cross).
    */
-  setGraphicForKey(assetKey: string, graphic: GraphicData | null): void {
-    if (graphic) {
-      this.graphics.set(assetKey, graphic);
+  setGraphicForKey(assetKey: string, imageData: ImageData | null): void {
+    if (imageData) {
+      this.graphics.set(assetKey, imageData);
       this.#syncToPreviews(assetKey);
     } else {
       this.graphics.delete(assetKey);
@@ -94,6 +90,7 @@ class PreviewManager {
   }
 
   /** Remove the graphic for a key and redraw matching previews with a cross. */
+  /** @deprecated */
   removeGraphic(assetKey: string): void {
     this.graphics.delete(assetKey);
     this.#syncCrossToPreviews(assetKey);
@@ -121,7 +118,7 @@ class PreviewManager {
     height: number,
   ): void {
     const assetKey = `${nodeId}:${slotName}`;
-    this.setGraphicForKey(assetKey, { kind: "raw", uint8arr, width, height });
+    this.setGraphicForKey(assetKey, new ImageData(uint8arr as Uint8ClampedArray<ArrayBuffer>, width, height, { colorSpace: "srgb" }));
   }
 
   /**
@@ -131,21 +128,21 @@ class PreviewManager {
   notifyInputMediaUpdated(nodeId: string, imageData: ImageData | null): void {
     const assetKey = nodeId;
     if (imageData) {
-      this.setGraphicForKey(assetKey, { kind: "imagedata", imageData });
+      this.setGraphicForKey(assetKey, imageData);
     } else {
       this.removeGraphic(assetKey);
     }
   }
 
-  // ─── Private rendering helpers ────────────────────────────────────────────
+  // ─── Private sync helpers ─────────────────────────────────────────────────
 
   #syncToPreviews(assetKey: string): void {
     const registrations = this.previewsByAssetKey.get(assetKey);
     if (!registrations?.length) return;
-    const graphic = this.graphics.get(assetKey);
-    if (!graphic) return;
+    const imageData = this.graphics.get(assetKey);
+    if (!imageData) return;
     for (const registration of registrations) {
-      this.#drawOnCanvas(registration.canvas, graphic);
+      drawImageDataLetterboxed(imageData, registration.canvas);
     }
   }
 
@@ -153,65 +150,10 @@ class PreviewManager {
     const registrations = this.previewsByAssetKey.get(assetKey);
     if (!registrations?.length) return;
     for (const registration of registrations) {
-      this.#drawCross(registration.canvas, assetKey);
+      drawEmptyCanvas(registration.canvas, assetKey);
     }
   }
 
-  #drawOnCanvas(canvas: OffscreenCanvas, graphic: GraphicData): void {
-    const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
-    let gw: number, gh: number, imageData: ImageData;
-
-    if (graphic.kind === "imagedata") {
-      gw = graphic.imageData.width;
-      gh = graphic.imageData.height;
-      imageData = graphic.imageData;
-    } else {
-      gw = graphic.width;
-      gh = graphic.height;
-      imageData = new ImageData(
-        graphic.uint8arr as Uint8ClampedArray<ArrayBuffer>,
-        gw,
-        gh,
-        { colorSpace: "srgb" },
-      );
-    }
-
-    const { dx, dy, dw, dh } = computeLetterbox(canvas.width, canvas.height, gw, gh);
-
-    // Fill background black (letterbox bars).
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Scale graphic into a temporary canvas, then blit at the letterboxed position.
-    const tmp = new OffscreenCanvas(gw, gh);
-    (tmp.getContext("2d") as OffscreenCanvasRenderingContext2D).putImageData(imageData, 0, 0);
-    ctx.drawImage(tmp, dx, dy, dw, dh);
-  }
-
-  #drawCross(canvas: OffscreenCanvas, assetKey: string): void {
-    const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
-    const { width: cw, height: ch } = canvas;
-
-    ctx.fillStyle = "#111";
-    ctx.fillRect(0, 0, cw, ch);
-
-    ctx.strokeStyle = "#555";
-    ctx.lineWidth = Math.max(1, Math.min(cw, ch) * 0.04);
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(cw, ch);
-    ctx.moveTo(cw, 0);
-    ctx.lineTo(0, ch);
-    ctx.stroke();
-
-    // Write the `assetKey` in the center for debugging (optional).
-    ctx.fillStyle = "#555";
-    ctx.font = `${Math.max(12, Math.round(cw * 0.08))}px sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(assetKey, cw / 2, ch / 2);
-  }
 }
 
-export { type GraphicData, PreviewManager };
+export { PreviewManager };
