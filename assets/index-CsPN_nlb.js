@@ -1,1 +1,0 @@
-(function(){globalThis.postMessage(`Welcome`),self.onmessage=e=>{let{a:t,b:n}=e.data,r=t+n;self.postMessage({result:r})}})();
