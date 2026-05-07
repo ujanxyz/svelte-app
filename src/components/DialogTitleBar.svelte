@@ -30,7 +30,6 @@
   }
 
   .title {
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);

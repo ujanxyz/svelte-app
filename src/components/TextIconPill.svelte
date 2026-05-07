@@ -86,7 +86,7 @@ button.pill-root:focus-visible {
 .pill-text {
   min-width: 0;
   padding: 0.15rem 0.45rem 0.15rem 0.65rem;
-  font-family: var(--font-family-mono, monospace);
+  font-family: var(--font-family-mono);
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;

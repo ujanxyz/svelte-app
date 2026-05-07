@@ -76,11 +76,16 @@ onMount(() => {
 
 <style>
 .dragbtn {
-  color: #ffffff;
-  background-color: transparent;
   margin: 0 8px;
   cursor: grab;
   user-select: none;
+  background-color: var(--color-bg-2);
+  color: var(--color-text-hi-con);
+  border-radius: var(--radius-md);
+}
+
+.dragbtn:hover {
+  background-color: var(--color-bg-3);
 }
 
 .dragbtn:active {

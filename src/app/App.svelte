@@ -6,6 +6,7 @@ import { createOverlayManager, OverlayRoot } from "@/modules/overlay2";
 import Toaster from "@/modules/toast/Toaster.svelte";
 import WorkerResourcesProvider from "@/webworkerclient/WorkerResourcesProvider.svelte";
 
+import AppTopBar from "./AppTopBar.svelte";
 import ComponentTesterMain from "./ComponentTesterMain.svelte";
 import useNewEventTarget from "./useNewEventTarget";
 
@@ -16,9 +17,12 @@ useNewEventTarget();
 
 <WorkerResourcesProvider>
   <OverlayRoot manager={overlayManager}>
-    <main>
-      <ComponentTesterMain />
-    </main>
+    <div class="app-shell">
+      <AppTopBar />
+      <main>
+        <ComponentTesterMain />
+      </main>
+    </div>
   </OverlayRoot>
   <MemLogger />
   <Toaster />
@@ -26,12 +30,18 @@ useNewEventTarget();
 
 
 <style>
-main {
+ .app-shell {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+main {
+  flex: 1 1 0%;
+  min-height: 0;
+  position: relative;
   margin: 0;
   padding: 0;
 }

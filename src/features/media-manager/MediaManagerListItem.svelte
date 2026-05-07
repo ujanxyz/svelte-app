@@ -91,7 +91,6 @@ function stop(ev: Event): void {
 
 .cell {
   padding: 0.7rem 0.5rem;
-  font-family: "Public Sans", "Segoe UI", sans-serif;
   font-size: 0.88rem;
   color: inherit;
 }

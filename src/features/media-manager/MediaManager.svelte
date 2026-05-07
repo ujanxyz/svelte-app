@@ -497,7 +497,6 @@ select {
 
 .placeholder-empty h4 {
   margin: 0.15rem 0 0;
-  font-family: "Public Sans", "Segoe UI", sans-serif;
   font-size: 1.06rem;
   color: var(--text-primary);
 }

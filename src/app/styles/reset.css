@@ -104,13 +104,9 @@ textarea {
   box-sizing: inherit;
 }
 
-html,
 body {
-  background: var(--color-dark-bg-0);
-  color: var(--color-text-hi-con);
-
-  font-family: var(--font-family-base);
-  line-height: var(--line-height-normal);
-
   box-sizing: border-box;
+  background: var(--color-bg-4);
+  color: var(--color-text-hi-con);
+  font-family: var(--font-family-base);
 }

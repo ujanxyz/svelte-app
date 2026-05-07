@@ -30,7 +30,6 @@ img {
   padding: 0;
   width: 100vw;
   height: 100dvh;
-  border: 1px solid #444;
 
   display: grid;
   grid-template-areas:
@@ -41,7 +40,6 @@ img {
   grid-template-columns: 15% 1fr 15%; /* 15% */
   grid-row-gap: 1px;
   grid-column-gap: 1px;
-  background-color: #444;
 }
 
 header,

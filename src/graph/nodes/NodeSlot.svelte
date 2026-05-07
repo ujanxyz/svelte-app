@@ -127,11 +127,12 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
 }
 .panebtn {
   flex-grow: 1;
-  background-color: #3a516c;
+  background-color: var(--color-bg-0);
   color: var(--color-text-hi-con);
   margin-left: calc(var(--space-4) + 4px);
   margin-right: calc(var(--space-4) + 4px);
   padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
   text-align: start;
   font-size: 0.5rem;
   cursor: pointer;

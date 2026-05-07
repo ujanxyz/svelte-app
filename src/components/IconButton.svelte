@@ -23,8 +23,6 @@ const { children, onclick, tooltip }: Props = $props();
   align-items: center;
   cursor: pointer;
 
-  font-family: var(--font-family-sans);
-
   background-color: var(--color-bg-3);
   color: var(--color-text-hi-con);
 }

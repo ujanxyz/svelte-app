@@ -12,11 +12,13 @@ import LineVerticalIcon from "phosphor-svelte/lib/LineVerticalIcon";
 import List from "phosphor-svelte/lib/ListIcon";
 import ListNumbers from "phosphor-svelte/lib/ListNumbersIcon";
 import MagnifyingGlass from "phosphor-svelte/lib/MagnifyingGlassIcon";
+import Moon from "phosphor-svelte/lib/MoonIcon";
 import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
 import PlusIcon from "phosphor-svelte/lib/PlusIcon";
 import Shapes from "phosphor-svelte/lib/ShapesIcon";
 import StackMinusIcon from "phosphor-svelte/lib/StackMinusIcon";
 import StackPlusIcon from "phosphor-svelte/lib/StackPlusIcon";
+import Sun from "phosphor-svelte/lib/SunIcon";
 import TrashIcon from "phosphor-svelte/lib/TrashIcon";
 import WarningIcon from "phosphor-svelte/lib/WarningIcon";
 import XCircleIcon from "phosphor-svelte/lib/XCircleIcon";
@@ -38,11 +40,13 @@ const appIcons = {
   list: List,
   "list-numbers": ListNumbers,
   "magnifying-glass": MagnifyingGlass,
+  "moon": Moon,
   pencil: PencilSimpleIcon,
   plus: PlusIcon,
   shapes: Shapes,
   "stack-minus": StackMinusIcon,
   "stack-plus": StackPlusIcon,
+  "sun": Sun,
   trash: TrashIcon,
   warning: WarningIcon,
   x: X,

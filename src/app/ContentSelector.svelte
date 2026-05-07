@@ -14,6 +14,5 @@ import RadioBtnGroup from "../components/RadioBtnGroup.svelte";
 <style>
 .comproot {
   display: inline-block;
-  background-color: rgb(47, 43, 16);
 }
 </style>

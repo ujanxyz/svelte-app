@@ -98,7 +98,6 @@ function openPicker(): void {
 
 :global(.filepond--root) {
   margin: 0;
-  font-family: "Public Sans", "Segoe UI", sans-serif;
   height: 220px;
 }
 

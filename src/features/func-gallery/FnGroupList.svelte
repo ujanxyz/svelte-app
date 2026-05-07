@@ -3,6 +3,8 @@ import type { fn } from "@/types/function";
 
 import CollapsibleDrawer from "../../components/CollapsibleDrawer.svelte";
 
+let drawerApi: { closeDrawer: () => void } | null = $state.raw(null);
+
 interface CategoryEntry {
   category: string; // "/gen" or "All"
   count: number;
@@ -32,6 +34,7 @@ let selectedFilter = $state<string | null>(initialFilterCategory);
 function setFilter(category: string | null) {
   selectedFilter = category;
   onFilterChange?.(category);
+  drawerApi?.closeDrawer();
 }
 
 export function clearFilter(): void {
@@ -54,7 +57,7 @@ const categories = $derived.by((): CategoryEntry[] => {
 });
 </script>
 
-<CollapsibleDrawer title="Categories" panelClass="fn-group-panel">
+<CollapsibleDrawer bind:this={drawerApi} title="Categories" panelClass="fn-group-panel">
   <nav class="group-list" aria-label="Function categories">
     <!-- "All" entry -->
     <button
@@ -104,7 +107,6 @@ const categories = $derived.by((): CategoryEntry[] => {
   background: transparent;
   color: var(--text-primary, var(--color-text-hi-con));
   font-size: 0.83rem;
-  font-family: inherit;
   text-align: left;
   cursor: pointer;
   border-radius: 0;

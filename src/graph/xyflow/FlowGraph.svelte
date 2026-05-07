@@ -19,6 +19,7 @@ import UploadSimpleIcon from "phosphor-svelte/lib/UploadSimpleIcon";
 // </icons>
 import { type Component } from "svelte";
 
+import { useAppSettings } from "@/features/app-settings/useAppSettings.svelte";
 import type { xy } from "@/types/xy";
 
 import DefaultEdge from "../edges/DefaultEdge.svelte";
@@ -38,6 +39,8 @@ const nodeTypes: Record<string, Component<xy.xyNodeProps>> = {
 const edgeTypes: Record<string, Component<xy.xyEdgeProps>> = {
   default: DefaultEdge,
 };
+
+const { isDarkTheme } = useAppSettings();
 
 const rawStoreService = useGraphService("rawStoreService");
 
@@ -79,7 +82,7 @@ const {
   {onedgecontextmenu}
   {onselectioncontextmenu}
   fitView
-  colorMode={"dark"}
+  colorMode={$isDarkTheme ? "dark" : "light"}
   // Debug actions:
   {isValidConnection}
   {ondelete}

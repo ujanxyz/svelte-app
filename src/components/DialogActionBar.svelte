@@ -39,7 +39,6 @@
   .btn {
     padding: var(--space-3) var(--space-6);
     border-radius: var(--radius-md);
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     letter-spacing: var(--letter-spacing-loose);

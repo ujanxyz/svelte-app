@@ -94,10 +94,12 @@ function clearGroupFilter() {
 
 <div class={["shell", "gallery-main"]}>
   <div class="topbar">
-    <h2 class="header-l1">www.mockaroo.com</h2>
-    <MoveButton size={32} />
+    <h2 class="header-l1">Pick a function</h2>
     <div class="flex-remaining"></div>
+    <MoveButton size={32} />
+    <span style="width: var(--space-6)"></span>
     <SearchInputBox placeholder="Search function" onUpdateText={handleUpdateSearchText} />
+    <span style="width: var(--space-6)"></span>
     <OverlayCloseButton />
   </div>
   <!-- Filter bar: always rendered at fixed height to prevent layout shift -->
@@ -130,9 +132,8 @@ function clearGroupFilter() {
 <style>
 .shell {
   position: fixed;
-  pointer-events: auto;
+  inset: 0;
   min-width: 160px;
-  z-index: 1;
 }
 .gallery-main {
   width: calc(100vw - 48px);
@@ -143,7 +144,7 @@ function clearGroupFilter() {
   margin: 24px auto;
   background: var(--color-bg-0);
   border: 2px solid var(--border-strong);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
 
   display: flex;
   flex-direction: column;
@@ -158,8 +159,6 @@ function clearGroupFilter() {
 
 .topbar {
   padding: 12px 12px 12px 24px;
-
-  font-family: "Roboto", sans-serif;
   font-weight: 400;
   line-height: 1.43;
 

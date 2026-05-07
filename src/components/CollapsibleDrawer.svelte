@@ -16,12 +16,16 @@ const {
   panelClass = "",
 }: Props = $props();
 
-let open = $state(true);
+let open = $state(false);
 
 const ListIcon = getAppIcon("list");
 
 function toggle() {
   open = !open;
+}
+
+export function closeDrawer(): void {
+  open = false;
 }
 </script>
 

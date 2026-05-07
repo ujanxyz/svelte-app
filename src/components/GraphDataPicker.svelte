@@ -186,7 +186,6 @@
   }
 
   .section-heading {
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
@@ -200,7 +199,6 @@
   }
 
   .field-label {
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
@@ -214,7 +212,6 @@
     border-radius: var(--radius-md);
     background-color: var(--surface-page);
     color: var(--text-primary);
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-sm);
     outline: none;
     transition: border-color 120ms ease;
@@ -254,7 +251,6 @@
   }
 
   .validation-hint {
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
@@ -273,7 +269,6 @@
   }
 
   .status-label {
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
@@ -295,7 +290,6 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    font-family: var(--font-family-sans);
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
