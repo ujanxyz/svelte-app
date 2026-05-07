@@ -297,9 +297,6 @@ const colorFns: fn.FunctionInfo[] = [
       { name: "fg", dtype: "float3[]", access: "I" },
       { name: "bg", dtype: "float3[]", access: "I" },
       { name: "ratio", dtype: "float[]", access: "I" },
-      { name: "fg", dtype: "float3[]", access: "I" },
-      { name: "bg", dtype: "float3[]", access: "I" },
-      { name: "ratio", dtype: "float[]", access: "O" },
     ],
   },
 ];

@@ -1,5 +1,5 @@
 <script lang="ts" module>
-type Ntype = plinfo.NodeInfo["ntype"];
+type Ntype = "FN" | "IN" | "OUT";
 
 export interface FnGalleryPayload {
   ntype: Ntype;
@@ -7,30 +7,88 @@ export interface FnGalleryPayload {
 </script>
 
 <script lang="ts">
-import ButtonGroup from "@/components/ButtonGroup.svelte";
-import { useOverlayInstance } from "@/modules/overlay2";
+import { getContext, onMount } from "svelte";
+
+import SearchInputBox from "@/components/SearchInputBox.svelte";
+import TextIconPill from "@/components/TextIconPill.svelte";
+import { OverlayCloseButton } from "@/modules/overlay2";
 import MoveButton from "@/modules/overlay2/MoveButton.svelte";
 import { type fn } from "@/types/function";
-import type { plinfo } from "@/types/plinfo";
+import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
+import { fetchFnInfos } from "./apiFunctionInfos";
+import FnGroupList from "./FnGroupList.svelte";
 import FuncTemplatesView from "./FuncTemplatesView.svelte";
-import GraphIOTemplatesView from "./GraphIOTemplatesView.svelte";
 
-const overlay = useOverlayInstance<FnGalleryPayload, fn.FunctionInfo | fn.GraphIoInfo>();
-
-const modes: { code: plinfo.NodeInfo["ntype"]; label: string }[] = [
-  { code: "FN", label: "Functions" },
-  { code: "IN", label: "Graph Inputs" },
-  { code: "OUT", label: "Graph Outputs" },
-];
-let selected = $state<plinfo.NodeInfo["ntype"]>(overlay.payload.ntype);
-
-function closeGallery() {
-  overlay.abort();
+interface GalleryFunctionEntry {
+  info: fn.FunctionInfo;
+  category: string;
 }
 
-function handleSelectFnType(code: string) {
-  // Nothing.
+const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
+const { fetchItemsAsync, abortFetch } = fetchFnInfos(pipeline);
+
+let searchText = $state("");
+let filterCategory = $state<string | null>(null);
+let allEntries = $state.raw<GalleryFunctionEntry[]>([]);
+
+let isLoading = $state(false);
+let loadError = $state<string | null>(null);
+
+let fnGroupListApi = $state.raw<{ clearFilter: () => void } | null>(null);
+
+const normalizedSearchText = $derived(searchText.trim().toLowerCase());
+const filteredEntries = $derived.by(() => {
+  return allEntries.filter((entry) => {
+    const matchesCategory = !filterCategory || entry.category === filterCategory;
+    if (!matchesCategory) return false;
+
+    if (!normalizedSearchText) return true;
+
+    const label = entry.info.label.toLowerCase();
+    const uri = entry.info.uri.toLowerCase();
+    return label.includes(normalizedSearchText) || uri.includes(normalizedSearchText);
+  });
+});
+
+const filteredItems = $derived(filteredEntries.map((entry) => entry.info));
+
+function extractCategory(uri: string): string {
+  const parts = uri.split("/");
+  return parts.length >= 2 && parts[1] ? `/${parts[1]}` : "/other";
+}
+
+async function loadFunctions(): Promise<void> {
+  isLoading = true;
+  loadError = null;
+  try {
+    const items = await fetchItemsAsync();
+    allEntries = items.map((info) => ({ info, category: extractCategory(info.uri) }));
+  } catch (err) {
+    if ((err as Error).name !== "AbortError") {
+      loadError = (err as Error).message;
+    }
+  } finally {
+    isLoading = false;
+  }
+}
+
+onMount(() => {
+  void loadFunctions();
+  return () => abortFetch();
+});
+
+function handleUpdateSearchText(text: string): void {
+  searchText = text;
+}
+
+function handleFilterChange(category: string | null) {
+  filterCategory = category;
+}
+
+function clearGroupFilter() {
+  fnGroupListApi?.clearFilter();
+  filterCategory = null;
 }
 </script>
 
@@ -39,18 +97,34 @@ function handleSelectFnType(code: string) {
     <h2 class="header-l1">www.mockaroo.com</h2>
     <MoveButton size={32} />
     <div class="flex-remaining"></div>
-    <input type="text" name="search" class="textfield" value="search" />
-    <button aria-label="close" class="iconbtn" onclick={closeGallery}>X</button>
-  </div> 
-  <ButtonGroup buttons={modes} bind:value={selected} onselect={handleSelectFnType} />
+    <SearchInputBox placeholder="Search function" onUpdateText={handleUpdateSearchText} />
+    <OverlayCloseButton />
+  </div>
+  <!-- Filter bar: always rendered at fixed height to prevent layout shift -->
+  <div class="filter-bar">
+    {#if filterCategory}
+      <TextIconPill text={filterCategory} icon="x" onClick={clearGroupFilter} />
+    {/if}
+    {#if !filterCategory}
+      <span class="filter-bar-empty">Showing all functions</span>
+    {/if}
+  </div>
 
-  {#if selected === "FN"}
-    <FuncTemplatesView />
-  {:else if selected === "IN"}
-    <GraphIOTemplatesView ntype="IN" />
-  {:else if selected === "OUT"}
-    <GraphIOTemplatesView ntype="OUT" />
-  {/if}
+  <div class="fn-view-container">
+    {#if isLoading}
+      <p class="status-label">Loading...</p>
+    {:else if loadError}
+      <p class="error-label">{loadError}</p>
+    {:else}
+      <FnGroupList
+        bind:this={fnGroupListApi}
+        entries={allEntries}
+        initialFilterCategory={filterCategory}
+        onFilterChange={handleFilterChange}
+      />
+      <FuncTemplatesView items={filteredItems} />
+    {/if}
+  </div>
 </div>
 
 <style>
@@ -67,12 +141,13 @@ function handleSelectFnType(code: string) {
   max-height: 1200px;
 
   margin: 24px auto;
-  background-color: #264359;
+  background: var(--color-bg-0);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-lg);
 
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  border-radius: 12px;
   overflow: hidden;
 }
 @media (max-width: 1200px) {
@@ -83,12 +158,10 @@ function handleSelectFnType(code: string) {
 
 .topbar {
   padding: 12px 12px 12px 24px;
-  background-color: #303030;
 
   font-family: "Roboto", sans-serif;
   font-weight: 400;
   line-height: 1.43;
-  color: #ffffff;
 
   display: flex;
   align-items: center;
@@ -104,62 +177,41 @@ function handleSelectFnType(code: string) {
   flex: 1 1 0%;
 }
 
-.textfield {
-  width: 250px;
-  height: 32px;
-  border-radius: 2px;
-  font-size: 1.1rem;
-  padding-left: 12px;
-}
-
-.iconbtn {
-  opacity: 0.5;
-  margin-left: 16px;
-  border-radius: 50%;
-  padding: 2px 8px;
-  width: 28px;
-  height: 28px;
-}
-.iconbtn:hover {
-  opacity: 1;
-  background-color: #7d7373;
-}
-
-.contentroot {
-  flex: 1 1 0%;
-  overflow-y: auto;
-
+/* ── Filter bar: fixed height, always rendered ───────────────────── */
+.filter-bar {
+  height: 3rem;
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.85rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  gap: 0.5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.filter-bar-empty {
+  font-size: 0.78rem;
+  color: var(--color-text-lo-con, var(--color-text-tertiary));
+  user-select: none;
+}
+
+/* ── Function view container ──────────────────────────────────────── */
+.fn-view-container {
+  flex: 1 1 0%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
   flex-direction: column;
 }
 
-.gridbox {
-  width: 100%;
-  max-height: 100%;
-
-  flex: 1;
-  align-self: flex-start;
-
-  padding: 18px 12px 12px 12px;
-
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  align-content: flex-start;
-  flex-wrap: wrap;
-  overflow-y: auto;
-  row-gap: 18px;
-  column-gap: 12px;
+.status-label,
+.error-label {
+  margin: 1rem;
+  color: var(--color-text-md-con);
 }
 
-.bottombox {
-  width: 100%;
-  align-items: center;
-  white-space: nowrap;
-  min-height: 32px;
-  background-color: #303030;
-
-  padding: 12px;
+.error-label {
+  color: var(--color-text-error);
 }
 </style>

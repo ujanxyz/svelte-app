@@ -1,92 +1,266 @@
 <script lang="ts">
+import { tick } from "svelte";
+
 import { type fn } from "@/types/function";
+import { getAppIcon } from "@/utils/appIcons";
+
+import ParamChip from "./ParamChip.svelte";
 
 interface Props {
   spec: fn.FunctionInfo;
   onSelect: (spec: fn.FunctionInfo) => void;
+  selected?: boolean;
 }
 
-const { spec, onSelect }: Props = $props();
+const {
+  spec,
+  onSelect,
+  selected = false,
+}: Props = $props();
 
-/* svelte-ignore state_referenced_locally */
-const { uri, label, desc, params } = spec;
+const FunctionIcon = getAppIcon("function");
+const params = $derived(spec.params ?? []);
 
-function onclick(ev: MouseEvent) {
+let chipViewport: HTMLDivElement;
+let chipMeasure: HTMLDivElement;
+let visibleParamCount = $state(0);
+let measuringParamCount = $state(0);
+let showOverflowEllipsis = $state(false);
+let measuringEllipsis = $state(false);
+let resizeTicket = $state(0);
+
+function handleClick(): void {
   onSelect(spec);
 }
+
+async function fitVisibleParams(): Promise<void> {
+  await tick();
+  if (!chipViewport || !chipMeasure) return;
+
+  const availableHeight = chipViewport.clientHeight;
+  if (availableHeight <= 0) return;
+
+  measuringParamCount = params.length;
+  measuringEllipsis = false;
+  await tick();
+
+  if (chipMeasure.scrollHeight <= availableHeight) {
+    visibleParamCount = params.length;
+    showOverflowEllipsis = false;
+    return;
+  }
+
+  let fittedCount = 0;
+  for (let count = params.length - 1; count >= 0; count -= 1) {
+    measuringParamCount = count;
+    measuringEllipsis = count < params.length;
+    await tick();
+    if (chipMeasure.scrollHeight <= availableHeight) {
+      fittedCount = count;
+      break;
+    }
+  }
+
+  visibleParamCount = fittedCount;
+  showOverflowEllipsis = fittedCount < params.length;
+}
+
+$effect(() => {
+  params.length;
+  spec.label;
+  spec.desc;
+  selected;
+  resizeTicket;
+  void fitVisibleParams();
+});
+
+$effect(() => {
+  if (!chipViewport) return;
+
+  const observer = new ResizeObserver(() => {
+    resizeTicket += 1;
+  });
+
+  observer.observe(chipViewport);
+  return () => observer.disconnect();
+});
 </script>
 
-<button class="gridcell" data-uj-fn-id={uri} {onclick}>
-  <p class="celltypo">{label}</p>
-  <p class="celldesc">{desc}</p>
-  <p>
-    {#each params as { name, access }: FuncParam}
-      {@const accessStyle = `param-${access}`}
-      <span class={["cellparam", accessStyle]} data-param-role={access}
-        >{name}</span
-      >
-    {/each}
-  </p>
+<button
+  type="button"
+  class="card"
+  class:selected
+  data-uj-fn-id={spec.uri}
+  onclick={handleClick}
+>
+  <div class="header-row">
+    <strong class="title">{spec.label}</strong>
+    <span class="header-icon" aria-hidden="true">
+      <FunctionIcon size={16} weight="regular" />
+    </span>
+  </div>
+
+  <p class="description">{spec.desc}</p>
+
+  <div class="chip-viewport" bind:this={chipViewport}>
+    <div class="chip-tray">
+      {#each params.slice(0, visibleParamCount) as param (param.name + param.dtype + param.access)}
+        <ParamChip
+          name={param.name}
+          dtype={param.dtype}
+          access={param.access}
+          chipClass={selected ? "selected-chip" : ""}
+        />
+      {/each}
+      {#if showOverflowEllipsis}
+        <span class="chip-overflow" class:selected>{"..."}</span>
+      {/if}
+    </div>
+
+    <div class="chip-measure" aria-hidden="true" bind:this={chipMeasure}>
+      {#each params.slice(0, measuringParamCount) as param (param.name + param.dtype + param.access)}
+        <ParamChip
+          name={param.name}
+          dtype={param.dtype}
+          access={param.access}
+          chipClass={selected ? "selected-chip" : ""}
+        />
+      {/each}
+      {#if measuringEllipsis}
+        <span class="chip-overflow" class:selected>{"..."}</span>
+      {/if}
+    </div>
+  </div>
 </button>
 
 <style>
-.gridcell {
-  width: 240px;
-  cursor: pointer;
-  height: 110px;
-  display: block;
-  padding: 12px;
-  overflow-x: hidden;
-  overflow-y: hidden;
+.card {
+  width: 15rem;
+  height: 8.75rem;
   box-sizing: border-box;
-  transition: 100ms linear;
-  border-radius: 7px;
-
-  background-color: #232323;
-  color: #eeeeee;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
 }
 
-.gridcell:hover {
-  background-color: #303030;
+.card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 
-.celltypo {
-  font-weight: 700;
-  line-height: 1.5;
+.card:focus-visible {
+  outline: 0;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
+
+  background: var(--color-flip-bg-2);
+  color: var(--color-flip-text-hi-con);
 }
 
-.celldesc {
-  font-size: 0.7rem;
-  font-style: italic;
-  font-weight: 400;
-  line-height: 1.66;
+.card.selected {
+  background: var(--color-flip-bg-2);
+  color: var(--color-flip-text-hi-con);
+  border-color: var(--color-flip-border-default);
 }
 
-.cellparam {
+.header-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.title {
+  margin: 0;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold, 700);
+  line-height: 1.15;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.header-icon {
   display: inline-flex;
   align-items: center;
-
-  margin-left: 0.15rem;
-  padding: 0.1rem 0.125rem;
-  font-size: 0.7rem;
-
-  color: #e0e0e0;
-  background-color: #606060; /* #404040; */
-  border-radius: 2px;
-  cursor: default; /* Default cursor for static chips */
-  white-space: nowrap; /* Prevents text from wrapping */
+  justify-content: center;
+  color: var(--text-secondary);
 }
 
-.param-I {
-  background-color: #3047a5;
+.card.selected .header-icon {
+  color: var(--color-flip-text-md-con);
 }
-.param-O {
-  background-color: #217446;
+
+.description {
+  margin: 0;
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.param-M {
-  background-color: #736c21;
+
+.card.selected .description {
+  color: var(--color-flip-text-md-con);
 }
-.cellparam:first-child {
-  margin-left: 0px;
+
+.chip-viewport {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+  min-height: 0;
+  margin-top: var(--space-1);
+  overflow: hidden;
+}
+
+.chip-tray,
+.chip-measure {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  align-content: flex-end;
+}
+
+.chip-measure {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.chip-overflow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  margin-right: 3px;
+  margin-bottom: 3px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-panel);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
+
+.chip-overflow.selected {
+  border-color: var(--color-flip-border-subtle);
+  background: var(--color-flip-bg-3);
+  color: var(--color-flip-text-md-con);
 }
 </style>

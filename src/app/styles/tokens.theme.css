@@ -69,6 +69,7 @@
   --color-flip-border-default: var(--color-dark-border-default);
   --color-flip-border-strong: var(--color-dark-border-strong);
 
+  --elevation-shadow-x:  4px 4px 18px 0 var(--color-light-border-strong);
   --color-focus-ring: var(--color-light-focus-ring);
 }
 
@@ -105,5 +106,6 @@
   --color-flip-border-default: var(--color-light-border-default);
   --color-flip-border-strong: var(--color-light-border-strong);
 
+  --elevation-shadow-x:  4px 4px 18px 0 var(--color-dark-border-strong);
   --color-focus-ring: var(--color-dark-focus-ring);
 }

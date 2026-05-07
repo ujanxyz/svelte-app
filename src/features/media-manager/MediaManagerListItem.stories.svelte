@@ -18,7 +18,7 @@ const sample = {
 } as const;
 
 const { Story } = defineMeta({
-  title: "features/MediaManagerListItem",
+  title: "features/media-manager/MediaManagerListItem",
   component: MediaManagerListItem,
   tags: ["autodocs"],
   args: {

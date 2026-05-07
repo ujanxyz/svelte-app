@@ -1,45 +1,31 @@
 <script lang="ts">
-import { getContext, onMount } from "svelte";
-
 import { useOverlayInstance } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
-import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
-
-import { fetchFnInfos } from "./apiFunctionInfos";
 import FunctionCard from "./FunctionCard.svelte";
 
-const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
-const { fetchItemsAsync, abortFetch } = fetchFnInfos(pipeline);
+interface Props {
+  items: fn.FunctionInfo[];
+}
+
+const { items }: Props = $props();
 
 const overlay = useOverlayInstance<unknown, fn.FunctionInfo | fn.GraphIoInfo>();
-
-let itemsPromise = $state(fetchItemsAsync());
-
-onMount(() => {
-  return () => abortFetch();
-});
 
 function onSelect(spec: fn.FunctionInfo) {
   overlay.settle(spec);
 }
 </script>
 
-  {#await itemsPromise}
-    <p>Loading...</p>
-  {:then items}
-    <div class="contentroot">
-      <div class="gridbox">
-        {#each items as item}
-          <FunctionCard spec={item} {onSelect} />
-        {/each}
-      </div>
-      <div class="bottombox">Bottom box.</div>
-    </div>
-  {:catch err}
-    <p style="color:red;">
-      {err.name === "AbortError" ? "Request cancelled." : err.message}
-    </p>
-  {/await}
+<div class="contentroot">
+  <div class="gridbox">
+    {#if items.length === 0}
+      <p class="empty-label">No functions match the current filters.</p>
+    {/if}
+    {#each items as item (item.uri)}
+      <FunctionCard spec={item} {onSelect} />
+    {/each}
+  </div>
+</div>
 
 <style>
 /* .elevated-rounded-md {
@@ -78,13 +64,9 @@ function onSelect(spec: fn.FunctionInfo) {
   column-gap: 12px;
 }
 
-.bottombox {
-  width: 100%;
-  align-items: center;
-  white-space: nowrap;
-  min-height: 32px;
-  background-color: #303030;
-
-  padding: 12px;
+.empty-label {
+  margin-top: 24px;
+  color: var(--color-text-md-con);
+  font-size: 0.9rem;
 }
 </style>

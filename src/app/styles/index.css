@@ -4,6 +4,7 @@
 @import './tokens.brand.css';
 @import './tokens.theme.css';
 @import './tokens.semantic.css';
+@import './tokens.tints.css';
 
 @import "./reset.css";
 

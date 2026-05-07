@@ -1,0 +1,32 @@
+/* Tint color tokens
+ *
+ * --tint-amount controls how strongly the hue mixes into the base background.
+ * Lower values (light theme) keep tints subtle; higher values (dark theme) make
+ * them more readable against dark surfaces.
+ *
+ * Components can locally override --tint-amount to produce a custom intensity:
+ *   style="--tint-amount: 25%"
+ *
+ * All tint variables use color-mix(in oklab) so perceptual lightness stays even
+ * across hues and themes.
+ */
+
+ :root, [data-theme='light'] {
+  --tint-amount: 15%;
+}
+
+[data-theme='dark'] {
+  --tint-amount: 35%;
+}
+
+:root {
+  --tint-blue:    color-mix(in oklab, var(--color-bg-2), #2186f1 var(--tint-amount));
+  --tint-green:   color-mix(in oklab, var(--color-bg-2), #2aac4a var(--tint-amount));
+  --tint-yellow:  color-mix(in oklab, var(--color-bg-2), #ab8000 var(--tint-amount));
+  --tint-red:     color-mix(in oklab, var(--color-bg-2), #ef5050 var(--tint-amount));
+  --tint-orange:  color-mix(in oklab, var(--color-bg-2), #e66204 var(--tint-amount));
+  --tint-cyan:    color-mix(in oklab, var(--color-bg-2), #06afcd var(--tint-amount));
+  --tint-magenta: color-mix(in oklab, var(--color-bg-2), #d440eb var(--tint-amount));
+  --tint-purple:  color-mix(in oklab, var(--color-bg-2), #8d62f2 var(--tint-amount));
+}
+

@@ -7,7 +7,7 @@ import MediaManager from "./MediaManager.svelte";
 import MockMediaManagerProvider from "./MockMediaManagerProvider.svelte";
 
 const { Story } = defineMeta({
-  title: "features/MediaManager",
+  title: "features/media-manager/MediaManager",
   component: MediaManager,
   tags: ["autodocs"],
   args: {},

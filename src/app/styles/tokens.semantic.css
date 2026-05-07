@@ -20,7 +20,7 @@
   --color-accent: #fc3dff;
 
 
-  
+/*   
   --interactive-primary-bg: var(--color-bg-3);
   --interactive-primary-bg-hover: var(--brand-action-600);
   --interactive-primary-text: var(--text-primary);
@@ -33,11 +33,11 @@
   --interactive-accent-bg-hover: color-mix(in srgb, var(--brand-sand) 86%, black);
   --interactive-accent-text: var(--brand-ink);
 
-  --focus-ring: 0 0 0 3px var(--color-focus-ring);
+  --focus-ring: 0 0 0 3px var(--color-focus-ring);*/
 
   /* Selected / active interactive state */
-  --interactive-selected-bg: var(--brand-action-500);
-  --interactive-selected-text: #ffffff;
+  /* --interactive-selected-bg: var(--brand-action-500);
+  --interactive-selected-text: #ffffff */
 
   /* Accent state (active pressed) */
   /* --color-accent: var(--color-focus-ring);

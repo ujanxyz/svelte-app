@@ -3,6 +3,7 @@ export { createOverlayController, useOverlayController } from "./controller";
 export { isOverlayAbortError,OverlayAbortError } from "./errors";
 export { createOverlayManager } from "./manager";
 export { default as OverlayLayer } from "./OverlayLayer.svelte";
+export { default as OverlayCloseButton } from "./OverlayCloseButton.svelte";
 export { default as OverlayRoot } from "./OverlayRoot.svelte";
 export type {
   OverlayAbortStatus,

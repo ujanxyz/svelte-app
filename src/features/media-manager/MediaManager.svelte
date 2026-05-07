@@ -9,6 +9,7 @@ import { getContext, onMount } from "svelte";
 
 import FileDropZone from "@/components/FileDropZone.svelte";
 import { useOverlayInstance } from "@/modules/overlay2";
+import OverlayCloseButton from "@/modules/overlay2/OverlayCloseButton.svelte";
 import type { StoredMediaMeta } from "@/types/worker-message-types";
 import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
 
@@ -45,10 +46,6 @@ async function handleUpload(file: File): Promise<string> {
   items = [newItem, ...items];
   await refreshUsageInsight(items);
   return meta.id;
-}
-
-function handleClose(): void {
-  overlay.abort();
 }
 
 function handleCheckbox(id: string, checked: boolean): void {
@@ -102,7 +99,7 @@ async function refreshUsageInsight(nextItems: MediaItem[]): Promise<void> {
 }
 
 async function fetchMediaList(): Promise<MediaItem[]> {
-  const { mediaEntries } = await io.listMedia();
+  const { mediaEntries } = await io.listMedia({});
   return mediaEntries.map(({ meta, thumbnail }: { meta: StoredMediaMeta; thumbnail: ImageBitmap }) =>
     toMediaItem(meta, thumbnail),
   );
@@ -196,7 +193,7 @@ function delay(ms: number): Promise<void> {
         <h2>Image Uploader</h2>
         <p>Upload, manage, and organize your images</p>
       </div>
-      <button class="xbtn" onclick={handleClose} aria-label="Close">X</button>
+      <OverlayCloseButton />
     </header>
 
     <div class="dropzone-wrap">
@@ -371,20 +368,6 @@ p {
   margin: 0.3rem 0 0;
   color: var(--text-secondary);
   font-size: 0.9rem;
-}
-
-.xbtn {
-  background: var(--interactive-muted-bg);
-  border: 1px solid var(--border-default);
-  color: var(--interactive-muted-text);
-  border-radius: var(--radius-lg);
-  width: 34px;
-  height: 34px;
-  cursor: pointer;
-}
-
-.xbtn:hover {
-  background: var(--interactive-muted-bg-hover);
 }
 
 .dropzone-wrap {
