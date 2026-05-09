@@ -1,12 +1,14 @@
 import { type DBSchema, type IDBPDatabase,openDB } from "idb";
 
 import {
+  type ArtifactStage,
   type AssetSummary,
   AssetType,
   type StoredArtifactMeta,
   type StoredMediaMeta,
 } from "@/types/worker-message-types";
 import { sha256Hex } from "@/utils/hash";
+import { parseAssetUri } from "@/utils/strUtils";
 
 import {
   FileNameConflictError,
@@ -14,7 +16,7 @@ import {
 } from "./types";
 
 const DB_NAME = "WorkerFileStorage";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 const STORE_MEDIA = "media";
 const STORE_ARTIFACTS = "artifacts";
 const MEDIA_STORE_SCHEME = "idb" as const;
@@ -37,7 +39,7 @@ interface WorkerFileDbSchema extends DBSchema {
   };
 
   [STORE_ARTIFACTS]: {
-    key: number;
+    key: string;
     value: StoredArtifactRecord;
   };
 }
@@ -93,7 +95,7 @@ class WorkerIndexedDb {
     const mimeType = file.type || "application/octet-stream";
     const kind = inferMediaKind(mimeType);
     const dim =
-      kind === "image" ? await this.getImageDimensionSafe(file) : undefined;
+      kind === "image" ? await this.#getImageDimensionSafe(file) : undefined;
 
     const record: StoredMediaRecord = {
       id: fileId,
@@ -180,8 +182,18 @@ class WorkerIndexedDb {
     }
 
     if (assetType === AssetType.ARTIFACT) {
-      // TODO: Read from STORE_ARTIFACTS and return artifact thumbnails + URIs.
-      return [];
+      const db = await this.getDb();
+      const all = await db.getAll(STORE_ARTIFACTS);
+      return all
+        .filter((record) => record.thumbnail !== null)
+        .map((record) => ({
+          summary: {
+            assetType: AssetType.ARTIFACT,
+            uri: this.toArtifactUri(record.id),
+          },
+          thumbnail: record.thumbnail!,
+        }))
+        .sort((a, b) => b.summary.uri.localeCompare(a.summary.uri));
     }
 
     throw new Error(`Unsupported asset type: ${assetType}`);
@@ -197,40 +209,45 @@ class WorkerIndexedDb {
   }
 
   public async uploadArtifactImage(
+    id: string,
     image: ImageData,
-    options?: { lastModified?: number; thumbnail?: ImageData | null },
-  ): Promise<{ id: number; meta: StoredArtifactMeta }> {
+    options: { stage: ArtifactStage; lastModified?: number; thumbnail?: ImageData | null },
+  ): Promise<{ id: string; meta: StoredArtifactMeta }> {
     const db = await this.getDb();
     const now = Date.now();
+    const existing = await db.get(STORE_ARTIFACTS, id);
 
     const record: StoredArtifactRecord = {
+      id,
       kind: "imagedata",
+      stage: options.stage,
       byteSize: image.data.byteLength,
-      createdAt: now,
+      createdAt: existing?.createdAt ?? now,
       lastModified: options?.lastModified ?? now,
+      updatedAt: now,
       dimension: [image.width, image.height],
       image,
       thumbnail: await this.#createThumbnailFromImageData(options?.thumbnail ?? image),
     };
 
-    const id = await db.add(STORE_ARTIFACTS, record);
+    await db.put(STORE_ARTIFACTS, record);
     return { id, meta: this.toArtifactMeta(record) };
   }
 
-  public async listArtifacts(): Promise<Array<{ id: number; meta: StoredArtifactMeta }>> {
+  public async listArtifacts(): Promise<Array<{ id: string; meta: StoredArtifactMeta }>> {
     const db = await this.getDb();
     const keys = await db.getAllKeys(STORE_ARTIFACTS);
     const records = await db.getAll(STORE_ARTIFACTS);
 
     return records
       .map((record, index) => ({
-        id: keys[index] as number,
+        id: keys[index] as string,
         meta: this.toArtifactMeta(record),
       }))
       .sort((a, b) => b.meta.createdAt - a.meta.createdAt);
   }
 
-  public async getArtifact(id: number): Promise<StoredArtifactRecord> {
+  public async getArtifact(id: string): Promise<StoredArtifactRecord> {
     const db = await this.getDb();
     const record = await db.get(STORE_ARTIFACTS, id);
     if (!record) {
@@ -239,7 +256,7 @@ class WorkerIndexedDb {
     return record;
   }
 
-  public async deleteArtifact(id: number): Promise<boolean> {
+  public async deleteArtifact(id: string): Promise<boolean> {
     const db = await this.getDb();
     const key = await db.getKey(STORE_ARTIFACTS, id);
     if (key === undefined) {
@@ -247,6 +264,39 @@ class WorkerIndexedDb {
     }
     await db.delete(STORE_ARTIFACTS, id);
     return true;
+  }
+
+  public async getAssetBitmapById(id: string): Promise<{ meta: StoredMediaMeta | StoredArtifactMeta; bitmap: ImageBitmap }> {
+    const parsed = parseAssetUri(id);
+    if (!parsed) {
+      const blob = await this.getMediaBlob(id);
+      const bitmap = await createImageBitmap(blob);
+      const meta = await this.getMediaMeta(id);
+      return { meta, bitmap };
+    }
+
+    if (parsed.scheme !== MEDIA_STORE_SCHEME) {
+      throw new Error(`Unsupported asset URI scheme: ${parsed.scheme}`);
+    }
+
+    if (parsed.store === STORE_MEDIA) {
+      const blob = await this.getMediaBlob(parsed.id);
+      const bitmap = await createImageBitmap(blob);
+      const meta = await this.getMediaMeta(parsed.id);
+      return { meta, bitmap };
+    }
+
+    if (parsed.store === STORE_ARTIFACTS) {
+      const artifact = await this.getArtifact(parsed.id);
+      if (!artifact.image) {
+        throw new Error(`Artifact image not found for id: ${parsed.id}`);
+      }
+      const bitmap = await createImageBitmap(artifact.image);
+      const meta = this.toArtifactMeta(artifact);
+      return { meta, bitmap };
+    }
+
+    throw new Error(`Unsupported asset URI store: ${parsed.store}`);
   }
 
   public async clearArtifacts(): Promise<number> {
@@ -297,8 +347,12 @@ class WorkerIndexedDb {
             db.createObjectStore(STORE_MEDIA, { keyPath: "id" });
           }
 
+          if (oldVersion < 6 && db.objectStoreNames.contains(STORE_ARTIFACTS)) {
+            db.deleteObjectStore(STORE_ARTIFACTS);
+          }
+
           if (!db.objectStoreNames.contains(STORE_ARTIFACTS)) {
-            db.createObjectStore(STORE_ARTIFACTS, { autoIncrement: true });
+            db.createObjectStore(STORE_ARTIFACTS, { keyPath: "id" });
           }
 
           if (rawDb.objectStoreNames.contains("outputs")) {
@@ -330,12 +384,19 @@ class WorkerIndexedDb {
 
   private toArtifactMeta(record: StoredArtifactRecord): StoredArtifactMeta {
     return {
+      id: record.id,
       kind: record.kind,
+      stage: record.stage,
       byteSize: record.byteSize,
       createdAt: record.createdAt,
       lastModified: record.lastModified,
+      updatedAt: record.updatedAt,
       dimension: record.dimension,
     };
+  }
+
+  private toArtifactUri(id: string): string {
+    return `${MEDIA_STORE_SCHEME}:/${STORE_ARTIFACTS}/${id}`;
   }
 
   async #computeMediaId(file: File): Promise<string> {
@@ -352,7 +413,7 @@ class WorkerIndexedDb {
     return `${file.name}.${shortHash}`;
   }
 
-  private async getImageDimensionSafe(blob: Blob): Promise<[number, number] | undefined> {
+  async #getImageDimensionSafe(blob: Blob): Promise<[number, number] | undefined> {
     try {
       const bmp = await createImageBitmap(blob);
       const dim: [number, number] = [bmp.width, bmp.height];

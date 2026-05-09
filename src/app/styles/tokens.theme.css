@@ -6,12 +6,14 @@
   --color-light-bg-2: #d5d9df;
   --color-light-bg-3: #c2c6cf;
   --color-light-bg-4: #aeb5c2;
+  --color-light-bg-5: #a4adbc;
 
   --color-dark-bg-0: #0a0e15;
   --color-dark-bg-1: #171b23;
   --color-dark-bg-2: #1f252d;
   --color-dark-bg-3: #313643;
   --color-dark-bg-4: #424957;
+  --color-dark-bg-5: #4a5160;
 
   --color-light-text-hi-con: rgb(0 0 0 / 0.87);
   --color-light-text-md-con: rgb(0 0 0 / 0.6);
@@ -42,6 +44,7 @@
   --color-bg-2: var(--color-light-bg-2);
   --color-bg-3: var(--color-light-bg-3);
   --color-bg-4: var(--color-light-bg-4);
+  --color-bg-5: var(--color-light-bg-5);
 
   /* For flipped bg */
   --color-flip-bg-0: var(--color-dark-bg-0);
@@ -79,6 +82,7 @@
   --color-bg-2: var(--color-dark-bg-2);
   --color-bg-3: var(--color-dark-bg-3);
   --color-bg-4: var(--color-dark-bg-4);
+  --color-bg-5: var(--color-dark-bg-5);
 
   /* For flipped bg */
   --color-flip-bg-0: var(--color-light-bg-0);

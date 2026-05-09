@@ -1,6 +1,7 @@
 /* Foundation tokens: raw scales and non-contextual values */
 :root {
   /* Typography scale */
+  --font-size-3xs: 0.5rem;
   --font-size-xxs: 0.625rem;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -51,4 +52,12 @@
   --radius-lg: 6px;
   --radius-xl: 10px;
   --radius-full: 9999px;
+
+  /* backdrop filters and blurs */
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+  --blur-lg: blur(12px);
+
+  --backdrop-filter: var(--blur-lg) saturate(1.2);
+
 }

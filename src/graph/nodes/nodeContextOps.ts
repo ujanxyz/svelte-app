@@ -8,6 +8,19 @@ import { useGraphService } from "../graph-services";
 
 const CONTEXT_KEY = Symbol("nodeCtx");
 
+function parseAssetUriFromEncodedData(encodedData: plstate.EncodedData | null): string | null {
+  if (!encodedData?.payload) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(encodedData.payload) as { assetUri?: unknown };
+    return typeof parsed.assetUri === "string" && parsed.assetUri.length > 0 ? parsed.assetUri : null;
+  } catch {
+    return null;
+  }
+}
+
 function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
   const rawNodeId: number = nodeInfo.rawId;
   const nodeId: string = nodeInfo.alnumid;
@@ -80,6 +93,13 @@ function makeNodeContextOps(nodeInfo: plinfo.NodeInfo) {
 
     unregisterPreview: async function (regKey: string): Promise<void> {
       await graphIo.unRegisterPreview({ regKey });
+    },
+
+    expandPreview: async function(slotId: plinfo.SlotId, encodedData: plstate.EncodedData | null = null): Promise<void> {
+      const assetUri: string = nodeInfo.ntype === "IN"
+        ? (parseAssetUriFromEncodedData(encodedData) ?? `idb:/artifacts/${slotId.parent}:${slotId.name}`)
+        : `idb:/artifacts/${slotId.parent}:${slotId.name}`;
+      await popupService.imgViewerModal(assetUri);
     },
   };
 }

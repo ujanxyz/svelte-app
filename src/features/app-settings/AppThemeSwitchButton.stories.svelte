@@ -4,7 +4,7 @@ import { defineMeta } from "@storybook/addon-svelte-csf";
 import AppThemeSwitchButton from "./AppThemeSwitchButton.svelte";
 
 const { Story } = defineMeta({
-  title: "Features/app-settings/AppThemeSwitchButton",
+  title: "features/app-settings/AppThemeSwitchButton",
   component: AppThemeSwitchButton,
   tags: ["autodocs"],
   args: {

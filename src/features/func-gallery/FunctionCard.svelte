@@ -135,7 +135,7 @@ $effect(() => {
 
 <style>
 .card {
-  width: 15rem;
+  width: 14.5rem;
   height: 8.75rem;
   box-sizing: border-box;
   display: grid;
@@ -247,8 +247,8 @@ $effect(() => {
   align-items: center;
   justify-content: center;
   min-height: 22px;
-  margin-right: 3px;
-  margin-bottom: 3px;
+  margin-right: var(--space-1);
+  margin-bottom: var(--space-1);
   padding: 0 var(--space-2);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);

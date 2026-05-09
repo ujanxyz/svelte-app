@@ -1,6 +1,7 @@
 <script lang="ts">
 import { setContext, type Snippet } from "svelte";
 
+import { filenameFromUrl, inferMimeType, loadImageFromUrl } from "@/.storybook-utils/imageLoadingUtils";
 import { defaultOverlayOptions, OVERLAY_INSTANCE_CONTEXT } from "@/modules/overlay2/constants";
 import type { OverlayInstance } from "@/modules/overlay2/types";
 import type { StoredMediaMeta } from "@/types/worker-message-types";
@@ -25,29 +26,6 @@ let initPromise: Promise<void> | null = null;
 $effect(() => {
   initPromise = hydrateFromUrls(picUrls);
 });
-
-function inferMimeType(filename: string, fallback = "image/jpeg"): string {
-  const ext = filename.split(".").pop()?.toLowerCase();
-  if (ext === "png") return "image/png";
-  if (ext === "webp") return "image/webp";
-  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
-  return fallback;
-}
-
-function filenameFromUrl(picUrl: string): string {
-  const clean = picUrl.split("?")[0]?.split("#")[0] ?? picUrl;
-  return clean.split("/").pop() || "mock-image.jpg";
-}
-
-async function loadImageFromUrl(picUrl: string): Promise<{ blob: Blob; bitmap: ImageBitmap }> {
-  const response = await fetch(picUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to load mock image: ${picUrl}`);
-  }
-  const blob = await response.blob();
-  const bitmap = await createImageBitmap(blob);
-  return { blob, bitmap };
-}
 
 async function hydrateFromUrls(urls: string[]): Promise<void> {
   const now = Date.now();

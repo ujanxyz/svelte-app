@@ -1,5 +1,5 @@
 import type { plinfo } from "./plinfo";
-import type { AssetSummary, AssetType, StoredMediaMeta } from "./worker-message-types";
+import type { AssetSummary, AssetType, StoredAssetMeta, StoredMediaMeta } from "./worker-message-types";
 
 export namespace ioApis {
   interface VoidType {};
@@ -37,7 +37,7 @@ export namespace ioApis {
         id: string;
       };
       response: {
-        meta: StoredMediaMeta;
+        meta: StoredAssetMeta;
         bitmap: ImageBitmap;
       };
     },

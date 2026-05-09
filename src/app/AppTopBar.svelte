@@ -5,10 +5,10 @@ import { getAppIcon } from "@/utils/appIcons";
 const LogoIcon = getAppIcon("shapes");
 </script>
 
-<header class="app-topbar" role="banner">
+<header class="app-topbar">
   <div class="brand">
     <LogoIcon size={18} />
-    <h1 class="title">Svelte App Shell</h1>
+    <h1 class="title">Graph Pipeline</h1>
   </div>
 
   <div class="actions" aria-label="App actions">

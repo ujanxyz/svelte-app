@@ -1,8 +1,12 @@
 
+import type { WorkerIndexedDb } from "./db";
 import { type PreviewManager } from "./PreviewManager";
+
+type ArtifactStage = "input" | "output" | "intermediate";
 
 interface BitmapCapturedMessage {
   assetKey: string;
+  mode: string;
   imageData: ImageData;
 }
 
@@ -23,9 +27,11 @@ const EventCodes = Object.freeze({
  * - FILE_UPLOADED   — deprecated; kept for backward compatibility.
  */
 class IoEventsHandler {
+  private readonly indexedDb: WorkerIndexedDb;
   private readonly previewManager: PreviewManager;
 
-  public constructor(previewManager: PreviewManager) {
+  public constructor(indexedDb: WorkerIndexedDb,  previewManager: PreviewManager) {
+    this.indexedDb = indexedDb;
     this.previewManager = previewManager;
   }
 
@@ -35,16 +41,38 @@ class IoEventsHandler {
   }
 
   #onBitmapCaptured(ev: Event): void {
-    const { assetKey, imageData } = (ev as CustomEvent).detail as BitmapCapturedMessage;
-    const { width, height } = imageData;
-    console.log("[IoEventsHandler] Bitmap captured for key: ", assetKey, " with imageData: ", imageData);
+    const { assetKey, mode, imageData } = (ev as CustomEvent).detail as BitmapCapturedMessage;
+    console.log("[IoEventsHandler] Bitmap captured for key: ", assetKey, " with imageData: ", imageData, " and mode: ", mode);
     this.previewManager.setGraphicForKey(assetKey, imageData);
     this.previewManager.syncPreviewsForKey(assetKey);
+    const stage = this.#toArtifactStage(mode);
+    void this.indexedDb.uploadArtifactImage(assetKey, imageData, { stage })
+      .catch((err) => {
+        console.error("[IoEventsHandler.ts] Failed to persist captured artifact", {
+          assetKey,
+          mode,
+          message: err instanceof Error ? err.message : String(err),
+        });
+      });
   }
 
   #onInputMediaUpdated(ev: Event): void {
     const { nodeId, imageData } = (ev as CustomEvent).detail as InputMediaUpdatedMessage;
     this.previewManager.notifyInputMediaUpdated(nodeId, imageData);
+  }
+
+  #toArtifactStage(mode: string): ArtifactStage {
+    switch (mode) {
+      case "encode":
+        return "input";
+      case "decode":
+        return "output";
+      case "function":
+        return "intermediate";
+      default:
+        console.warn("[IoEventsHandler.ts] Unknown bitmap capture mode, defaulting to intermediate", { mode });
+        return "intermediate";
+    }
   }
 }
 

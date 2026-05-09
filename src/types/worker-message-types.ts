@@ -43,10 +43,17 @@ export interface StoredMediaMeta {
   dimension?: [number, number];
 }
 
+export type ArtifactStage = "input" | "output" | "intermediate";
+
 export interface StoredArtifactMeta {
+  id: string;
   kind: "imagedata";
+  stage: ArtifactStage;
   byteSize: number;
   createdAt: number;
   lastModified: number;
+  updatedAt: number;
   dimension: [number, number];
 }
+
+export type StoredAssetMeta = StoredMediaMeta | StoredArtifactMeta;

@@ -6558,8 +6558,8 @@ function JsOnCreateBitmap(handle) { const target = Emval.toValue(handle); const 
 JsOnCreateBitmap.sig = 'ii';
 function JsReleaseStagedBitmap(slotIdStr,assetUri) { const jSlotIdStr = UTF8ToString(slotIdStr); const jAssetUri = UTF8ToString(assetUri); const imageData = Module.assetStaging.releaseImageData(jSlotIdStr, jAssetUri); if (!imageData) { console.warn("[JsBitmapPool] No staged bitmap found for slot: ", jSlotIdStr, " with asset URI: ", jAssetUri); return null; } const { width, height, data, colorSpace, pixelFormat } = imageData; if (colorSpace !== "srgb" || pixelFormat !== "rgba-unorm8") { console.error("[JsBitmapPool] Unsupported image data format: ", colorSpace, pixelFormat); return null; } const { byteLength, byteOffset } = data; const numBytes = width * height * 4; if (byteLength !== numBytes) { console.error("[JsBitmapPool] Mismatch in expected byte length: ", byteLength, " vs calculated: ", numBytes); return null; } const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); uint8arr.set(imageData.data); const newImgData = new ImageData(uint8arr, width, height, { colorSpace, pixelFormat }); const retValue = { width, height, dataPtr: ptr, imageData: newImgData, }; console.log("[JsBitmapPool] returning : ", retValue); return Emval.toHandle(retValue); }
 JsReleaseStagedBitmap.sig = 'iii';
-function JsOnCaptureBitmap(slotIdStr,imageData) { const jSlotIdStr = UTF8ToString(slotIdStr); const jImageData = Emval.toValue(imageData); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CAPTURED", { detail: { assetKey: jSlotIdStr, imageData: jImageData } })); }
-JsOnCaptureBitmap.sig = 'vii';
+function JsOnCaptureBitmap(slotIdStr,modeStr,imageData) { const jSlotIdStr = UTF8ToString(slotIdStr); const jModeStr = UTF8ToString(modeStr); const jImageData = Emval.toValue(imageData); globalThis.pipelineEvents.dispatchEvent(new CustomEvent("BITMAP_CAPTURED", { detail: { assetKey: jSlotIdStr, mode: jModeStr, imageData: jImageData } })); }
+JsOnCaptureBitmap.sig = 'viii';
 function JsOnDestroyBitmap(pixelData) { Module._free(pixelData); }
 JsOnDestroyBitmap.sig = 'vi';
 

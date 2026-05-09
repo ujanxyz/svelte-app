@@ -1,8 +1,9 @@
 <script lang="ts">
+import FuncParamSlot from "@/graph/components/FuncParamSlot.svelte";
 import type { plinfo } from "@/types/plinfo";
 
+import MyHandle from "./MyHandle.svelte";
 import { getNodeContextOps } from "./nodeContextOps";
-import NodeSlot from "./NodeSlot.svelte";
 
 interface Props {
   ins: plinfo.SlotInfo[];
@@ -17,30 +18,31 @@ const nodeOps = getNodeContextOps();
 </script>
 
 <div class="flex-fitted-rows">
-  {#each ins as slot (slot.name)}
-    {@render inSlot(slot)}
-  {/each}
-  {#each outs as slot (slot.name)}
-    {@render outSlot(slot)}
-  {/each}
-  {#each inouts as slot (slot.name)}
-    {@render inoutSlot(slot)}
+  {#each [...ins, ...outs, ...inouts] as slot (slot.name)}
+    {@render renderSlot(slot)}
   {/each}
 </div>
 
-{#snippet inSlot(slotInfo: plinfo.SlotInfo)}
+{#snippet renderSlot(slotInfo: plinfo.SlotInfo)}
   {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
-  <NodeSlot {slotInfo} {slotState} />
-{/snippet}
+  <div class="slotrow">
+    <FuncParamSlot {slotInfo} {slotState} />
 
-{#snippet outSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
-  <NodeSlot {slotInfo} {slotState} />
-{/snippet}
-
-{#snippet inoutSlot(slotInfo: plinfo.SlotInfo)}
-  {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
-  <NodeSlot {slotInfo} {slotState} />
+    {#if slotInfo.access === "I"}
+      <MyHandle kind="in" id={slotInfo.name} />
+      <MyHandle kind="out-x" />
+    {:else if slotInfo.access === "O"}
+      <MyHandle kind="in-x" />
+      <MyHandle kind="out" id={slotInfo.name} />
+    {:else}
+      {@const [handleNameIn, handleNameOut] = [
+        `${slotInfo.name}/in`,
+        `${slotInfo.name}/out`,
+      ]}
+      <MyHandle kind="in" id={handleNameIn} />
+      <MyHandle kind="out" id={handleNameOut} />
+    {/if}
+  </div>
 {/snippet}
 
 <style>
@@ -51,5 +53,11 @@ const nodeOps = getNodeContextOps();
   justify-content: flex-start;
   align-items: stretch;
   row-gap: var(--space-1);
+}
+
+.slotrow {
+  position: relative;
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
 }
 </style>

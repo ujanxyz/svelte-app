@@ -4,19 +4,19 @@ import { MenuCodes } from "../constants";
 
 export const paneMenuItems: readonly ctxmenu.CtxMenuItem<string>[] = [
   {
-    label: "New Node",
+    label: "New Function",
     code: MenuCodes.NEW_NODE,
-    icon: "plus",
+    icon: "function",
   },
   {
     label: "New Input",
     code: MenuCodes.NEW_INPUT,
-    icon: "plus",
+    icon: "sign-in",
   },
   {
     label: "New Output",
     code: MenuCodes.NEW_OUTPUT,
-    icon: "plus",
+    icon: "sign-out",
   },
   {
     label: "",

@@ -449,9 +449,10 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
   list-style: none;
   margin: 0;
   padding: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-medium);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--color-bg-2);
+  color: var(--color-text-hi-con);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
@@ -466,8 +467,7 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
   border: none;
   background: transparent;
   border-radius: 7px;
-  color: #1f2937;
-  padding: 7px 9px;
+  padding: var(--space-5) var(--space-6);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -479,7 +479,7 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
 .ctxmenu-item:hover,
 .ctxmenu-item:focus-visible {
   outline: none;
-  background: #edf2ff;
+  background: var(--color-bg-3);
 }
 
 .ctxmenu-item.disabled {
@@ -495,15 +495,16 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
 .left {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-6);
   min-width: 0;
+  color: var(--color-text-hi-con);
 }
 
 .right {
   display: inline-flex;
   align-items: center;
+  color: var(--color-text-lo-con);
   gap: 8px;
-  color: #6b7280;
 }
 
 .icon-placeholder {
@@ -519,18 +520,18 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
 .shortcut {
   font-size: 0.75rem;
   letter-spacing: 0.01em;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .ctxmenu-separator {
-  margin: 4px 0;
+  margin: var(--space-2) 0;
   padding: 0;
   list-style: none;
 }
 
 .ctxmenu-separator hr {
   border: none;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border-subtle);
   margin: 0 6px;
 }
 </style>

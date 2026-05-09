@@ -5,7 +5,7 @@ import EmptyIcon from "phosphor-svelte/lib/EmptyIcon";
 import SignInIcon from "phosphor-svelte/lib/SignInIcon";
 import SignOutIcon from "phosphor-svelte/lib/SignOutIcon";
 
-const size = 12;
+const size = 6;
 
 interface Props {
   id?: string;
@@ -68,7 +68,7 @@ let { id, kind }: Props = $props();
   height: calc(var(--handle-size) + 4px + 2px);
   padding: 2px;
   border: 0;
-  border: 1px solid var(--color-bg-3);
+  border: 0.5px solid var(--color-border-subtle);
 }
 
 :global(.svelte-flow .svelte-flow__node .svelte-flow__handle svg) {
@@ -78,7 +78,7 @@ let { id, kind }: Props = $props();
 :global(
   .svelte-flow .svelte-flow__node .svelte-flow__handle[data-enabled="true"]
 ) {
-  background-color: #37496a;
+  background-color: var(--color-bg-4);
   color: var(--color-text-hi-con);
 }
 

@@ -19,7 +19,7 @@ class WorkerIoManager {
     this.exManager = exManager;
     this.indexedDb = indexedDb;
     this.previewManager = new PreviewManager();
-    this.ioEventsHandler = new IoEventsHandler(this.previewManager);
+    this.ioEventsHandler = new IoEventsHandler(indexedDb, this.previewManager);
     this.ioEventsHandler.setUpListeners(pipelineEvents);
   }
 
@@ -68,9 +68,7 @@ class WorkerIoManager {
        */
       case "getMediaData": {
         const { id } = request as { id: string };
-        const blob = await this.indexedDb.getMediaBlob(id);
-        const bitmap = await createImageBitmap(blob);
-        const meta = await this.indexedDb.getMediaMeta(id);
+        const { meta, bitmap } = await this.indexedDb.getAssetBitmapById(id);
         return { meta, bitmap };
       }
 

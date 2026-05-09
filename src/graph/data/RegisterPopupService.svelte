@@ -24,10 +24,12 @@ async function _internalOpenContextMenu(
 </script>
 
 <script lang="ts">
-import FnGalleryV2, { type FnGalleryPayload } from "@/features/func-gallery/FnGalleryV2.svelte";
+//-------------------------------------------------------------------------------
+import FunctionGallery from "@/features/func-gallery/FunctionGallery.svelte";
+import IoGallery, { type IoGalleryPayload } from "@/features/func-gallery/IoGallery.svelte";
+import ImageViewer from "@/features/image-viewer/ImageViewer.svelte";
 import MediaManager from "@/features/media-manager/MediaManager.svelte";
 import ManualInputEditor, { type ManualInputOverlayPayload } from "@/graph/data/ManualInputEditor.svelte";
-import ImageViewer from "@/modules/imgviewer/ImageViewer.svelte";
 import { createOverlayController, type OverlayResult,overlayStatuses, useOverlayManager } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
 import type { plinfo } from "@/types/plinfo";
@@ -47,7 +49,8 @@ type Ntype = plinfo.NodeInfo["ntype"];
 const overlayMgr = useOverlayManager();
 const mediaManager = createOverlayController<{}, void>(overlayMgr, renderMediaManager);
 const imageViewer = createOverlayController<{id: string}, void>(overlayMgr, renderImgViewer);
-const fnGallery = createOverlayController<FnGalleryPayload, fn.FunctionInfo | fn.GraphIoInfo>(overlayMgr, renderFnGallery);
+const fnGallery = createOverlayController<{}, fn.FunctionInfo | fn.GraphIoInfo>(overlayMgr, renderFnGallery);
+const ioGallery = createOverlayController<IoGalleryPayload, string>(overlayMgr, renderIoGallery);
 const manualInput = createOverlayController<ManualInputOverlayPayload, plstate.EncodedData>(overlayMgr, renderGraphInputEditor);
 
 registerGraphService("popupService", {
@@ -67,14 +70,26 @@ async function imgViewerModal(id: string): Promise<void> {
 }
 
 async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
-  const result: OverlayResult<fn.FunctionInfo | fn.GraphIoInfo> = await fnGallery.open({ ntype: "IN" });
-  if (result.status === overlayStatuses.OK) {
-    console.log("Selected item:", result.value);
-    return { status: "OK", value: result.value };
-  } else {
+  if (ntype === "FN") {
+    const result: OverlayResult<fn.FunctionInfo | fn.GraphIoInfo> = await fnGallery.open({ ntype });
+    if (result.status === overlayStatuses.OK) {
+      console.log("Selected item:", result.value);
+      return { status: "OK", value: result.value };
+    }
     console.log("Gallery dismissed with status:", result.status);
     return { status: "DISMISSED", reason: result.status };
   }
+
+  const ioResult: OverlayResult<string> = await ioGallery.open({ ntype });
+  if (ioResult.status === overlayStatuses.OK) {
+    const ioInfo: fn.GraphIoInfo = {
+      dtype: ioResult.value,
+      uri: (ntype === "IN" ? "/$IN/" : "/$OUT/") + ioResult.value,
+    };
+    return { status: "OK", value: ioInfo };
+  }
+
+  return { status: "DISMISSED", reason: ioResult.status };
 }
 
 async function encodedDataEditor(rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect): Promise<StatusOr<plstate.EncodedData>> {
@@ -124,7 +139,11 @@ function _contextMenuApiImpls(overlayMgr: overlay2.OverlayManager) {
 {/snippet}
 
 {#snippet renderFnGallery()}
-  <FnGalleryV2 />
+  <FunctionGallery />
+{/snippet}
+
+{#snippet renderIoGallery()}
+  <IoGallery />
 {/snippet}
 
 {#snippet renderGraphInputEditor()}
