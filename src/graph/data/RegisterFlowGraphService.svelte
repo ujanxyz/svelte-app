@@ -11,10 +11,9 @@ import {
 } from "@xyflow/svelte";
 import { getContext } from "svelte";
 
-import type { ClientXY } from "@/types/base";
+import type { base } from "@/types/base";
 import type { fn } from "@/types/function";
-import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
 import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
 
@@ -33,6 +32,8 @@ const {
   getNode: _getNode,
   getNodes: _getNodes,
   getEdges: _getEdges,
+  getViewport: _getViewport,
+  setViewport: _setViewport,
   screenToFlowPosition: _screenToFlowXY,
 } = useSvelteFlow();
 
@@ -57,6 +58,8 @@ registerGraphService("flowGraphService", {
   assignGraph,
   setGraphInput,
   setSlotInput,
+  getViewport,
+  setViewport,
   // getGraphState,
 });
 
@@ -84,7 +87,7 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise
   }
   for (let i = 0; i < allSlotInfos.length; i++) {
     const slotInfo = allSlotInfos[i];
-    const slotId: plinfo.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
+    const slotId: grph.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
     reactiveService.setSlotState(slotId, allSlotStates[i]);
   }
 
@@ -110,7 +113,7 @@ async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPositi
   };
 
   reactiveService.setNodeState(nodeInfo.rawId, nodeState!);
-  const slotId: plinfo.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
+  const slotId: grph.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
   reactiveService.setSlotState(slotId, slotState!);
 
   _updateNodes((nodes: Node[]) => {
@@ -118,7 +121,7 @@ async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPositi
   });
 }
 
-async function validateEdge(connection: Connection): Promise<plstate.SlotValidity> {
+async function validateEdge(connection: Connection): Promise<grph.SlotValidity> {
   const sourceHandle = connection.sourceHandle!;
   const targetHandle = connection.targetHandle!;
   const sourceSlot = _removeSuffix(sourceHandle, "/out");
@@ -136,7 +139,7 @@ async function validateEdge(connection: Connection): Promise<plstate.SlotValidit
     sourceSlot,
     targetSlot,
   });
-  return validity as plstate.SlotValidity;
+  return validity as grph.SlotValidity;
 }
 
 async function addEdge(connection: Connection): Promise<void> {
@@ -168,8 +171,8 @@ async function addEdge(connection: Connection): Promise<void> {
     data,
   };
   rawStoreService.edges = _addEdge(edge, rawStoreService.edges);
-  const slotId0: plinfo.SlotId = {parent: edgeInfo.node0, name: edgeInfo.slot0};
-  const slotId1: plinfo.SlotId = {parent: edgeInfo.node1, name: edgeInfo.slot1};  
+  const slotId0: grph.SlotId = {parent: edgeInfo.node0, name: edgeInfo.slot0};
+  const slotId1: grph.SlotId = {parent: edgeInfo.node1, name: edgeInfo.slot1};  
   reactiveService.setSlotState(slotId0, sourceState);
   reactiveService.setSlotState(slotId1, targetState);
 }
@@ -190,23 +193,23 @@ async function deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<v
   }
 }
 
-function screenToFlowXY(input: MouseEvent | ClientXY): XYPosition {
+function screenToFlowXY(input: MouseEvent | base.XYPosition): XYPosition {
   if (input instanceof MouseEvent) {
     return _screenToFlowXY({
       x: input.clientX,
       y: input.clientY,
-    } as ClientXY);
+    } as base.XYPosition);
   } else {
-    return _screenToFlowXY(input as ClientXY);
+    return _screenToFlowXY(input as base.XYPosition);
   }
 }
 
-function allNodes(): Node[] {
-  return _getNodes();
+function allNodes(): xy.xyNode[] {
+  return _getNodes() as xy.xyNode[];
 }
 
-function allEdges(): Edge[] {
-  return _getEdges();
+function allEdges(): xy.xyEdge[] {
+  return _getEdges() as xy.xyEdge[];
 }
 
 async function deleteNodes(nodeIds: string[]): Promise<void> {
@@ -239,23 +242,31 @@ async function setGraphInput(rawNodeId: number, encoded: string): Promise<void> 
     isNode: true,
     nodeId: rawNodeId,
     slotId: null,
-    encodedData: { payload: encoded } as plstate.EncodedData,
+    encodedData: { payload: encoded } as grph.EncodedData,
   });
   await _internalUpdateNodeState(rawNodeId);
 }
 
 async function setSlotInput(rawNodeId: number, slotName: string, encoded: string): Promise<void> {
-  const slotId: plinfo.SlotId = { parent: rawNodeId, name: slotName };
+  const slotId: grph.SlotId = { parent: rawNodeId, name: slotName };
   await pipeline.setEncodedData({
     isNode: false,
     nodeId: null,
     slotId,
-    encodedData: { payload: encoded } as plstate.EncodedData,
+    encodedData: { payload: encoded } as grph.EncodedData,
   });
   await _internalUpdateSlotState(slotId);
 }
 
-function _getClientXY(event: MouseEvent | TouchEvent): ClientXY {
+function getViewport(): xy.Viewport {
+  return _getViewport();
+}
+
+function setViewport(viewport: xy.Viewport): void {
+  _setViewport(viewport);
+}
+
+function _getClientXY(event: MouseEvent | TouchEvent): base.XYPosition {
   if (event instanceof MouseEvent) {
     return { x: event.clientX, y: event.clientY };
   } else {
@@ -278,7 +289,7 @@ async function _internalUpdateNodeState(rawNodeId: number): Promise<void> {
   }
 }
 
-async function _internalUpdateSlotState(slotId: plinfo.SlotId): Promise<void> {
+async function _internalUpdateSlotState(slotId: grph.SlotId): Promise<void> {
   const { slotStates } = await pipeline.getSlotStates({ slotIds: [slotId] });
   for (const [slotId, slotState] of slotStates) {
     reactiveService.setSlotState(slotId, slotState);

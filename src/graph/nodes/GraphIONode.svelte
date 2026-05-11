@@ -1,6 +1,6 @@
 <script lang="ts">
 import PreviewCanvas from "@/graph/components/PreviewCanvas.svelte";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
 
 import NodeHeader from "../components/NodeHeader.svelte";
@@ -26,7 +26,7 @@ const slotInfo = graphIONodeData.slotInfo;
 /* svelte-ignore state_referenced_locally */
 const nodeOps = setNodeContextOps(graphIONodeData.info);
 
-const nodeState = $derived(nodeOps.reactiveNodeState()) as plstate.NodeState;
+const nodeState = $derived(nodeOps.reactiveNodeState()) as grph.NodeState;
 
 let canvasRef: HTMLCanvasElement | undefined = $state();
 

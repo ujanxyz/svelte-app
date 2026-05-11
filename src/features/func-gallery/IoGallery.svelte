@@ -1,7 +1,7 @@
 <script lang="ts" module>
-import type { plinfo } from "@/types/plinfo";
+  import type { grph } from "@/types/grph";
 
-type Ntype = plinfo.NodeInfo["ntype"];
+type Ntype = grph.NodeInfo["ntype"];
 
 export interface IoGalleryPayload {
   ntype: Ntype;
@@ -11,11 +11,10 @@ export interface IoGalleryPayload {
 <script lang="ts">
 import { OverlayCloseButton, useOverlayInstance } from "@/modules/overlay2";
 import MoveButton from "@/modules/overlay2/MoveButton.svelte";
-import type { plinfo } from "@/types/plinfo";
 
 import IoCard from "./IoCard.svelte";
 
-type IoMode = Extract<plinfo.NodeInfo["ntype"], "IN" | "OUT">;
+type IoMode = Extract<grph.NodeInfo["ntype"], "IN" | "OUT">;
 
 interface IoTemplate {
   dtype: string;

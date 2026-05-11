@@ -1,15 +1,15 @@
 <script lang="ts">
 import { getContext, onMount } from "svelte";
 
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 import { AssetType } from "@/types/worker-message-types";
 import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
 
 import PickFileRow from "./PickFileRow.svelte";
 
 interface Props {
-  initial: plstate.EncodedData | null;
-  onData: (edited: plstate.EncodedData) => void;
+  initial: grph.EncodedData | null;
+  onData: (edited: grph.EncodedData) => void;
 }
 
 interface PickFilePayload {
@@ -70,7 +70,7 @@ function selectItem(id: string): void {
 
 function applySelection(): void {
 	if (!selectedItem) return;
-	const data: plstate.EncodedData = {
+	const data: grph.EncodedData = {
 		payload: JSON.stringify({ assetUri: selectedItem.assetUri }),
 	};
 	scheduleOndataUpdate(data);
@@ -78,14 +78,14 @@ function applySelection(): void {
 
 function clearSelection(): void {
 	selectedId = "";
-	const data: plstate.EncodedData = {
+	const data: grph.EncodedData = {
 		payload: JSON.stringify({ assetUri: "" }),
 	};
 	scheduleOndataUpdate(data);
 }
 
 // Call onData after 0.1 seconds, also cancel any previously scheduled timeout.
-function scheduleOndataUpdate(data: plstate.EncodedData): void {
+function scheduleOndataUpdate(data: grph.EncodedData): void {
 	if (ondataUpdateTimeoutId) {
 		clearTimeout(ondataUpdateTimeoutId);
 	}

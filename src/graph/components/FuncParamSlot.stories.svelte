@@ -1,47 +1,46 @@
 <script module lang="ts">
 import { defineMeta } from "@storybook/addon-svelte-csf";
 
-import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 
 import FuncParamSlot from "./FuncParamSlot.svelte";
 
-const slotInfoInput: plinfo.SlotInfo = {
+const slotInfoInput: grph.SlotInfo = {
   parent: 101,
   name: "seedValue",
   dtype: "floats",
   access: "I",
 };
 
-const slotInfoOutput: plinfo.SlotInfo = {
+const slotInfoOutput: grph.SlotInfo = {
   parent: 101,
   name: "preview",
   dtype: "bitmap",
   access: "O",
 };
 
-const slotInfoInOut: plinfo.SlotInfo = {
+const slotInfoInOut: grph.SlotInfo = {
   parent: 101,
   name: "points",
   dtype: "points2d",
   access: "M",
 };
 
-const slotStateEmpty: plstate.SlotState = {
+const slotStateEmpty: grph.SlotState = {
   inEdges: [],
   outEdges: [],
   encodedData: null,
   genId: 1,
 };
 
-const slotStateConnectedIn: plstate.SlotState = {
+const slotStateConnectedIn: grph.SlotState = {
   inEdges: [11],
   outEdges: [],
   encodedData: null,
   genId: 2,
 };
 
-const slotStateConnectedBoth: plstate.SlotState = {
+const slotStateConnectedBoth: grph.SlotState = {
   inEdges: [22],
   outEdges: [31, 32],
   encodedData: null,

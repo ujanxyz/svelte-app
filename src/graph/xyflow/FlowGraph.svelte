@@ -81,7 +81,7 @@ const {
   {onedgeclick}
   {onedgecontextmenu}
   {onselectioncontextmenu}
-  fitView
+  fitView={false}
   colorMode={$isDarkTheme ? "dark" : "light"}
   // Debug actions:
   {isValidConnection}

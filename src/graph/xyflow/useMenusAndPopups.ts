@@ -1,16 +1,16 @@
 import { type Edge, type Node, type XYPosition } from "@xyflow/svelte";
 import { type FinalConnectionState } from "@xyflow/system";
 
-import type { ClientXY, StatusOr } from "@/types/base";
+import type { base } from "@/types/base";
 import type { fn } from "@/types/function";
-import type { plinfo } from "@/types/plinfo";
+import type { grph } from "@/types/grph";
 
 import { MenuCodes } from "../constants";
 import { useGraphService } from "../graph-services";
 
-type Ntype = plinfo.NodeInfo["ntype"];
+type Ntype = grph.NodeInfo["ntype"];
 
-function getClientXY(event: MouseEvent | TouchEvent): ClientXY {
+function getClientXY(event: MouseEvent | TouchEvent): base.XYPosition {
   if (event instanceof MouseEvent) {
     return { x: event.clientX, y: event.clientY };
   } else {
@@ -21,7 +21,6 @@ function getClientXY(event: MouseEvent | TouchEvent): ClientXY {
 
 export default function useMenusAndPopups() {
   const rawStoreService = useGraphService("rawStoreService");
-  const ioService = useGraphService("ioService");
   const flowGraphService = useGraphService("flowGraphService");
   const pipelineService = useGraphService("pipelineService");
   const popupService = useGraphService("popupService");
@@ -36,7 +35,7 @@ export default function useMenusAndPopups() {
   }: {
     event: MouseEvent;
   }): Promise<void> {
-    const clientXY: ClientXY = {
+    const clientXY: base.XYPosition = {
       x: event.clientX,
       y: event.clientY,
     };
@@ -70,7 +69,7 @@ export default function useMenusAndPopups() {
     node: Node;
     event: MouseEvent;
   }): Promise<void> {
-    const clientXY: ClientXY = {
+    const clientXY: base.XYPosition = {
       x: event.clientX,
       y: event.clientY,
     };
@@ -91,12 +90,12 @@ export default function useMenusAndPopups() {
     edge: Edge;
     event: MouseEvent;
   }): Promise<void> {
-    const clientXY: ClientXY = {
+    const clientXY: base.XYPosition = {
       x: event.clientX,
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await popupService.menuInEdge(clientXY) as StatusOr<string>;
+    const retval = await popupService.menuInEdge(clientXY) as base.StatusOr<string>;
     if (retval.status !== "OK") return;
     const edgeId = edge.id as string;
     switch (retval.value) {
@@ -112,12 +111,12 @@ export default function useMenusAndPopups() {
     nodes: Node[];
     event: MouseEvent;
   }): Promise<void> {
-    const clientXY: ClientXY = {
+    const clientXY: base.XYPosition = {
       x: event.clientX,
       y: event.clientY,
     };
     event.preventDefault();
-    const retval = await popupService.menuInSelection(clientXY) as StatusOr<string>;
+    const retval = await popupService.menuInSelection(clientXY) as base.StatusOr<string>;
     if (retval.status !== "OK") return;
     switch (retval.value) {
       case MenuCodes.RM_SELECTION:
@@ -143,10 +142,10 @@ export default function useMenusAndPopups() {
       fromHandle,
     );
 
-    const clientXY: ClientXY = getClientXY(event);
+    const clientXY: base.XYPosition = getClientXY(event);
     const flowPosn: XYPosition = flowGraphService.screenToFlowXY(clientXY);
 
-    const retval = await popupService.menuInConnEnd(clientXY) as StatusOr<string>;
+    const retval = await popupService.menuInConnEnd(clientXY) as base.StatusOr<string>;
     if (retval.status !== "OK") return;
     console.log(retval);
     switch (retval.value) {
@@ -161,7 +160,7 @@ export default function useMenusAndPopups() {
   }
 
   async function onpopupgallery(event: MouseEvent): Promise<void> {
-    const clientXY: ClientXY = {
+    const clientXY: base.XYPosition = {
       x: event.clientX,
       y: event.clientY,
     };
@@ -174,11 +173,7 @@ export default function useMenusAndPopups() {
   }
 
   async function onsavelocalstorage(): Promise<void> {
-    const nodes = flowGraphService.allNodes();
-    const edges = flowGraphService.allEdges();
-    const viewport = rawStoreService.currentViewport();
-    const graph = ioService.serializeObject(nodes, edges, viewport);
-    console.log("Save json .. ", graph);
+    await pipelineService.saveGraphToLocalStorage();
   }
 
   async function onplaypipeline(): Promise<void> {
@@ -187,12 +182,12 @@ export default function useMenusAndPopups() {
 
   async function _internalOpenGallery(ntype: Ntype, position: XYPosition): Promise<void> {
     if (ntype === "FN") {
-      const retval = await popupService.nodeTemplateGallery(ntype) as StatusOr<fn.FunctionInfo>;
+      const retval = await popupService.nodeTemplateGallery(ntype) as base.StatusOr<fn.FunctionInfo>;
       if (retval.status !== "OK") return;
       const funcInfo = retval.value as fn.FunctionInfo;
       await flowGraphService.newNodeAt(funcInfo, position);
     } else if (ntype === "IN" || ntype === "OUT") {
-      const retval = await popupService.nodeTemplateGallery(ntype) as StatusOr<fn.GraphIoInfo>;
+      const retval = await popupService.nodeTemplateGallery(ntype) as base.StatusOr<fn.GraphIoInfo>;
       if (retval.status !== "OK") return;
       const ioInfo = retval.value as fn.GraphIoInfo;
       await flowGraphService.newGraphIOAt(ioInfo.dtype, ntype === "OUT" /* isOutput */, position);

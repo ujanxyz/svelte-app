@@ -7,11 +7,11 @@ import {
   Separator,
 } from "svelte-tweakpane-ui";
 
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 
 interface Props {
-  initial: plstate.EncodedData | null;
-  onData: (edited: plstate.EncodedData) => void;
+  initial: grph.EncodedData | null;
+  onData: (edited: grph.EncodedData) => void;
 }
 
 interface Float {
@@ -32,7 +32,7 @@ function onClickAdd(ev: ButtonClickEvent) {
 function onClickApply(ev: ButtonClickEvent) {
   ev.preventDefault();
   const valueArrayPlain = $state.snapshot(valueArray).map((v) => v.n);
-  const data: plstate.EncodedData = {
+  const data: grph.EncodedData = {
     payload: JSON.stringify(valueArrayPlain),
   };
   onData(data);

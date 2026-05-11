@@ -6,7 +6,7 @@ import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
 import SelectionIcon from "phosphor-svelte/lib/SelectionIcon";
 import TrashIcon from "phosphor-svelte/lib/TrashIcon";
 
-import type { plinfo } from "@/types/plinfo";
+import type { grph } from "@/types/grph";
 
 import IconButton from "../../components/IconButton.svelte";
 
@@ -16,7 +16,7 @@ export interface ActionHandler {
 }
 
 interface Props {
-  ntype: plinfo.NodeInfo["ntype"];
+  ntype: grph.NodeInfo["ntype"];
   actionHandler: ActionHandler;
 };
 

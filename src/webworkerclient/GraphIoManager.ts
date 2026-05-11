@@ -1,5 +1,4 @@
 import type { ioApis } from "@/types/ioApis";
-import type { plinfo } from "@/types/plinfo";
 
 import { type WebWorkerClient } from "./WebWorkerClient";
 

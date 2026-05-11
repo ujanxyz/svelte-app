@@ -13,15 +13,14 @@ export { kDtypeToIcon };
 <script lang="ts">
 import type { Component } from "svelte";
 
-import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 import { getAppIcon } from "@/utils/appIcons";
 
 import { getNodeContextOps } from "../nodes/nodeContextOps";
 
 interface Props {
-  slotInfo: plinfo.SlotInfo;
-  slotState: plstate.SlotState;
+  slotInfo: grph.SlotInfo;
+  slotState: grph.SlotState;
 }
 
 const { slotInfo, slotState }: Props = $props();

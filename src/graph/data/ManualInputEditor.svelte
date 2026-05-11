@@ -1,9 +1,9 @@
 <script lang="ts" module>
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 
 export interface ManualInputOverlayPayload {
   dtypeStr: string;
-  priorIoData: plstate.EncodedData | null;
+  priorIoData: grph.EncodedData | null;
   rawNodeId: number;
   triggerRect: DOMRect;
 };
@@ -19,14 +19,13 @@ import PickCoords2D from "@/modules/sloteditor/PickCoords2D.svelte";
 import PickFile from "@/modules/sloteditor/PickFile.svelte";
 import PickFloats from "@/modules/sloteditor/PickFloats.svelte";
 import PickTexts from "@/modules/sloteditor/PickTexts.svelte";
-import type { ClientXY } from "@/overlay/types";
-
+import type { base } from "@/types/base";
 
 interface Props {}
 
 const {}: Props = $props();
 
-let clientXY = $state<ClientXY>({ x: 0, y: 0 });
+let clientXY = $state<base.XYPosition>({ x: 0, y: 0 });
 
 /**
  * CSS vars controlling the menu position.
@@ -35,11 +34,11 @@ const styleString: string = $derived(
   `left: ${clientXY.x}px; top: ${clientXY.y}px;`,
 );
 
-const overlay = useOverlayInstance<ManualInputOverlayPayload, plstate.EncodedData>();
+const overlay = useOverlayInstance<ManualInputOverlayPayload, grph.EncodedData>();
 
 const { dtypeStr: payloadDatatype, priorIoData, rawNodeId, triggerRect } = overlay.payload as {
   dtypeStr: string;
-  priorIoData: plstate.EncodedData | null;
+  priorIoData: grph.EncodedData | null;
   rawNodeId: number;
   triggerRect: DOMRect;
 };
@@ -51,7 +50,7 @@ onMount(() => {
   clientXY = { x: clientLeft, y: clientTop };
 });
 
-function onData(edited: plstate.EncodedData): void {
+function onData(edited: grph.EncodedData): void {
   console.log("onData = ", edited);
   overlay.settle(edited);
 }

@@ -3,14 +3,14 @@ import type { Snippet } from "svelte";
 
 import * as ctxmenu from "@/modules/ctxmenu";
 import * as overlay2 from "@/modules/overlay2";
-import type { ClientXY, StatusOr } from "@/types/base";
+import type { base } from "@/types/base";
 
 async function _internalOpenContextMenu(
   overlayMgr: overlay2.OverlayManager,
-  clientXY: ClientXY,
+  clientXY: base.XYPosition,
   menuSnippetFn: Snippet,
   items: readonly ctxmenu.CtxMenuItem<string>[],
-): Promise<StatusOr<string>> {
+): Promise<base.StatusOr<string>> {
   const menuResult = await ctxmenu.openCtxMenu<string>(overlayMgr, menuSnippetFn, {
     x: clientXY.x,
     y: clientXY.y,
@@ -32,8 +32,7 @@ import MediaManager from "@/features/media-manager/MediaManager.svelte";
 import ManualInputEditor, { type ManualInputOverlayPayload } from "@/graph/data/ManualInputEditor.svelte";
 import { createOverlayController, type OverlayResult,overlayStatuses, useOverlayManager } from "@/modules/overlay2";
 import type { fn } from "@/types/function";
-import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 
 import { registerGraphService } from "../graph-services";
 import {
@@ -44,14 +43,14 @@ import {
   selectionMenuItems,
 } from "./menuData";
 
-type Ntype = plinfo.NodeInfo["ntype"];
+type Ntype = grph.NodeInfo["ntype"];
 
 const overlayMgr = useOverlayManager();
 const mediaManager = createOverlayController<{}, void>(overlayMgr, renderMediaManager);
 const imageViewer = createOverlayController<{id: string}, void>(overlayMgr, renderImgViewer);
 const fnGallery = createOverlayController<{}, fn.FunctionInfo | fn.GraphIoInfo>(overlayMgr, renderFnGallery);
 const ioGallery = createOverlayController<IoGalleryPayload, string>(overlayMgr, renderIoGallery);
-const manualInput = createOverlayController<ManualInputOverlayPayload, plstate.EncodedData>(overlayMgr, renderGraphInputEditor);
+const manualInput = createOverlayController<ManualInputOverlayPayload, grph.EncodedData>(overlayMgr, renderGraphInputEditor);
 
 registerGraphService("popupService", {
   mediaManagerModal,
@@ -69,7 +68,7 @@ async function imgViewerModal(id: string): Promise<void> {
   await imageViewer.open({id});
 }
 
-async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
+async function nodeTemplateGallery(ntype: Ntype): Promise<base.StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {
   if (ntype === "FN") {
     const result: OverlayResult<fn.FunctionInfo | fn.GraphIoInfo> = await fnGallery.open({ ntype });
     if (result.status === overlayStatuses.OK) {
@@ -92,7 +91,7 @@ async function nodeTemplateGallery(ntype: Ntype): Promise<StatusOr<fn.FunctionIn
   return { status: "DISMISSED", reason: ioResult.status };
 }
 
-async function encodedDataEditor(rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect): Promise<StatusOr<plstate.EncodedData>> {
+async function encodedDataEditor(rawNodeId: number, dtypeStr: string, priorIoData: grph.EncodedData | null, triggerRect: DOMRect): Promise<base.StatusOr<grph.EncodedData>> {
   const result = await manualInput.open({rawNodeId, dtypeStr, priorIoData, triggerRect});
   if (result.status === overlayStatuses.OK) {
     return { status: "OK", value: result.value };
@@ -103,23 +102,23 @@ async function encodedDataEditor(rawNodeId: number, dtypeStr: string, priorIoDat
 
 function _contextMenuApiImpls(overlayMgr: overlay2.OverlayManager) {
   return {
-    menuInPane: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+    menuInPane: async (clientXY: base.XYPosition): Promise<base.StatusOr<string>> => {
       return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, paneMenuItems);
     },
 
-    menuInNode: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+    menuInNode: async (clientXY: base.XYPosition): Promise<base.StatusOr<string>> => {
       return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, nodeMenuItems);
     },
 
-    menuInEdge: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+    menuInEdge: async (clientXY: base.XYPosition): Promise<base.StatusOr<string>> => {
       return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, edgeMenuItems);
     },
 
-    menuInSelection: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+    menuInSelection: async (clientXY: base.XYPosition): Promise<base.StatusOr<string>> => {
       return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, selectionMenuItems);
     },
 
-    menuInConnEnd: async (clientXY: ClientXY): Promise<StatusOr<string>> => {
+    menuInConnEnd: async (clientXY: base.XYPosition): Promise<base.StatusOr<string>> => {
       return _internalOpenContextMenu(overlayMgr, clientXY, renderCtxMenu, connEndMenuItems);
     },
   };

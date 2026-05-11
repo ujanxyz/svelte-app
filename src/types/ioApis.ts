@@ -1,4 +1,5 @@
-import type { plinfo } from "./plinfo";
+import type { grph } from "@/types/grph";
+
 import type { AssetSummary, AssetType, StoredAssetMeta, StoredMediaMeta } from "./worker-message-types";
 
 export namespace ioApis {
@@ -54,14 +55,14 @@ export namespace ioApis {
     stageAssets: {
       request: {
         isPostRun: boolean;
-        assetInfos: plinfo.AssetInfo[];
+        assetInfos: grph.AssetInfo[];
       };
       response: {};
     },
 
     registerPreview: {
       request: {
-        slotId: plinfo.SlotId;
+        slotId: grph.SlotId;
         offscreen: OffscreenCanvas;
       };
       response: {

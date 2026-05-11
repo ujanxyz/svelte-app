@@ -13,6 +13,14 @@ class PipelineBuilder {
     return await this.invokeAsync<"getGraph">("getGraph", request);
   }
 
+  public async encodeGraph(request: apis.Request<"encodeGraph">): Promise<apis.Response<"encodeGraph">> {
+    return await this.invokeAsync<"encodeGraph">("encodeGraph", request);
+  }
+
+  public async decodeGraph(request: apis.Request<"decodeGraph">): Promise<apis.Response<"decodeGraph">> {
+    return await this.invokeAsync<"decodeGraph">("decodeGraph", request);
+  }
+
   public async createNode(request: apis.Request<"createNode">): Promise<apis.Response<"createNode">> {
     return await this.invokeAsync<"createNode">("createNode", request);
   }

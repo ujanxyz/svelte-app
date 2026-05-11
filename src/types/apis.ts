@@ -1,6 +1,6 @@
+import type { grph } from "@/types/grph";
+
 import type { fn } from "./function";
-import type { plinfo } from "./plinfo";
-import type { plstate } from "./plstate";
 
 export namespace apis {
 
@@ -15,20 +15,30 @@ export namespace apis {
         slotInfos: any[];
       };
     };
+
+    encodeGraph: {
+      request: VoidType;
+      response: string;
+    };
+
+    decodeGraph: {
+      request: string;
+      response: VoidType;
+    };
   
     createNode: {
       request: {
         func: fn.FunctionInfo,
       };
       response: {
-        nodeInfo?: plinfo.NodeInfo;
-        nodeState?: plstate.NodeState;
-        inInfos: plinfo.SlotInfo[];
-        outInfos: plinfo.SlotInfo[];
-        inoutInfos: plinfo.SlotInfo[];
-        inStates: plstate.SlotState[];
-        outStates: plstate.SlotState[];
-        inoutStates: plstate.SlotState[];
+        nodeInfo?: grph.NodeInfo;
+        nodeState?: grph.NodeState;
+        inInfos: grph.SlotInfo[];
+        outInfos: grph.SlotInfo[];
+        inoutInfos: grph.SlotInfo[];
+        inStates: grph.SlotState[];
+        outStates: grph.SlotState[];
+        inoutStates: grph.SlotState[];
       };
     };
 
@@ -38,10 +48,10 @@ export namespace apis {
         isOutput: boolean;
       };
       response: {
-        nodeInfo?: plinfo.NodeInfo;
-        nodeState?: plstate.NodeState;
-        slotInfo?: plinfo.SlotInfo;
-        slotState?: plstate.SlotState;
+        nodeInfo?: grph.NodeInfo;
+        nodeState?: grph.NodeState;
+        slotInfo?: grph.SlotInfo;
+        slotState?: grph.SlotState;
       };
     };
   
@@ -53,9 +63,9 @@ export namespace apis {
         targetSlot: string;
       };
       response: {
-        edgeInfo: plinfo.EdgeInfo;
-        sourceState: plstate.SlotState;
-        targetState: plstate.SlotState;
+        edgeInfo: grph.EdgeInfo;
+        sourceState: grph.SlotState;
+        targetState: grph.SlotState;
       };
     };
   
@@ -67,8 +77,8 @@ export namespace apis {
       response: {
         nodeIds: number[];
         edgeIds: number[];
-        deletedSlotIds: plinfo.SlotId[];
-        affectedSlotIds: plinfo.SlotId[];
+        deletedSlotIds: grph.SlotId[];
+        affectedSlotIds: grph.SlotId[];
         topoOrder?: string[];
       };
     };
@@ -81,7 +91,7 @@ export namespace apis {
         targetSlot: string;
       };
       response: {
-        validity: plstate.SlotValidity;
+        validity: grph.SlotValidity;
       };
     };
 
@@ -90,21 +100,27 @@ export namespace apis {
         nodeIds: number[];
       };
       response: {
-        nodeStates: [number /* nodeId */, plstate.NodeState][];
+        nodeStates: [number /* nodeId */, grph.NodeState][];
       };
     };
 
     getSlotStates: {
       request: {
-        slotIds: plinfo.SlotId[];
+        slotIds: grph.SlotId[];
       };
       response: {
-        slotStates: [plinfo.SlotId, plstate.SlotState][];
+        slotStates: [grph.SlotId, grph.SlotState][];
       };
     };
 
     getAvailableFuncs: {
-      request: VoidType;
+      request: {
+        filters: ("UNKNOWN" | "URI_LIST" | "PREFIX" | "PAGE")[];
+        uriList?: string[];
+        prefix?: string;
+        pageStart?: number;
+        pageSize?: number;
+      };
       response: {
         infos: fn.FunctionInfo[];
       };
@@ -114,8 +130,8 @@ export namespace apis {
       request: {
         isNode: boolean;
         nodeId: number | null;
-        slotId: plinfo.SlotId | null;
-        encodedData: plstate.EncodedData | null;
+        slotId: grph.SlotId | null;
+        encodedData: grph.EncodedData | null;
       };
       response: VoidType;
     };
@@ -123,21 +139,21 @@ export namespace apis {
     buildPipeline: {
       request: VoidType;
       response: {
-        assetInfos: plinfo.AssetInfo[];
+        assetInfos: grph.AssetInfo[];
       };
     };
 
     runPipeline: {
       request: VoidType;
       response: {
-        runResult: plstate.GraphRunOutput[];
+        runResult: grph.GraphRunOutput[];
       };
     };
 
     getResources: {
       request: VoidType;
       response: {
-        resources: plinfo.ResourceInfo[];
+        resources: grph.ResourceInfo[];
       };
     };
 

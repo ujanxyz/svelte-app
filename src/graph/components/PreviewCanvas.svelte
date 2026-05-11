@@ -1,12 +1,12 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import type { plinfo } from "@/types/plinfo";
+import type { grph } from "@/types/grph";
 
 import type { NodeContextOps } from "../nodes/nodeContextOps";
 
 interface Props {
-  slotInfo: plinfo.SlotInfo;
+  slotInfo: grph.SlotInfo;
   nodeOps: Pick<NodeContextOps, "registerPreview" | "unregisterPreview">;
   onclick: (ev: MouseEvent) => void;
   canvasRef: HTMLCanvasElement | undefined;

@@ -2,18 +2,18 @@
 import { defineMeta } from "@storybook/addon-svelte-csf";
 import { fn as testFn } from "storybook/test";
 
-import type { plinfo } from "@/types/plinfo";
+import type { grph } from "@/types/grph";
 
 import PreviewCanvas from "./PreviewCanvas.svelte";
 
-const bitmapSlotInfo: plinfo.SlotInfo = {
+const bitmapSlotInfo: grph.SlotInfo = {
   parent: 1,
   name: "preview",
   dtype: "bitmap",
   access: "O",
 };
 
-const floatSlotInfo: plinfo.SlotInfo = {
+const floatSlotInfo: grph.SlotInfo = {
   parent: 1,
   name: "scalar",
   dtype: "floats",

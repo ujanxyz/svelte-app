@@ -1,4 +1,4 @@
-import type { IDimension } from "@/types/base";
+import type { base } from "@/types/base";
 
 /**
  * Shared canvas rendering utilities. Used by PreviewManager (web worker)

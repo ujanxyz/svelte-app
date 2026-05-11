@@ -6,10 +6,9 @@ import {
   type XYPosition,
 } from "@xyflow/svelte";
 
-import type { ClientXY, StatusOr } from "@/types/base";
+import type { base } from "@/types/base";
 import type { fn } from "@/types/function";
-import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
 
 import { createReactiveContext } from "../utils/reactive-context.svelte";
@@ -33,11 +32,11 @@ interface RawStoreService {
 }
 
 interface ReactiveService {
-  setNodeState(rawNodeId: number, state: plstate.NodeState): void;
-  useNodeState(rawNodeId: number): plstate.NodeState;
-  setSlotState(slotId: plinfo.SlotId, state: plstate.SlotState): void;
-  useSlotState(slotId: plinfo.SlotId): plstate.SlotState;
-  deleteSlots(slotIds: plinfo.SlotId[]): void;
+  setNodeState(rawNodeId: number, state: grph.NodeState): void;
+  useNodeState(rawNodeId: number): grph.NodeState;
+  setSlotState(slotId: grph.SlotId, state: grph.SlotState): void;
+  useSlotState(slotId: grph.SlotId): grph.SlotState;
+  deleteSlots(slotIds: grph.SlotId[]): void;
 }
 
 interface IoService {
@@ -56,15 +55,15 @@ interface FlowGraphService {
   newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition): Promise<void>;
 
   // Status: Done, Tested.
-  validateEdge(connection: Connection): Promise<plstate.SlotValidity>;
+  validateEdge(connection: Connection): Promise<grph.SlotValidity>;
   addEdge(connection: Connection): Promise<void>;
 
   // Status: Done, Tested.
   deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void>;
 
-  screenToFlowXY: (input: MouseEvent | ClientXY) => XYPosition;
-  allNodes: () => Node[];
-  allEdges: () => Edge[];
+  screenToFlowXY: (input: MouseEvent | base.XYPosition) => XYPosition;
+  allNodes: () => xy.xyNode[];
+  allEdges: () => xy.xyEdge[];
   deleteNodes: (nodeIds: string[]) => Promise<void>;
   deleteEdges: (edgeIds: string[]) => Promise<void>;
   deleteAllEdges: () => Promise<void>;
@@ -72,20 +71,25 @@ interface FlowGraphService {
   assignGraph: (newNodes: Node[], newEdges: Edge[]) => void;
   setGraphInput: (rawNodeId: number, encoded: string) => Promise<void>;
   setSlotInput: (rawNodeId: number, slotName: string, encoded: string) => Promise<void>;
+
+  getViewport(): xy.Viewport;
+  setViewport(viewport: xy.Viewport): void;
 }
 
 interface PipelineService {
   playPipeline: () => Promise<void>;
+  saveGraphToLocalStorage: () => Promise<boolean>;
+  restoreGraphFromLocalStorage: () => Promise<boolean>;
 }
 
-type MenuFunction = (clientXY: ClientXY) => Promise<StatusOr<string>>;
+type MenuFunction = (clientXY: base.XYPosition) => Promise<base.StatusOr<string>>;
 
 interface PopupService {
   mediaManagerModal: () => Promise<void>;
   imgViewerModal: (id: string) => Promise<void>;
-  nodeTemplateGallery: (ntype: plinfo.NodeInfo["ntype"]) => Promise<StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
-  encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: plstate.EncodedData | null, triggerRect: DOMRect)
-      => Promise<StatusOr<plstate.EncodedData>>;
+  nodeTemplateGallery: (ntype: grph.NodeInfo["ntype"]) => Promise<base.StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
+  encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: grph.EncodedData | null, triggerRect: DOMRect)
+      => Promise<base.StatusOr<grph.EncodedData>>;
 
   // Context menu APIs.
   menuInPane: MenuFunction;

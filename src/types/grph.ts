@@ -1,15 +1,15 @@
 /**
- * plinfo: Pipeline info
- * Fixed information for pipeline elements, node, edge, slot etc.
+ * Fixed information and states for graph elements, like nodes, edges, slots.
  */
-export namespace plinfo {
-  // See C++ repo -> //ujcore/data/IdTypes.h
+export namespace grph {
+  // Info related types.
+
   export interface SlotId {
     parent: number;
     name: string;
   };
 
-  // See C++ repo -> //ujcore/data/plinfo.h
+  // See C++ repo -> //ujcore/graph
   export interface SlotInfo {
     parent: number;
     name: string;
@@ -17,7 +17,7 @@ export namespace plinfo {
     access: "I" | "O" | "M";
   };
 
-  // See C++ repo -> //ujcore/data/plinfo.h
+  // See C++ repo -> //ujcore/graph
   export interface NodeInfo {
     rawId: number;
     alnumid: string;
@@ -29,7 +29,7 @@ export namespace plinfo {
     inouts: string[];
   };
 
-  // See C++ repo -> //ujcore/data/plinfo.h
+  // See C++ repo -> //ujcore/graph
   export interface EdgeInfo {
     id: number;
     catid: string;
@@ -39,7 +39,7 @@ export namespace plinfo {
     slot1: string;
   };
 
-  // See C++ repo -> //ujcore/data/ResourceInfo.h
+  // See C++ repo -> //ujcore/graph/ResourceInfo.h
   export interface BitmapInfo {
     id: string;
     backend: string;
@@ -50,7 +50,7 @@ export namespace plinfo {
 
   export interface ResourceInfo {
     type: "UNKNOWN" | "BITMAP";
-    bitmap: BitmapInfo | null;
+    bitmap?: BitmapInfo;
   };
 
   export interface AssetInfo {
@@ -59,4 +59,32 @@ export namespace plinfo {
     dtype: string;
     assetUri: string | null;
   };
+
+  // State related types.
+
+  export interface EncodedData {
+    payload: string;
+  };
+
+  export interface SlotState {
+    inEdges: number[];
+    outEdges: number[];
+    encodedData: EncodedData | null;
+    genId: number;
+  }
+
+  export interface NodeState {
+    label: string;
+    encodedData: EncodedData | null;
+    connected: "WAIT" | "RUN" | "ERR";
+    genId: number;
+  }
+
+  export interface GraphRunOutput {
+    nodeId: number;
+    dtype: string;
+    encodedData: EncodedData | null;
+  };
+
+  export type SlotValidity = "VALID" | "WARN_DATA" | "ERR_TYPE" | "ERR_EDGE";
 }

@@ -1,74 +1,48 @@
 <script lang="ts">
-import { useEdges, useNodes } from "@xyflow/svelte";
 import { onMount } from "svelte";
 
-import useAppLocalData from "@/modules/persistence/useAppLocalData";
-
 import { useGraphService } from "../graph-services";
-import type { UjGraphStorage } from "../types";
 
-const ioService = useGraphService("ioService");
 const flowGraphService = useGraphService("flowGraphService");
+const pipelineService = useGraphService("pipelineService");
 
-let localDataOps: ReturnType<typeof useAppLocalData<UjGraphStorage>>;
+const LOCAL_STORAGE_ENABLED = import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE === "true";
+const AUTOSAVE_ENABLED = import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE_AUTOSAVE === "true";
+const AUTOSAVE_MS = 10_000;
 
-if (import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE === "true") {
-  localDataOps = useAppLocalData<UjGraphStorage>(
-    "graph",
-    (): UjGraphStorage | null => {
-      const nodes = flowGraphService.allNodes();
-      const edges = flowGraphService.allEdges();
-      if (nodes.length === 0) return null;
-      const graph = ioService.serializeObject(nodes, edges);
-      return graph;
-    },
-  );
-}
-
-const nodesStore = useNodes();
-const edgesStore = useEdges();
+let autosaveTimer: ReturnType<typeof setInterval> | null = null;
 
 onMount(() => {
-  if (currentGraphSize() > 0) {
-    // Graph not empty, do not populate.
+  void _initializeGraph();
+
+  if (LOCAL_STORAGE_ENABLED && AUTOSAVE_ENABLED) {
+    autosaveTimer = setInterval(() => {
+      void pipelineService.saveGraphToLocalStorage();
+    }, AUTOSAVE_MS);
+  }
+
+  return () => {
+    if (autosaveTimer !== null) {
+      clearInterval(autosaveTimer);
+      autosaveTimer = null;
+    }
+  };
+});
+
+async function _initializeGraph(): Promise<void> {
+  if (_currentGraphSize() > 0) {
+    // The current graph allready has ome data, likely from hot module
+    // replacement during development, or UI switching.
+    // In this case, we should not override it with any persisted graph data,
+    // to avoid disrupting the developer's workflow.
     return;
   }
-  if (import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE === "true") {
-    if (tryPopulateFromLocalStorage()) return;
+  if (LOCAL_STORAGE_ENABLED) {
+    await pipelineService.restoreGraphFromLocalStorage();
   }
-  if (import.meta.env.DEV) {
-    if (tryPopulateFromFixedData()) return;
-  }
-  // Empty graph to build from scratch.
-});
-
-$effect(() => {
-  if (import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE === "true") {
-    nodesStore.current;
-    edgesStore.current;
-    localDataOps!.signalUpdate();
-  }
-});
-
-function currentGraphSize(): number {
-  return (
-    flowGraphService.allNodes().length + flowGraphService.allEdges().length
-  );
 }
 
-function tryPopulateFromFixedData(): boolean {
-  //flowGraphService.assignGraph(initialNodes, initialEdges);
-  return currentGraphSize() > 0;
-}
-
-/**
- * @requires import.meta.env.VITE_FLAG_ENABLE_LOCAL_STORAGE
- */
-function tryPopulateFromLocalStorage(): boolean {
-  const loadedData = localDataOps.getLoadedData();
-  if (loadedData === null) return false;
-  const { nodes, edges } = loadedData;
-  flowGraphService.assignGraph(nodes, edges);
-  return currentGraphSize() > 0;
+function _currentGraphSize(): number {
+  return flowGraphService.allNodes().length + flowGraphService.allEdges().length;
 }
 </script>

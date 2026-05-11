@@ -1,36 +1,35 @@
 <script lang="ts">
 import { SvelteMap } from "svelte/reactivity";
 
-import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 
 import { registerGraphService } from "../graph-services";
 
 registerGraphService("reactiveService", _createReactiveStore());
 
 function _createReactiveStore() {
-  const nodeStates = new SvelteMap<number, plstate.NodeState>();
-  const slotStates = new SvelteMap<string, plstate.SlotState>();
+  const nodeStates = new SvelteMap<number, grph.NodeState>();
+  const slotStates = new SvelteMap<string, grph.SlotState>();
 
-  function setNodeState(rawNodeId: number, state: plstate.NodeState): void {
+  function setNodeState(rawNodeId: number, state: grph.NodeState): void {
       nodeStates.set(rawNodeId, state);
   }
 
-  function useNodeState(rawNodeId: number): plstate.NodeState {
+  function useNodeState(rawNodeId: number): grph.NodeState {
     return nodeStates.get(rawNodeId)!;
   }
 
-  function setSlotState(slotId: plinfo.SlotId, state: plstate.SlotState): void {
+  function setSlotState(slotId: grph.SlotId, state: grph.SlotState): void {
     const catId = `${slotId.parent}-${slotId.name}`;
     slotStates.set(catId, state);
   }
 
-  function useSlotState(slotId: plinfo.SlotId): plstate.SlotState {
+  function useSlotState(slotId: grph.SlotId): grph.SlotState {
     const catId = `${slotId.parent}-${slotId.name}`;
     return slotStates.get(catId)!;
   }
 
-  function deleteSlots(slotIds: plinfo.SlotId[]): void {
+  function deleteSlots(slotIds: grph.SlotId[]): void {
     for (const slotId of slotIds) {
       const catId = `${slotId.parent}-${slotId.name}`;
       slotStates.delete(catId);

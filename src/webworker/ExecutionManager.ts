@@ -1,4 +1,4 @@
-import type { plinfo } from "@/types/plinfo";
+import type { grph } from "@/types/grph";
 import type { wa } from "@/types/wa";
 import { makeImageDataFromBlob } from "@/utils/canvasUtils";
 import { parseAssetUri } from "@/utils/strUtils";
@@ -18,7 +18,7 @@ class ExecutionManager {
     this.assetStaging = assetStaging;
   }
 
-  public async stagePreRunAssets(assetInfos: plinfo.AssetInfo[]): Promise<void> {
+  public async stagePreRunAssets(assetInfos: grph.AssetInfo[]): Promise<void> {
     console.log("[ExecutionManager] Staging pre-run assets: ", assetInfos);
     for (const assetInfo of assetInfos) {
       if (assetInfo.dtype !== "bitmap") {
@@ -57,7 +57,7 @@ class ExecutionManager {
     }
   }
 
-  public async stagePostRunAssets(assetInfos: plinfo.AssetInfo[]): Promise<void> {
+  public async stagePostRunAssets(assetInfos: grph.AssetInfo[]): Promise<void> {
     throw new Error("Post-run asset staging is not implemented yet");
   }
 }

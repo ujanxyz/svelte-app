@@ -1,14 +1,14 @@
 <script lang="ts">
 import FuncParamSlot from "@/graph/components/FuncParamSlot.svelte";
-import type { plinfo } from "@/types/plinfo";
+import type { grph } from "@/types/grph";
 
 import MyHandle from "./MyHandle.svelte";
 import { getNodeContextOps } from "./nodeContextOps";
 
 interface Props {
-  ins: plinfo.SlotInfo[];
-  outs: plinfo.SlotInfo[];
-  inouts: plinfo.SlotInfo[];
+  ins: grph.SlotInfo[];
+  outs: grph.SlotInfo[];
+  inouts: grph.SlotInfo[];
 }
 
 const { ins, outs, inouts }: Props = $props();
@@ -23,7 +23,7 @@ const nodeOps = getNodeContextOps();
   {/each}
 </div>
 
-{#snippet renderSlot(slotInfo: plinfo.SlotInfo)}
+{#snippet renderSlot(slotInfo: grph.SlotInfo)}
   {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
   <div class="slotrow">
     <FuncParamSlot {slotInfo} {slotState} />

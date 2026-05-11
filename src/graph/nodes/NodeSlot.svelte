@@ -5,15 +5,14 @@ import DotOutlineIcon from "phosphor-svelte/lib/DotOutlineIcon";
 import LinkSimpleBreakIcon from "phosphor-svelte/lib/LinkSimpleBreakIcon";
 import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
 
-import type { plinfo } from "@/types/plinfo";
-import type { plstate } from "@/types/plstate";
+import type { grph } from "@/types/grph";
 
 import MyHandle from "./MyHandle.svelte";
 import { getNodeContextOps } from "./nodeContextOps";
 
 interface Props {
-  slotInfo: plinfo.SlotInfo;
-  slotState: plstate.SlotState;
+  slotInfo: grph.SlotInfo;
+  slotState: grph.SlotState;
 }
 
 const { slotInfo, slotState }: Props = $props();
@@ -83,7 +82,7 @@ async function onClickPane(ev: MouseEvent): Promise<void> {
   {/if}
 </div>
 
-{#snippet statusIcons(slotInfo: plinfo.SlotInfo, slotState: plstate.SlotState)}
+{#snippet statusIcons(slotInfo: grph.SlotInfo, slotState: grph.SlotState)}
   {#if slotInfo.access === "I"}
     {#if slotState.inEdges.length > 0 }
       <LinkSimpleIcon size={8} />

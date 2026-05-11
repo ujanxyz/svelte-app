@@ -445,13 +445,13 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
 <style>
 .ctxmenu {
   position: fixed;
-  min-width: 220px;
+  min-width: 200px;
   list-style: none;
   margin: 0;
   padding: 6px;
-  border: 1px solid var(--color-border-medium);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 10px;
-  background: var(--color-bg-2);
+  background: var(--color-bg-5);
   color: var(--color-text-hi-con);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
   z-index: 1;
@@ -467,7 +467,7 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
   border: none;
   background: transparent;
   border-radius: 7px;
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-4) var(--space-5);
   display: flex;
   align-items: center;
   justify-content: space-between;
