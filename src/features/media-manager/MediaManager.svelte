@@ -11,13 +11,13 @@ import FileDropZone from "@/components/FileDropZone.svelte";
 import { useOverlayInstance } from "@/modules/overlay2";
 import OverlayCloseButton from "@/modules/overlay2/OverlayCloseButton.svelte";
 import type { StoredMediaMeta } from "@/types/worker-message-types";
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 import MediaManagerGridItem from "./MediaManagerGridItem.svelte";
 import MediaManagerListItem from "./MediaManagerListItem.svelte";
 import type { MediaItem, MediaViewMode } from "./mediaManagerTypes";
 
-const io = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
+const io = getContext(IoWorkerApi.CONTEXT_KEY) as IoWorkerApi;
 const overlay = useOverlayInstance<MediaManagerPayload, never>();
 
 let items = $state.raw<MediaItem[]>([]);

@@ -4,9 +4,9 @@ import { getContext } from "svelte";
 import TextButton from "@/components/TextButton.svelte";
 import type { fn } from "@/types/function";
 
-import type { PipelineBuilder } from "./PipelineBuilder";
+import { GraphWorkerApi } from "./GraphWorkerApi";
 
-const pipelineBuilder = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
+const pipelineBuilder = getContext(GraphWorkerApi.CONTEXT_KEY) as GraphWorkerApi;
 
 async function onGetGraph() {
   const res = await pipelineBuilder.getGraph({});

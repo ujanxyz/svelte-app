@@ -5,7 +5,9 @@ import type { ExecutionManager } from "./ExecutionManager";
 import { IoEventsHandler } from "./IoEventsHandler";
 import { PreviewManager } from "./PreviewManager";
 
-type IoProcessResult = Record<string, any>;
+export interface IoProcessResult extends Record<string, any> {
+  transfer?: Transferable[];
+};
 
 class WorkerIoManager {
   public static readonly CMD_PREFIX = "IO:" as const;
@@ -69,7 +71,7 @@ class WorkerIoManager {
       case "getMediaData": {
         const { id } = request as { id: string };
         const { meta, bitmap } = await this.indexedDb.getAssetBitmapById(id);
-        return { meta, bitmap };
+        return { meta, bitmap, transfer: [bitmap] };
       }
 
       /**

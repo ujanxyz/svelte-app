@@ -47,10 +47,16 @@ export namespace wa {
     clearAssets(): void;
   }
 
-  export interface WasmModuleType {
+  type ApiClass = { new (): ApiInstance };
+
+  export interface WasmApiSet {
+    FlowApi: ApiClass;
+    GraphApi: ApiClass;
+  }
+
+  export interface WasmModuleType extends WasmApiSet {
     getBuildInfo: () => object;
     parseAbseilFlags: (args: string[]) => number;
     assetStaging: AssetStagingInterface;
-    GraphEngineApi: { new (): wa.ApiInstance };
   }
 }

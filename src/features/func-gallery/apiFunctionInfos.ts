@@ -1,6 +1,6 @@
 
 import { type fn } from "@/types/function";
-import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
+import { type GraphWorkerApi } from "@/webworkerclient/GraphWorkerApi";
 
 import getFunctionSpecs from "./functionSpecs";
 
@@ -34,7 +34,7 @@ async function delayedDummyData<T>(
   });
 }
 
-function fetchFnInfos(pipeline: PipelineBuilder) {
+function fetchFnInfos(pipeline: GraphWorkerApi) {
   let controller: AbortController | null = null;
 
   async function _fetchInternal(): Promise<fn.FunctionInfo[]> {

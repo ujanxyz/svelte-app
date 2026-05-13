@@ -185,12 +185,12 @@ export default function useMenusAndPopups() {
       const retval = await popupService.nodeTemplateGallery(ntype) as base.StatusOr<fn.FunctionInfo>;
       if (retval.status !== "OK") return;
       const funcInfo = retval.value as fn.FunctionInfo;
-      await flowGraphService.newNodeAt(funcInfo, position);
+      await flowGraphService.newNodeAt(funcInfo, position, null /* overrideId */);
     } else if (ntype === "IN" || ntype === "OUT") {
       const retval = await popupService.nodeTemplateGallery(ntype) as base.StatusOr<fn.GraphIoInfo>;
       if (retval.status !== "OK") return;
       const ioInfo = retval.value as fn.GraphIoInfo;
-      await flowGraphService.newGraphIOAt(ioInfo.dtype, ntype === "OUT" /* isOutput */, position);
+      await flowGraphService.newGraphIOAt(ioInfo.dtype, ntype === "OUT" /* isOutput */, position, null /* overrideId */);
     }
   }
 

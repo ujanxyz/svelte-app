@@ -5,7 +5,7 @@ import {
   type Viewport,
 } from "@xyflow/svelte";
 
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+import type { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 import { registerGraphService } from "../graph-services";
 import { type UjGraphStorage, type UjNodeData } from "../types";

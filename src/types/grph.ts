@@ -9,6 +9,13 @@ export namespace grph {
     name: string;
   };
 
+  // Encoded form of SlotId, used for communication with backend.
+  // Here the node id is encoded by a 2-way cryptographic function.
+  export interface EncodedSlotId {
+    parent: string;
+    name: string;
+  };
+
   // See C++ repo -> //ujcore/graph
   export interface SlotInfo {
     parent: number;
@@ -33,6 +40,8 @@ export namespace grph {
   export interface EdgeInfo {
     id: number;
     catid: string;
+    alnumNode0: string;
+    alnumNode1: string;
     node0: number;
     node1: number;
     slot0: string;

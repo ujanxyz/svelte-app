@@ -15,7 +15,7 @@ import type { base } from "@/types/base";
 import type { fn } from "@/types/function";
 import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
-import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
+import { GraphWorkerApi } from "@/webworkerclient/GraphWorkerApi";
 
 import { registerGraphService, useGraphService } from "../graph-services";
 
@@ -37,7 +37,7 @@ const {
   screenToFlowPosition: _screenToFlowXY,
 } = useSvelteFlow();
 
-const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
+const graph = getContext(GraphWorkerApi.CONTEXT_KEY) as GraphWorkerApi;
 
 const rawStoreService = useGraphService("rawStoreService");
 const reactiveService = useGraphService("reactiveService");
@@ -46,7 +46,7 @@ registerGraphService("flowGraphService", {
   newNodeAt,
   newGraphIOAt,
   validateEdge,
-  addEdge,
+  addEdges,
   deletionHandle,
   screenToFlowXY,
   allNodes,
@@ -63,9 +63,10 @@ registerGraphService("flowGraphService", {
   // getGraphState,
 });
 
-async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<void> {
-  const { nodeInfo, nodeState, inInfos, outInfos, inoutInfos, inStates, outStates, inoutStates } = await pipeline.createNode({
+async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition, overrideId: string | null): Promise<void> {
+  const { nodeInfo, nodeState, inInfos, outInfos, inoutInfos, inStates, outStates, inoutStates } = await graph.createNode({
     func: fnSpec,
+    overrideId,
   });
   if (!nodeInfo) {
     throw new Error("Node not created");
@@ -96,10 +97,11 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise
   });
 }
 
-async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition): Promise<void> {
-  const { nodeInfo, nodeState, slotInfo, slotState } = await pipeline.createIONode({
+async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition, overrideId: string | null): Promise<void> {
+  const { nodeInfo, nodeState, slotInfo, slotState } = await graph.createIONode({
     dtype,
     isOutput,
+    overrideId,
   });
   if (!nodeInfo || !slotInfo) {
     throw new Error("Graph IO not created");
@@ -133,7 +135,7 @@ async function validateEdge(connection: Connection): Promise<grph.SlotValidity> 
     throw new Error("Source or target node data not found");
   }
 
-  const { validity } = await pipeline.validateEdge({
+  const { validity } = await graph.validateEdge({
     sourceNode: nodeData0.info.rawId,
     targetNode: nodeData1.info.rawId,
     sourceSlot,
@@ -142,51 +144,49 @@ async function validateEdge(connection: Connection): Promise<grph.SlotValidity> 
   return validity as grph.SlotValidity;
 }
 
-async function addEdge(connection: Connection): Promise<void> {
-  const sourceHandle = connection.sourceHandle!;
-  const targetHandle = connection.targetHandle!;
-  const sourceSlot = _removeSuffix(sourceHandle, "/out");
-  const targetSlot = _removeSuffix(targetHandle, "/in");
-
-  const nodeData0 = _getNode(connection.source)?.data as xy.xyBaseNodeData;
-  const nodeData1 = _getNode(connection.target)?.data as xy.xyBaseNodeData;
-  if (!nodeData0 || !nodeData1) {
-    throw new Error("Source or target node data not found");
+async function addEdges(entries: { source: grph.EncodedSlotId; target: grph.EncodedSlotId; overrideEdgeId?: number }[]): Promise<void> {
+  const { edgeInfos } = await graph.addEdges({
+      entries,
+  });
+  for (const edgeInfo of edgeInfos) {
+    const data: xy.xyEdgeData = { info: edgeInfo };
+    const edge: xy.xyEdge = {
+      source: edgeInfo.alnumNode0,
+      target: edgeInfo.alnumNode1,
+      sourceHandle: edgeInfo.slot0 + "/out",
+      targetHandle: edgeInfo.slot1 + "/in",
+      id: edgeInfo.catid,
+      type: "default",
+      data,
+    };
+    rawStoreService.edges = _addEdge(edge, rawStoreService.edges);
   }
 
-  const { edgeInfo, sourceState, targetState } = await pipeline.addEdge({
-    sourceNode: nodeData0.info.rawId,
-    targetNode: nodeData1.info.rawId,
-    sourceSlot,
-    targetSlot,
+  const allSlotIds: grph.EncodedSlotId[] = [];
+  for (const entry of entries) {
+    allSlotIds.push(entry.source, entry.target);
+  }
+  const { slotStates } = await graph.getSlotStates({
+    slotIds: [],
+    slotIdsEncoded: allSlotIds,
   });
-  const data: xy.xyEdgeData = { info: edgeInfo };
-  const edge: xy.xyEdge = {
-    source: connection.source,
-    target: connection.target,
-    sourceHandle,
-    targetHandle,
-    id: edgeInfo.catid,
-    type: "default",
-    data,
-  };
-  rawStoreService.edges = _addEdge(edge, rawStoreService.edges);
-  const slotId0: grph.SlotId = {parent: edgeInfo.node0, name: edgeInfo.slot0};
-  const slotId1: grph.SlotId = {parent: edgeInfo.node1, name: edgeInfo.slot1};  
-  reactiveService.setSlotState(slotId0, sourceState);
-  reactiveService.setSlotState(slotId1, targetState);
+  console.log("Updated slot states after adding edges:", slotStates);
+  for (const [slotId, slotState] of slotStates) {
+    reactiveService.setSlotState(slotId, slotState);
+  }
 }
 
 async function deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void> {
   const nodeIds: number[] = nodes.map((n: xy.xyNode) => (n.data as xy.xyBaseNodeData).info.rawId);
   const edgeIds: number[] = edges.map((e: xy.xyEdge) => (e.data as xy.xyEdgeData).info.id);
-  const { deletedSlotIds, affectedSlotIds } = await pipeline.deleteElements({
+  const { deletedSlotIds, affectedSlotIds } = await graph.deleteElements({
     nodeIds,
     edgeIds,
   });
   reactiveService.deleteSlots(deletedSlotIds);
-  const { slotStates } = await pipeline.getSlotStates({
+  const { slotStates } = await graph.getSlotStates({
     slotIds: affectedSlotIds,
+    slotIdsEncoded: [],
   });
   for (const [slotId, slotState] of slotStates) {
     reactiveService.setSlotState(slotId, slotState);
@@ -238,7 +238,7 @@ function assignGraph(newNodes: Node[], newEdges: Edge[]): void {
 }
 
 async function setGraphInput(rawNodeId: number, encoded: string): Promise<void> {
-  await pipeline.setEncodedData({
+  await graph.setEncodedData({
     isNode: true,
     nodeId: rawNodeId,
     slotId: null,
@@ -249,7 +249,7 @@ async function setGraphInput(rawNodeId: number, encoded: string): Promise<void> 
 
 async function setSlotInput(rawNodeId: number, slotName: string, encoded: string): Promise<void> {
   const slotId: grph.SlotId = { parent: rawNodeId, name: slotName };
-  await pipeline.setEncodedData({
+  await graph.setEncodedData({
     isNode: false,
     nodeId: null,
     slotId,
@@ -283,14 +283,17 @@ function _removeSuffix(text: string, suffix: string): string {
 }
 
 async function _internalUpdateNodeState(rawNodeId: number): Promise<void> {
-  const { nodeStates } = await pipeline.getNodeStates({ nodeIds: [rawNodeId] });
+  const { nodeStates } = await graph.getNodeStates({ nodeIds: [rawNodeId] });
   for (const [nodeId, nodeState] of nodeStates) {
     reactiveService.setNodeState(nodeId, nodeState);
   }
 }
 
 async function _internalUpdateSlotState(slotId: grph.SlotId): Promise<void> {
-  const { slotStates } = await pipeline.getSlotStates({ slotIds: [slotId] });
+  const { slotStates } = await graph.getSlotStates({
+    slotIds: [slotId],
+    slotIdsEncoded: [],
+  });
   for (const [slotId, slotState] of slotStates) {
     reactiveService.setSlotState(slotId, slotState);
   }

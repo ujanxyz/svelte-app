@@ -114,4 +114,4 @@ Perform these tasks:
 - `src/types/ioApis.ts`
 - `src/webworker/db/WorkerIndexedDb.ts`
 - `src/webworker/WorkerIoManager.ts`
-- `src/webworkerclient/GraphIoManager.ts`
+- `src/webworkerclient/IoWorkerApi.ts`

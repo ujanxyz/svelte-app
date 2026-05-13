@@ -6,7 +6,7 @@ import { useOverlayInstance } from "@/modules/overlay2";
 import type { StoredAssetMeta } from "@/types/worker-message-types";
 import { getAppIcon } from "@/utils/appIcons";
 import { computeFitScale } from "@/utils/canvasUtils";
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 const ZOOM_STEP = 1.25;
 const ZOOM_MIN = 0.1;
@@ -15,9 +15,9 @@ const PAN_STEP = 40;
 const FADE_DELAY_MS = 2500;
 const INITIAL_MAX_W = 1200;
 const INITIAL_MAX_H = 800;
-const ARTIFICIAL_DELAY_MS = 2000;
+const ARTIFICIAL_DELAY_MS = 0;
 
-const io = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
+const io = getContext(IoWorkerApi.CONTEXT_KEY) as IoWorkerApi;
 const overlay = useOverlayInstance<{ id: string }, void>();
 const IcoSeparator = getAppIcon("dot-outline");
 

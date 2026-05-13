@@ -61,10 +61,12 @@ async function handleExpand(ev: MouseEvent): Promise<void> {
   </div>
   <button onclick={handleExpand}>Expand</button>
 
-  {#if graphIONodeData.info.ntype === "OUT"}
-    <MyHandle kind="in" id={slotInfo.name} />
+  {#if graphIONodeData.info.ntype === "OUT"} 
+    {@const handleId = slotInfo.name + "/in"}
+    <MyHandle kind="in" id={handleId} />
   {:else if graphIONodeData.info.ntype === "IN"}
-    <MyHandle kind="out" id={slotInfo.name} />
+    {@const handleId = slotInfo.name + "/out"}
+    <MyHandle kind="out" id={handleId} />
   {/if}
 </div>
 

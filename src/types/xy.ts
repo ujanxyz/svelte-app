@@ -32,12 +32,25 @@ export namespace xy {
     info: grph.EdgeInfo;
   };
 
+  export interface StoredGraphMeta {
+    lastNodeId: number;
+    lastEdgeId: number;
+  }
+
   export interface StoredNode {
     id: string;
     rawId: number;
     type: string;
     uri: string;
     position: base.XYPosition;
+  };
+
+  export interface StoredEdge {
+    id: number;
+    n0: string; // The source node id
+    s0: string; // The source slot name
+    n1: string; // The target node id
+    s1: string; // The target slot name
   };
 
   // This is a copy of xyflow's Viewport type, to avoid importing

@@ -26,12 +26,12 @@ class WasmService {
   }
 
   // Pre-requisite: Loading is complete.
-  public newGraphEngineApi(): wa.ApiInstance {
+  public newBackendApi(apiName: keyof wa.WasmApiSet): wa.ApiInstance {
     if (!this.wasmModule) {
       throw new Error("wasmModule not loaded");
     }
-    const mod = this.wasmModule!;
-    return new mod.GraphEngineApi();
+    const api = this.wasmModule![apiName as keyof wa.WasmApiSet];
+    return new api();
   }
 
   // Trigger loading and forget.

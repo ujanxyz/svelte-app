@@ -51,12 +51,12 @@ interface IoService {
 
 interface FlowGraphService {
   // Status: Done, Tested.
-  newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition): Promise<void>;
-  newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition): Promise<void>;
+  newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition, overrideId: string | null): Promise<void>;
+  newGraphIOAt(dtype: string, isOutput: boolean, position: XYPosition, overrideId: string | null): Promise<void>;
 
   // Status: Done, Tested.
   validateEdge(connection: Connection): Promise<grph.SlotValidity>;
-  addEdge(connection: Connection): Promise<void>;
+  addEdges(entries: { source: grph.EncodedSlotId; target: grph.EncodedSlotId; overrideEdgeId?: number }[]): Promise<void>;
 
   // Status: Done, Tested.
   deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void>;

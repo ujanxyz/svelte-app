@@ -5,7 +5,7 @@ import { createPlaceholderBitmap, inferMimeType, loadImageFromUrl } from "@/.sto
 import { defaultOverlayOptions,OVERLAY_INSTANCE_CONTEXT } from "@/modules/overlay2/constants";
 import type { OverlayInstance } from "@/modules/overlay2/types";
 import type { StoredMediaMeta } from "@/types/worker-message-types";
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 interface Props {
   id: string;
@@ -78,7 +78,7 @@ const mockIo = {
       bitmap,
     };
   },
-} as unknown as GraphIoManager;
+} as unknown as IoWorkerApi;
 
 const mockOverlayInstance: OverlayInstance<{ id: string }, void> = $derived.by(() => ({
   id: "mock-image-viewer-overlay-id",
@@ -90,7 +90,7 @@ const mockOverlayInstance: OverlayInstance<{ id: string }, void> = $derived.by((
   abort: () => {},
 }));
 
-setContext(Symbol.for("GraphIoManager"), mockIo);
+setContext(IoWorkerApi.CONTEXT_KEY), mockIo);
 // svelte-ignore state_referenced_locally
 setContext(OVERLAY_INSTANCE_CONTEXT, mockOverlayInstance);
 </script>

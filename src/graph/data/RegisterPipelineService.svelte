@@ -1,17 +1,21 @@
 <script lang="ts">
-import type { Edge, Node, Viewport, XYPosition } from "@xyflow/svelte";
+import type { Viewport } from "@xyflow/svelte";
 import { getContext } from "svelte";
 
 import type { base } from "@/types/base";
+import type { fn } from "@/types/function";
+import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
-import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
+import { NodeTemplateUri } from "@/utils/NodeTemplateUri";
+import { FlowWorkerApi } from "@/webworkerclient/FlowWorkerApi";
+import { GraphWorkerApi } from "@/webworkerclient/GraphWorkerApi";
+import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 import { registerGraphService, useGraphService } from "../graph-services";
-import type { fn } from "@/types/function";
 
-const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
-const io = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
+const flow = getContext(FlowWorkerApi.CONTEXT_KEY) as FlowWorkerApi;
+const graph = getContext(GraphWorkerApi.CONTEXT_KEY) as GraphWorkerApi;
+const io = getContext(IoWorkerApi.CONTEXT_KEY) as IoWorkerApi;
 
 const flowGraphService = useGraphService("flowGraphService");
 const reactiveService = useGraphService("reactiveService");
@@ -23,20 +27,23 @@ interface PersistedGraphDoc {
   version: 1;
   viewport: Viewport;
   savedAt: number;
+  meta: xy.StoredGraphMeta;
   nodes: xy.StoredNode[];
+  edges: xy.StoredEdge[];
 }
 
 registerGraphService("pipelineService", _createPipelineService());
 
 function _createPipelineService() {
+
   async function playPipeline(): Promise<void> {
     console.log("Playing pipeline...");
-    const { assetInfos } = await pipeline.buildPipeline({});
+    const { assetInfos } = await flow.buildPipeline({});
     console.log("[DONE] buildPipeline done, asset infos:", assetInfos);
     await io.stageAssets({ isPostRun: false, assetInfos });
 
-    await pipeline.runPipeline({});
-    const resources = await pipeline.getResources({});
+    await graph.runPipeline({});
+    const resources = await graph.getResources({});
     console.log("Resources after run:", resources);
   }
 
@@ -48,7 +55,7 @@ function _createPipelineService() {
       return false;
     }
 
-    const doc = _makePersistedGraphDoc();
+    const doc = await _makePersistedGraphDoc();
     try {
       localStorage.setItem(GRAPH_STORAGE_KEY, JSON.stringify(doc));
       console.log("Graph persisted to localStorage");
@@ -70,7 +77,7 @@ function _createPipelineService() {
     console.log("Restoring graph from localStorage, doc:", doc);
     await _restoreGraphFromPipelineDoc(doc);
     console.log("Restoring done !");
-    return false;
+    return true;
   }
 
   function _readStoredGraphDoc(): PersistedGraphDoc | null {
@@ -85,7 +92,9 @@ function _createPipelineService() {
         version: parsed.version === 1 ? 1 : 1,
         viewport: parsed.viewport,
         savedAt: typeof parsed.savedAt === "number" ? parsed.savedAt : 0,
+        meta: parsed.meta || { lastNodeId: 0, lastEdgeId: 0 },
         nodes: parsed.nodes,
+        edges: parsed.edges || [],
       };
     } catch (error) {
       console.warn("Failed reading graph from localStorage", error);
@@ -94,18 +103,44 @@ function _createPipelineService() {
   }
 
   async function _restoreGraphFromPipelineDoc(doc: PersistedGraphDoc): Promise<void> {
-    // await pipeline.decodeGraph(doc.encodedGraph);
-    // await _syncGraphFromPipeline();
     if (doc.viewport) {
       flowGraphService.setViewport(doc.viewport);
     }
 
-    const usedFuncInfos = await _loadUsedFuncInfos(doc.nodes);
+    const nodesAndUris: Array<{ node: xy.StoredNode; parsed: NodeTemplateUri }> = [];
+    const funcUriSet = new Set<string>();
+
     for (const node of doc.nodes) {
-      const funcInfo = usedFuncInfos.get(node.uri);
-      flowGraphService.newNodeAt(funcInfo!, node.position);
+      const parsed = NodeTemplateUri.ParseFromStr(node.uri);
+      nodesAndUris.push({ node, parsed });
+      if (parsed.getNodeType() === "FN") {
+        funcUriSet.add(parsed.getAsFuncUri());
+      }
     }
-    console.log("Used func infos needed for graph restore:", usedFuncInfos);
+
+    const usedFuncInfos = await _loadUsedFuncInfos(funcUriSet);
+    for (const { node, parsed } of nodesAndUris) {
+      const nodeType = parsed.getNodeType();
+      if (nodeType === "FN") {
+        const funcUri = parsed.getAsFuncUri();
+        const funcInfo = usedFuncInfos.get(funcUri)!;
+        await flowGraphService.newNodeAt(funcInfo, node.position, node.id);
+      } else {
+        const isOutput = nodeType === "OUT";
+        await flowGraphService.newGraphIOAt(parsed.getDataType(), isOutput, node.position, node.id);
+      }
+    }
+
+    const edgeEntries: { source: grph.EncodedSlotId; target: grph.EncodedSlotId; overrideEdgeId: number }[] = [];
+    for (const edge of doc.edges) {
+      const source: grph.EncodedSlotId = { parent: edge.n0, name: edge.s0 };
+      const target: grph.EncodedSlotId = { parent: edge.n1, name: edge.s1 };
+      edgeEntries.push({ source, target, overrideEdgeId: edge.id });
+    }
+    await flowGraphService.addEdges(edgeEntries);
+    const lastNodeId = doc.meta?.lastNodeId ?? 0;
+    const lastEdgeId = doc.meta?.lastEdgeId ?? 0;
+    await graph.setGraphMeta({ lastNodeId, lastEdgeId });  
   }
 
   return {
@@ -115,7 +150,9 @@ function _createPipelineService() {
   };
 }
 
-function _makePersistedGraphDoc(): PersistedGraphDoc {
+async function _makePersistedGraphDoc(): Promise<PersistedGraphDoc> {
+  const { lastNodeId, lastEdgeId } = await graph.getGraphMeta({});
+
   const now = Date.now();
 
   const xyNodes = flowGraphService.allNodes();
@@ -132,32 +169,42 @@ function _makePersistedGraphDoc(): PersistedGraphDoc {
       position,
       uri: node.data.info.uri,
     };
-    console.log(`StoredNode ${node.id}:`, storedNode);
     nodes.push(storedNode);
+  }
+
+  const xyEdges = flowGraphService.allEdges();
+  const edges: xy.StoredEdge[] = [];
+  for (const edge of xyEdges) {
+    const edgeInfo = edge.data!.info;
+    const storedEdge: xy.StoredEdge = {
+      id: edgeInfo.id,
+      n0: edge.source,
+      s0: edgeInfo.slot0!,
+      n1: edge.target,
+      s1: edgeInfo.slot1!,
+    };
+    edges.push(storedEdge);
   }
 
   return {
     version: 1,
     viewport: flowGraphService.getViewport(),
     savedAt: now,
+    meta: { lastNodeId, lastEdgeId },
     nodes,
+    edges,
   };
 }
 
-async function _loadUsedFuncInfos(nodes: xy.StoredNode[]): Promise<Map<string /* uri */, fn.FunctionInfo>> {
-  const nodeUris = new Set<string>();
-  nodes.forEach((storedNode: xy.StoredNode) => {
-    nodeUris.add(storedNode.uri);
-  });
-  const resp = await pipeline.getAvailableFuncs({
+async function _loadUsedFuncInfos(nodeUris: Set<string>): Promise<Map<string /* uri */, fn.FunctionInfo>> {
+  const resp = await graph.getAvailableFuncs({
     filters: ["URI_LIST"],
     uriList: Array.from(nodeUris),
   });
   console.log("Available funcs response:", resp);
 
   const usedFuncInfos: Map<string /* uri */, fn.FunctionInfo> = new Map();
-  nodes.forEach((storedNode: xy.StoredNode) => {
-    const fnUri = storedNode.uri;
+  nodeUris.forEach((fnUri) => {
     if (usedFuncInfos.has(fnUri)) {
       // Already found info for this URI, skip.
       return;

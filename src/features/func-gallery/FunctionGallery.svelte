@@ -6,7 +6,7 @@ import TextIconPill from "@/components/TextIconPill.svelte";
 import { OverlayCloseButton, useOverlayInstance } from "@/modules/overlay2";
 import MoveButton from "@/modules/overlay2/MoveButton.svelte";
 import { type fn } from "@/types/function";
-import type { PipelineBuilder } from "@/webworkerclient/PipelineBuilder";
+import { GraphWorkerApi } from "@/webworkerclient/GraphWorkerApi";
 
 import { fetchFnInfos } from "./apiFunctionInfos";
 import FnGroupList from "./FnGroupList.svelte";
@@ -17,8 +17,8 @@ interface GalleryFunctionEntry {
   category: string;
 }
 
-const pipeline = getContext(Symbol.for("PipelineBuilder")) as PipelineBuilder;
-const { fetchItemsAsync, abortFetch } = fetchFnInfos(pipeline);
+const graph = getContext(GraphWorkerApi.CONTEXT_KEY) as GraphWorkerApi;
+const { fetchItemsAsync, abortFetch } = fetchFnInfos(graph);
 
 let searchText = $state("");
 let filterCategory = $state<string | null>(null);

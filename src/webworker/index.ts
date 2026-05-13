@@ -3,11 +3,11 @@ import {
   type SecureMessage,
 } from "@/types/worker-message-types";
 
-import { CppGraphBuilder } from "./CppGraphBuilder";
+import { CppBackendApi } from "./CppBackendApi";
 import { WorkerIndexedDb } from "./db/index";
 import { ExecutionManager } from "./ExecutionManager";
 import wasmService from "./wasmService";
-import { WorkerIoManager } from "./WorkerIoManager";
+import { type IoProcessResult,WorkerIoManager } from "./WorkerIoManager";
 
 const SysCodes = Object.freeze({
   OK: "_OK",
@@ -19,8 +19,10 @@ const SysCodes = Object.freeze({
   APP_ERROR: "_APP_ERROR",
 });
 
+let graphApi: CppBackendApi | null = null;
+let flowApi: CppBackendApi | null = null;
+
 let execManager: ExecutionManager | null = null;
-let graphBuilder: CppGraphBuilder | null = null;
 let ioManager: WorkerIoManager | null = null;
 
 //-----------------------------------------------------------------------------
@@ -42,6 +44,7 @@ const postman = (function createPostman() {
     ack: bigint,
     reqcode: string,
     payload: Record<string, any>,
+    transfer?: Transferable[],
   ): void {
     const response: RawWorkerResponse = {
       ack,
@@ -50,7 +53,11 @@ const postman = (function createPostman() {
       reqcode,
       payload,
     };
-    globalThis.postMessage(response);
+    if (!transfer) {
+      globalThis.postMessage(response);
+    } else {
+      globalThis.postMessage(response, {transfer});
+    }
   }
 
   // Notify the main thread about an error.
@@ -82,9 +89,10 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
     const assetStaging = wasmService.getAssetStaging();
     const indexedDb = new WorkerIndexedDb({ idleCloseMs: 60_000 });
 
-    const graph = wasmService.newGraphEngineApi();
+    graphApi = new CppBackendApi("GRAPH", wasmService.newBackendApi("GraphApi"));
+    flowApi = new CppBackendApi("FLOW", wasmService.newBackendApi("FlowApi"));
+
     execManager = new ExecutionManager(indexedDb, assetStaging);
-    graphBuilder = new CppGraphBuilder(graph, "GRAPH:");
     ioManager = new WorkerIoManager(execManager!, indexedDb, (globalThis as any).pipelineEvents as EventTarget);
     isThisWorkerReady = true;
     postman.postImReady();
@@ -113,29 +121,44 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
       return;
     }
 
-    // Process and Respond
-    // console.log(`[Worker] Received (Seq: ${seq}, Code: ${code}): `, payload);
-
     try {
-      if (code.startsWith("GRAPH:")) {
-        const response = await graphBuilder!.process(code, payload);
+      if (graphApi!.matchesPrefix(code)) {
+        const response = await graphApi!.process(code, payload);
         if (response instanceof Error) {
           const errmsg = (response as Error).message;
           console.warn(seq, code, SysCodes.APP_ERROR, errmsg);
           postman.postError(seq, code, SysCodes.APP_ERROR, errmsg);
         } else {
-          console.log(`[Worker] Rooundtrip (Seq: ${seq}, Code: ${code}): `, payload, response);
+          console.log(`[Worker] Rooundtrip GRAPH (Seq: ${seq}, Code: ${code}): `, payload, response);
+          postman.postResponse(seq, code, response!);
+        }
+      } else if (flowApi!.matchesPrefix(code)) {
+        const response = await flowApi!.process(code, payload);
+        if (response instanceof Error) {
+          const errmsg = (response as Error).message;
+          console.warn(seq, code, SysCodes.APP_ERROR, errmsg);
+          postman.postError(seq, code, SysCodes.APP_ERROR, errmsg);
+        } else {
+          console.log(`[Worker] Rooundtrip FLOW (Seq: ${seq}, Code: ${code}): `, payload, response);
           postman.postResponse(seq, code, response!);
         }
       } else if (code.startsWith(WorkerIoManager.CMD_PREFIX)) {
-        const response = await ioManager!.process(code, payload);
+        let response = await ioManager!.process(code, payload);
         if (response instanceof Error) {
           const errmsg = (response as Error).message;
           console.warn(seq, code, SysCodes.APP_ERROR, errmsg);
           postman.postError(seq, code, SysCodes.APP_ERROR, errmsg);
         } else {
+          const transfer: Transferable[] | undefined = (response as IoProcessResult).transfer;
+          // postman.postResponse(seq, code, response);
+          if (!!transfer) {
+            const {transfer, ...rest} = response as IoProcessResult;
+            response = rest; // Remove transfer from the payload before posting
+            postman.postResponse(seq, code, rest, transfer);
+          } else {
+            postman.postResponse(seq, code, response);
+          }
           console.log(`[Worker] Rooundtrip (Seq: ${seq}, Code: ${code}): `, payload, response);
-          postman.postResponse(seq, code, response);
         }
       } else {
         const errmsg = `Unknown app code: ${code}`;

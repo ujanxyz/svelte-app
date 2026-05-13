@@ -5,7 +5,7 @@ import { filenameFromUrl, inferMimeType, loadImageFromUrl } from "@/.storybook-u
 import { defaultOverlayOptions, OVERLAY_INSTANCE_CONTEXT } from "@/modules/overlay2/constants";
 import type { OverlayInstance } from "@/modules/overlay2/types";
 import type { StoredMediaMeta } from "@/types/worker-message-types";
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 interface MockMediaEntry {
   meta: StoredMediaMeta;
@@ -59,7 +59,7 @@ async function ensureInitialized(): Promise<void> {
   await initPromise;
 }
 
-const mockMediaManager: GraphIoManager = {
+const mockMediaManager: IoWorkerApi = {
   listMedia: async () => {
     await ensureInitialized();
     return {
@@ -100,7 +100,7 @@ const mockMediaManager: GraphIoManager = {
     if (!item) throw new Error(`Media not found: ${request.id}`);
     return { meta: item.meta, bitmap: item.thumbnail };
   },
-} as unknown as GraphIoManager;
+} as unknown as IoWorkerApi;
 
 const mockOverlay: OverlayInstance<any, any> = {
   id: "mock-overlay-id",
@@ -112,7 +112,7 @@ const mockOverlay: OverlayInstance<any, any> = {
   abort: () => {},
 };
 
-setContext(Symbol.for("GraphIoManager"), mockMediaManager);
+setContext(IoWorkerApi.CONTEXT_KEY, mockMediaManager);
 setContext(OVERLAY_INSTANCE_CONTEXT, mockOverlay);
 </script>
 

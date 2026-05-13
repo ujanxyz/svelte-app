@@ -29,18 +29,20 @@ const nodeOps = getNodeContextOps();
     <FuncParamSlot {slotInfo} {slotState} />
 
     {#if slotInfo.access === "I"}
-      <MyHandle kind="in" id={slotInfo.name} />
+    {@const handleId = slotInfo.name + "/in"}
+      <MyHandle kind="in" id={handleId} />
       <MyHandle kind="out-x" />
     {:else if slotInfo.access === "O"}
+      {@const handleId = slotInfo.name + "/out"}
       <MyHandle kind="in-x" />
-      <MyHandle kind="out" id={slotInfo.name} />
+      <MyHandle kind="out" id={handleId} />
     {:else}
-      {@const [handleNameIn, handleNameOut] = [
+      {@const [handleIdIn, handleIdOut] = [
         `${slotInfo.name}/in`,
         `${slotInfo.name}/out`,
       ]}
-      <MyHandle kind="in" id={handleNameIn} />
-      <MyHandle kind="out" id={handleNameOut} />
+      <MyHandle kind="in" id={handleIdIn} />
+      <MyHandle kind="out" id={handleIdOut} />
     {/if}
   </div>
 {/snippet}

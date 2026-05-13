@@ -3,7 +3,7 @@ import { getContext, onMount } from "svelte";
 
 import type { grph } from "@/types/grph";
 import { AssetType } from "@/types/worker-message-types";
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 import PickFileRow from "./PickFileRow.svelte";
 
@@ -18,7 +18,7 @@ interface PickFilePayload {
 
 const { initial, onData }: Props = $props();
 
-const graphIo = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
+const io = getContext(IoWorkerApi.CONTEXT_KEY) as IoWorkerApi;
 
 interface PickFileItem {
 	id: string;
@@ -47,7 +47,7 @@ onMount(async () => {
 async function refreshMediaItems(): Promise<void> {
 	loadError = null;
 	try {
-		const { assetEntries } = await graphIo.listAssets({ assetType: AssetType.MEDIA });
+		const { assetEntries } = await io.listAssets({ assetType: AssetType.MEDIA });
 		items = assetEntries.map(({ summary, thumbnail }) => toPickItem(summary.uri, thumbnail));
 
 		const preselected = items.find((item) => item.assetUri === initialAssetUri);

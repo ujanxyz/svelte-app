@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte";
 
 import type { grph } from "@/types/grph";
-import type { GraphIoManager } from "@/webworkerclient/GraphIoManager";
+import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 import { useGraphService } from "../graph-services";
 
@@ -26,7 +26,7 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
   const flowService = useGraphService("flowGraphService");
   const reactiveService = useGraphService("reactiveService");
   const popupService = useGraphService("popupService");
-  const graphIo = getContext(Symbol.for("GraphIoManager")) as GraphIoManager;
+  const graphIo = getContext(IoWorkerApi.CONTEXT_KEY) as IoWorkerApi;
 
   return {
     reactiveNodeState: function(): grph.NodeState {

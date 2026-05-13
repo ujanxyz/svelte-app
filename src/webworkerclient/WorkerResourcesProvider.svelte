@@ -1,6 +1,9 @@
 <script lang="ts">
 import { onDestroy, setContext, type Snippet } from "svelte";
 
+import { FlowWorkerApi } from "./FlowWorkerApi";
+import { GraphWorkerApi } from "./GraphWorkerApi";
+import { IoWorkerApi } from "./IoWorkerApi";
 import { useWebWorkerResources } from "./useWebWorkerResources";
 
 interface Props {
@@ -9,10 +12,11 @@ interface Props {
 
 const { children }: Props = $props();
 
-const { pipeline, graphIo, destroyWorker } = useWebWorkerResources();
+const { flow, graph, io, destroyWorker } = useWebWorkerResources();
 
-setContext(Symbol.for("PipelineBuilder"), pipeline);
-setContext(Symbol.for("GraphIoManager"), graphIo);
+setContext(FlowWorkerApi.CONTEXT_KEY, flow);
+setContext(GraphWorkerApi.CONTEXT_KEY, graph);
+setContext(IoWorkerApi.CONTEXT_KEY, io);
 onDestroy(destroyWorker);
 </script>
 

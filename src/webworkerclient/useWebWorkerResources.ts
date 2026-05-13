@@ -1,21 +1,23 @@
 import MyWorker from "../webworker?worker";
-import { GraphIoManager } from "./GraphIoManager";
-import { PipelineBuilder } from "./PipelineBuilder";
+import { FlowWorkerApi } from "./FlowWorkerApi";
+import { GraphWorkerApi } from "./GraphWorkerApi";
+import { IoWorkerApi } from "./IoWorkerApi";
 import { WebWorkerClient } from "./WebWorkerClient";
 
 function useWebWorkerResources() {
   const rawWorker = new MyWorker({ name: "GraphWorker" });
   const workerClient = new WebWorkerClient(rawWorker);
 
-  const pipeline = new PipelineBuilder(workerClient);
-  const graphIo = new GraphIoManager(workerClient);
+  const flow = new FlowWorkerApi(workerClient);
+  const graph = new GraphWorkerApi(workerClient);
+  const io = new IoWorkerApi(workerClient);
 
   function destroyWorker() {
     workerClient.destroy();
     rawWorker.terminate();
   }
 
-  return { pipeline, graphIo, destroyWorker };
+  return { flow, graph, io, destroyWorker };
 }
 
 export { useWebWorkerResources };

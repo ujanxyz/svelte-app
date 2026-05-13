@@ -4,7 +4,9 @@ import {
   type OnConnectStartParams,
 } from "@xyflow/svelte";
 
+import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
+import { handleToSlotName } from "@/utils/idUtils";
 
 import useMemlogging from "../../modules/memlogging/useMemlogging";
 import { useGraphService } from "../graph-services";
@@ -30,8 +32,16 @@ export default function useEditorInteractions() {
     flowGraphService.validateEdge(connection).then((validity) => {
       console.log("Edge validity: ", validity);
       if (validity === "VALID") {
-        flowGraphService.addEdge(connection).then(() => {
-          debugLog("Edge added successfully.");
+        const source: grph.EncodedSlotId = {
+          parent: connection.source,
+          name: handleToSlotName(connection.sourceHandle!),
+        };
+        const target: grph.EncodedSlotId = {
+          parent: connection.target,
+          name: handleToSlotName(connection.targetHandle!),
+        };
+        flowGraphService.addEdges([{ source, target }]).then(() => {
+          debugLog("Edge(s) added successfully.");
         });
       } else {
         warnLog(`Invalid edge connection: ${validity}`);
