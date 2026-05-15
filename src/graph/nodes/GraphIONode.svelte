@@ -30,37 +30,29 @@ const nodeState = $derived(nodeOps.reactiveNodeState()) as grph.NodeState;
 
 let canvasRef: HTMLCanvasElement | undefined = $state();
 
-const actionHandler: ActionHandler = {
+async function onZoomClick(): Promise<void> {
+  await nodeOps.expandPreview(slotInfo, nodeState.encodedData);
+}
 
-  onSelfInput: async function (): Promise<void> {
-    const rect = canvasRef!.getBoundingClientRect();
-    await nodeOps.onGraphInput(slotInfo.dtype, nodeState.encodedData, rect);
-  },
-
-  onDeleteSelf: async function (): Promise<void> {
-    throw new Error("Delete action not implemented for GraphIONode yet");
-  }
-};
-
-async function handlePaneClick(ev: MouseEvent): Promise<void> {
-  ev.preventDefault();
+async function onEditClick(): Promise<void> {
   const rect = canvasRef!.getBoundingClientRect();
   await nodeOps.onGraphInput(slotInfo.dtype, nodeState.encodedData, rect);
 }
 
-async function handleExpand(ev: MouseEvent): Promise<void> {
-  await nodeOps.expandPreview(slotInfo, nodeState.encodedData);
-}
+const actionHandler: ActionHandler = {
+  onSelfInput: onEditClick,
+  onDeleteSelf: async function (): Promise<void> {
+    throw new Error("Delete action not implemented for GraphIONode yet");
+  }
+};
 
 </script>
 
 <div class="node-shell">
   <NodeHeader label={`${rawNodeId} / ${nodeState.label}`} {nodeId} />
   <div class="content">
-    <PreviewCanvas {slotInfo} {nodeOps} onclick={handlePaneClick} bind:canvasRef={canvasRef} />
+    <PreviewCanvas {slotInfo} {nodeOps} {onZoomClick} {onEditClick} bind:canvasRef={canvasRef} />
   </div>
-  <button onclick={handleExpand}>Expand</button>
-
   {#if graphIONodeData.info.ntype === "OUT"} 
     {@const handleId = slotInfo.name + "/in"}
     <MyHandle kind="in" id={handleId} />

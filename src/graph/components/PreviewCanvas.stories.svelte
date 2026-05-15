@@ -32,7 +32,7 @@ const { Story } = defineMeta({
   args: {
     slotInfo: bitmapSlotInfo,
     nodeOps: mockNodeOps,
-    onclick: testFn(),
+    onClickZoom: testFn(),
   },
 });
 </script>

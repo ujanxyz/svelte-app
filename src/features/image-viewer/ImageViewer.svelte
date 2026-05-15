@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext, onMount } from "svelte";
 
+import FadingPanel from "@/components/FadingPanel.svelte";
 import LoadingSpinner from "@/components/LoadingSpinner.svelte";
 import { useOverlayInstance } from "@/modules/overlay2";
 import type { StoredAssetMeta } from "@/types/worker-message-types";
@@ -12,7 +13,6 @@ const ZOOM_STEP = 1.25;
 const ZOOM_MIN = 0.1;
 const ZOOM_MAX = 8;
 const PAN_STEP = 40;
-const FADE_DELAY_MS = 2500;
 const INITIAL_MAX_W = 1200;
 const INITIAL_MAX_H = 800;
 const ARTIFICIAL_DELAY_MS = 0;
@@ -36,7 +36,6 @@ let zoomLevel = $state<number>(0); // 0 = not yet initialized
 let pan = $state.raw<{ x: number; y: number }>({ x: 0, y: 0 });
 let canvasW = $state<number>(0);
 let canvasH = $state<number>(0);
-let actionBarVisible = $state<boolean>(true);
 let isDragging = $state<boolean>(false);
 
 // DOM refs (assigned by bind:this, not reactive state)
@@ -46,7 +45,6 @@ let canvas: HTMLCanvasElement;
 // Non-reactive helpers
 let checkerImage: HTMLImageElement | null = null;
 let checkerPattern: CanvasPattern | null = null;
-let fadeTimer: ReturnType<typeof setTimeout> | null = null;
 let dragStartX: number = 0;
 let dragStartY: number = 0;
 let dragStartPanX: number = 0;
@@ -223,16 +221,7 @@ function doOriginalScale(): void {
   pan = { x: 0, y: 0 };
 }
 
-function resetFadeTimer(): void {
-  actionBarVisible = true;
-  if (fadeTimer !== null) clearTimeout(fadeTimer);
-  fadeTimer = setTimeout(() => {
-    actionBarVisible = false;
-  }, FADE_DELAY_MS);
-}
-
 function handleMouseMove(ev: MouseEvent): void {
-  resetFadeTimer();
   if (isDragging && isZoomedIn) {
     pan = { x: dragStartPanX + (ev.clientX - dragStartX), y: dragStartPanY + (ev.clientY - dragStartY) };
   }
@@ -344,12 +333,10 @@ onMount(() => {
   img.src = "/images/CheckerBoardSeemlessPattern.jpg";
 
   windowEl.focus();
-  resetFadeTimer();
   void loadMediaByPayloadId();
 
   return () => {
     ro.disconnect();
-    if (fadeTimer !== null) clearTimeout(fadeTimer);
   };
 });
 </script>
@@ -406,7 +393,8 @@ onMount(() => {
   </div>
 
   <!-- ── Floating action bar (bottom, fades on inactivity) ─────────────────── -->
-  <div class="iv-fab" class:iv-fab-hidden={!actionBarVisible} role="toolbar" aria-label="Image controls">
+  <FadingPanel className="iv-fab">
+    <div role="toolbar" aria-label="Image controls" class="iv-fab-content">
     <button class="iv-btn" onclick={doZoomOut} title="Zoom out (scroll down)" disabled={loading || !!loadError}>
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <circle cx="9" cy="9" r="5.5"/>
@@ -447,7 +435,8 @@ onMount(() => {
         <line x1="15" y1="5" x2="5" y2="15"/>
       </svg>
     </button>
-  </div>
+    </div>
+  </FadingPanel>
 </div>
 
 <style>
@@ -545,11 +534,14 @@ onMount(() => {
 }
 
 /* ── Floating action bar (bottom centre overlay) ────────────────────────────── */
-.iv-fab {
+:global(.iv-fab) {
   position: absolute;
   bottom: var(--space-6);
   left: 50%;
   transform: translateX(-50%);
+}
+
+.iv-fab-content {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -563,14 +555,6 @@ onMount(() => {
   box-shadow: 0 4px 16px var(--color-flip-bg-0);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-
-  transition: opacity 0.45s ease;
-  opacity: 1;
-}
-
-.iv-fab.iv-fab-hidden {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .iv-fab-divider {
@@ -618,7 +602,7 @@ onMount(() => {
 }
 
 .iv-btn-close:hover {
-  background: rgba(220, 50, 50, 0.25);
-  color: #e05050;
+  background: rgba(170, 40, 40, 0.262);
+  color: #f66d6d;
 }
 </style>
