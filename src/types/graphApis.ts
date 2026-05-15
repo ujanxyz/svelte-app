@@ -162,13 +162,6 @@ export namespace graphApis {
       };
     };
 
-    runPipeline: {
-      request: VoidType;
-      response: {
-        runResult: grph.GraphRunOutput[];
-      };
-    };
-
     getResources: {
       request: VoidType;
       response: {

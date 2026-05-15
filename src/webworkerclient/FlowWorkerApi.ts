@@ -18,6 +18,10 @@ class FlowWorkerApi {
     return await this.invokeAsync<"buildPipeline">("buildPipeline", request);
   }
 
+  public async stepPipeline(request: flowApis.Request<"stepPipeline">): Promise<flowApis.Response<"stepPipeline">> {
+    return await this.invokeAsync<"stepPipeline">("stepPipeline", request);
+  }
+
   private async invokeAsync<K extends flowApis.Names>(name: K, request: flowApis.Request<K>): Promise<flowApis.Response<K>> {
     const { ok, code, payload, error } = await this.client.send(`FLOW:${name}`, request, []);
     if (!ok) {

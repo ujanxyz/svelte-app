@@ -70,10 +70,6 @@ class GraphWorkerApi {
     return await this.invokeAsync<"buildPipeline">("buildPipeline", request);
   }
 
-  public async runPipeline(request: graphApis.Request<"runPipeline">): Promise<graphApis.Response<"runPipeline">> {
-    return await this.invokeAsync<"runPipeline">("runPipeline", request);
-  }
-
   public async getResources(request: graphApis.Request<"getResources">): Promise<graphApis.Response<"getResources">> {
     return await this.invokeAsync<"getResources">("getResources", request);
   }

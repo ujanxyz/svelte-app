@@ -21,6 +21,7 @@ import { type Component } from "svelte";
 
 import { useAppSettings } from "@/features/app-settings/useAppSettings.svelte";
 import type { xy } from "@/types/xy";
+import { getAppIcon } from "@/utils/appIcons";
 
 import DefaultEdge from "../edges/DefaultEdge.svelte";
 import { useGraphService } from "../graph-services";
@@ -41,6 +42,7 @@ const edgeTypes: Record<string, Component<xy.xyEdgeProps>> = {
 };
 
 const { isDarkTheme } = useAppSettings();
+const WrenchIcon = getAppIcon("wrench");
 
 const rawStoreService = useGraphService("rawStoreService");
 
@@ -56,6 +58,7 @@ const {
   onpopupgallery,
   ondatainspector,
   onsavelocalstorage,
+  onbuildpipeline,
   onplaypipeline,
 } = useMenusAndPopups();
 
@@ -111,6 +114,9 @@ const {
     </ControlButton>
     <ControlButton onclick={onMediaManager}>
       <EyeIcon />
+    </ControlButton>
+    <ControlButton onclick={onbuildpipeline}>
+      <WrenchIcon />
     </ControlButton>
     <ControlButton onclick={onplaypipeline}>
       <PlayIcon />

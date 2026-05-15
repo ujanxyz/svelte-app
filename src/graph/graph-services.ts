@@ -12,7 +12,6 @@ import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
 
 import { createReactiveContext } from "../utils/reactive-context.svelte";
-import type { UjGraphStorage } from "./types";
 
 interface RawStoreService {
   // List of nodes.
@@ -37,16 +36,6 @@ interface ReactiveService {
   setSlotState(slotId: grph.SlotId, state: grph.SlotState): void;
   useSlotState(slotId: grph.SlotId): grph.SlotState;
   deleteSlots(slotIds: grph.SlotId[]): void;
-}
-
-interface IoService {
-  uploadFile: (rawNodeId: number, slotName: string, file: File) => Promise<void>;
-
-  serializeObject: (
-    nodes: Node[],
-    edges: Edge[],
-    viewport: Viewport,
-  ) => UjGraphStorage;
 }
 
 interface FlowGraphService {
@@ -77,7 +66,8 @@ interface FlowGraphService {
 }
 
 interface PipelineService {
-  playPipeline: () => Promise<void>;
+  buildPipeline: () => Promise<void>;
+  stepPipeline: () => Promise<void>;
   saveGraphToLocalStorage: () => Promise<boolean>;
   restoreGraphFromLocalStorage: () => Promise<boolean>;
 }
@@ -102,7 +92,6 @@ interface PopupService {
 export interface GraphServices {
   rawStoreService?: RawStoreService;
   reactiveService?: ReactiveService;
-  ioService?: IoService;
   flowGraphService?: FlowGraphService;
   popupService?: PopupService;
   pipelineService?: PipelineService;

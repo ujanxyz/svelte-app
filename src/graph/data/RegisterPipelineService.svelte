@@ -36,15 +36,24 @@ registerGraphService("pipelineService", _createPipelineService());
 
 function _createPipelineService() {
 
-  async function playPipeline(): Promise<void> {
-    console.log("Playing pipeline...");
+  async function buildPipeline(): Promise<void> {
+    console.log("Building pipeline...");
     const { assetInfos } = await flow.buildPipeline({});
     console.log("[DONE] buildPipeline done, asset infos:", assetInfos);
     await io.stageAssets({ isPostRun: false, assetInfos });
+  }
 
-    await graph.runPipeline({});
-    const resources = await graph.getResources({});
-    console.log("Resources after run:", resources);
+  async function stepPipeline(): Promise<void> {
+    console.time("step-loop");
+    while (true) {
+      const { stepResult } = await flow.stepPipeline({});
+      if (stepResult.status === "PARTIAL" && stepResult.awaitInfos.length > 0) {
+        await io.fulfillAwaiters({ awaitInfos: stepResult.awaitInfos });
+      } else {
+        break;
+      }
+    }
+    console.timeEnd("step-loop");
   }
 
   async function saveGraphToLocalStorage(): Promise<boolean> {
@@ -144,7 +153,8 @@ function _createPipelineService() {
   }
 
   return {
-    playPipeline,
+    buildPipeline,
+    stepPipeline,
     saveGraphToLocalStorage,
     restoreGraphFromLocalStorage,
   };

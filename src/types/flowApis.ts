@@ -1,3 +1,4 @@
+import type { flow } from "./flow";
 import type { fn } from "./function";
 import type { grph } from "./grph";
 
@@ -17,6 +18,13 @@ export namespace flowApis {
       request: VoidType;
       response: {
         assetInfos: grph.AssetInfo[];
+      };
+    };
+
+    stepPipeline: {
+      request: VoidType;
+      response: {
+        stepResult: flow.FlowStepResult;
       };
     };
 

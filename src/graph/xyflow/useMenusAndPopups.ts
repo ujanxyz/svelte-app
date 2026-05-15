@@ -177,7 +177,11 @@ export default function useMenusAndPopups() {
   }
 
   async function onplaypipeline(): Promise<void> {
-    await pipelineService.playPipeline();
+    await pipelineService.stepPipeline();
+  }
+
+  async function onbuildpipeline(): Promise<void> {
+    await pipelineService.buildPipeline();
   }
 
   async function _internalOpenGallery(ntype: Ntype, position: XYPosition): Promise<void> {
@@ -206,6 +210,7 @@ export default function useMenusAndPopups() {
     onpopupgallery,
     ondatainspector,
     onsavelocalstorage,
+    onbuildpipeline,
     onplaypipeline,
   };
 }

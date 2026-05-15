@@ -2,7 +2,6 @@
  * Fixed information and states for graph elements, like nodes, edges, slots.
  */
 export namespace grph {
-  // Info related types.
 
   export interface SlotId {
     parent: number;
