@@ -123,6 +123,16 @@ class WorkerIoManager {
         return {} as ioApis.Response<"unRegisterPreview">;
       }
 
+      /**
+       * "fulfillAwaiters": Fulfill any pending awaiters for a specific sequence number.
+       * This is typically used to signal the completion of an asynchronous operation.
+       */
+      case "fulfillAwaiters": {
+        const { awaitInfos } = request as ioApis.Request<"fulfillAwaiters">;
+        await this.exManager.fulfillTasks(awaitInfos);
+        return {} as ioApis.Response<"fulfillAwaiters">;
+      }
+
 
       // ── Graph editing commands ───────────────────────────────────────────────
 

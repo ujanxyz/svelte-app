@@ -16,13 +16,10 @@ class WasmService {
     return WasmService.instance;
   }
 
-  public getAssetStaging(): wa.AssetStagingInterface {
-    const assetStaging = this.wasmModule?.assetStaging;
-    if (!assetStaging) {
-      throw new Error("Asset staging API is not available on the loaded WASM module");
-    }
-    console.log(this.wasmModule!.assetStaging);
-    return assetStaging;
+  public getAttachments(): wa.WasmAttachments {
+    const { assetStaging, wgpuTaskPool } = this.wasmModule!;
+    const attachments: wa.WasmAttachments = { assetStaging, wgpuTaskPool };
+    return attachments;
   }
 
   // Pre-requisite: Loading is complete.

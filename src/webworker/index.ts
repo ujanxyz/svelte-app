@@ -1,3 +1,4 @@
+import type { wa } from "@/types/wa";
 import {
   type RawWorkerResponse,
   type SecureMessage,
@@ -7,7 +8,7 @@ import { CppBackendApi } from "./CppBackendApi";
 import { WorkerIndexedDb } from "./db/index";
 import { ExecutionManager } from "./ExecutionManager";
 import wasmService from "./wasmService";
-import { type IoProcessResult,WorkerIoManager } from "./WorkerIoManager";
+import { type IoProcessResult, WorkerIoManager } from "./WorkerIoManager";
 
 const SysCodes = Object.freeze({
   OK: "_OK",
@@ -25,60 +26,7 @@ let flowApi: CppBackendApi | null = null;
 let execManager: ExecutionManager | null = null;
 let ioManager: WorkerIoManager | null = null;
 
-//-----------------------------------------------------------------------------
-const postman = (function createPostman() {
-  // Notify the main thread that the worker is ready. this reponse is special
-  // as it is not a reply to an incoming message.
-  function postImReady(): void {
-    const response: RawWorkerResponse = {
-      ack: -1n,
-      ok: true,
-      code: SysCodes.IAM_READY,
-      error: "Worker is ready to accept messages",
-    };
-    globalThis.postMessage(response);
-  }
-
-  // Notify the main thread with a computed response.
-  function postResponse(
-    ack: bigint,
-    reqcode: string,
-    payload: Record<string, any>,
-    transfer?: Transferable[],
-  ): void {
-    const response: RawWorkerResponse = {
-      ack,
-      ok: true,
-      code: SysCodes.OK,
-      reqcode,
-      payload,
-    };
-    if (!transfer) {
-      globalThis.postMessage(response);
-    } else {
-      globalThis.postMessage(response, {transfer});
-    }
-  }
-
-  // Notify the main thread about an error.
-  function postError(
-    ack: bigint,
-    reqcode: string,
-    errcode: string,
-    errmsg: string,
-  ): void {
-    const response: RawWorkerResponse = {
-      ack,
-      ok: false,
-      code: errcode,
-      reqcode,
-      error: errmsg,
-    };
-    globalThis.postMessage(response);
-  }
-
-  return { postImReady, postResponse, postError };
-})();
+const postman = _createPostman();
 
 //-----------------------------------------------------------------------------
 const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
@@ -86,13 +34,13 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
   let expectedSeq: bigint = 0n;
 
   function markHandlerReady() {
-    const assetStaging = wasmService.getAssetStaging();
+    const wasmAttachments = wasmService.getAttachments();
     const indexedDb = new WorkerIndexedDb({ idleCloseMs: 60_000 });
 
     graphApi = new CppBackendApi("GRAPH", wasmService.newBackendApi("GraphApi"));
     flowApi = new CppBackendApi("FLOW", wasmService.newBackendApi("FlowApi"));
 
-    execManager = new ExecutionManager(indexedDb, assetStaging);
+    execManager = new ExecutionManager(wasmAttachments, indexedDb);
     ioManager = new WorkerIoManager(execManager!, indexedDb, (globalThis as any).pipelineEvents as EventTarget);
     isThisWorkerReady = true;
     postman.postImReady();
@@ -166,6 +114,7 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
         postman.postError(seq, code, SysCodes.UNKNOWN_CODE, errmsg);
       }
     } catch (reason: any) {
+      console.error(reason);
       let errmsg: string = "na";
       if (reason instanceof Error) {
         errmsg = (reason as Error).message;
@@ -178,6 +127,61 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
 
   return { markHandlerReady, handlePostEvent };
 })();
+
+//-----------------------------------------------------------------------------
+function _createPostman() {
+  // Notify the main thread that the worker is ready. this reponse is special
+  // as it is not a reply to an incoming message.
+  function postImReady(): void {
+    const response: RawWorkerResponse = {
+      ack: -1n,
+      ok: true,
+      code: SysCodes.IAM_READY,
+      error: "Worker is ready to accept messages",
+    };
+    globalThis.postMessage(response);
+  }
+
+  // Notify the main thread with a computed response.
+  function postResponse(
+    ack: bigint,
+    reqcode: string,
+    payload: Record<string, any>,
+    transfer?: Transferable[],
+  ): void {
+    const response: RawWorkerResponse = {
+      ack,
+      ok: true,
+      code: SysCodes.OK,
+      reqcode,
+      payload,
+    };
+    if (!transfer) {
+      globalThis.postMessage(response);
+    } else {
+      globalThis.postMessage(response, {transfer});
+    }
+  }
+
+  // Notify the main thread about an error.
+  function postError(
+    ack: bigint,
+    reqcode: string,
+    errcode: string,
+    errmsg: string,
+  ): void {
+    const response: RawWorkerResponse = {
+      ack,
+      ok: false,
+      code: errcode,
+      reqcode,
+      error: errmsg,
+    };
+    globalThis.postMessage(response);
+  }
+
+  return { postImReady, postResponse, postError };
+}
 
 //-----------------------------------------------------------------------------
 globalThis.onmessage = handlePostEvent;

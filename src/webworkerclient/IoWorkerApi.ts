@@ -59,6 +59,10 @@ class IoWorkerApi {
     return await this.#invokeAsync<"unRegisterPreview">("unRegisterPreview", request);
   }
 
+  public async fulfillAwaiters(request: ioApis.Request<"fulfillAwaiters">): Promise<ioApis.Response<"fulfillAwaiters">> {
+    return await this.#invokeAsync<"fulfillAwaiters">("fulfillAwaiters", request);
+  }
+
   //-- Private methods --
 
   async #invokeAsync<K extends ioApis.Names>(name: K, request: ioApis.Request<K>, transfer: Transferable[] = []): Promise<ioApis.Response<K>> {

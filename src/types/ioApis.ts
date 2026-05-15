@@ -1,6 +1,7 @@
 import type { grph } from "@/types/grph";
 
 import type { AssetSummary, AssetType, StoredAssetMeta, StoredMediaMeta } from "./worker-message-types";
+import type { flow } from "./flow";
 
 export namespace ioApis {
   interface VoidType {};
@@ -76,6 +77,13 @@ export namespace ioApis {
       };
       response: VoidType;
     },
+
+    fulfillAwaiters: {
+      request: {
+        awaitInfos: flow.AwaitEntry[]; 
+      };
+      response: VoidType;
+    };
 
   };
 
