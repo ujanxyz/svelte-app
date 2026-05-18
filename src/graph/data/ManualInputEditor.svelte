@@ -98,10 +98,9 @@ function onChangeFile(ev: Event): void {
   position: fixed;
   left: var(--left, 0);
   top: var(--top, 0);
-  width: 240px;
+  width: 360px;
   height: auto;
 
-  background-color: #222222;
   font-size: 0.8rem;
   display: flex;
   flex-direction: column;
@@ -115,7 +114,8 @@ function onChangeFile(ev: Event): void {
   padding-left: 6px;
   padding-right: 6px;
 
-  background-color: #222222;
+  background: var(--color-bg-1);
+  color: var(--color-text-hi-con);
   border-radius: 4px;
 
   display: flex;

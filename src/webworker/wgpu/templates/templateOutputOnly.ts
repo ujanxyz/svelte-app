@@ -6,12 +6,12 @@
 import type { OutputOnlyTask } from '../types';
 import {
   calculateBufferAlignment,
-  createRenderTargetTexture,
-  createOutputBuffer,
   createFullscreenTriangleVertexModule,
+  createOutputBuffer,
+  createRenderTargetTexture,
   initializeDevice,
   readbackBuffer,
-} from '../lib/wgpuCommon';
+} from '../wgpuCommon';
 
 export async function processOutputOnlyTemplate(
   task: OutputOnlyTask,

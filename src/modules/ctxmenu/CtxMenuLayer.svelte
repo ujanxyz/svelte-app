@@ -444,6 +444,8 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
 
 <style>
 .ctxmenu {
+  --menu-bgcolor-default: var(--color-bg-1);
+  --menu-bgcolor-hover: var(--color-bg-2);
   position: fixed;
   min-width: 200px;
   list-style: none;
@@ -451,7 +453,7 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
   padding: 6px;
   border: 1px solid var(--color-border-subtle);
   border-radius: 10px;
-  background: var(--color-bg-5);
+  background: var(--menu-bgcolor-default);
   color: var(--color-text-hi-con);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
   z-index: 1;
@@ -479,7 +481,7 @@ function handleSubmenuKeydown(event: KeyboardEvent): void {
 .ctxmenu-item:hover,
 .ctxmenu-item:focus-visible {
   outline: none;
-  background: var(--color-bg-3);
+  background: var(--menu-bgcolor-hover);
 }
 
 .ctxmenu-item.disabled {

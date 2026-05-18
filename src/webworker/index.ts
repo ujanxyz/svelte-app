@@ -4,9 +4,12 @@ import {
   type SecureMessage,
 } from "@/types/worker-message-types";
 
+import { AssetDbAwaitProcessor } from "./await-task/AssetDbAwaitProcessor";
+import { AwaitProcessorSet } from "./await-task/AwaitProcessorSet";
 import { CppBackendApi } from "./CppBackendApi";
 import { WorkerIndexedDb } from "./db/index";
 import { ExecutionManager } from "./ExecutionManager";
+import { PreviewManager } from "./PreviewManager";
 import wasmService from "./wasmService";
 import { type IoProcessResult, WorkerIoManager } from "./WorkerIoManager";
 
@@ -23,8 +26,11 @@ const SysCodes = Object.freeze({
 let graphApi: CppBackendApi | null = null;
 let flowApi: CppBackendApi | null = null;
 
+let awaitProc: AwaitProcessorSet | null = null;
+
 let execManager: ExecutionManager | null = null;
 let ioManager: WorkerIoManager | null = null;
+
 
 const postman = _createPostman();
 
@@ -36,12 +42,21 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
   function markHandlerReady() {
     const wasmAttachments = wasmService.getAttachments();
     const indexedDb = new WorkerIndexedDb({ idleCloseMs: 60_000 });
+    console.log("[Worker] WASM attachments obtained:", wasmAttachments);
 
     graphApi = new CppBackendApi("GRAPH", wasmService.newBackendApi("GraphApi"));
     flowApi = new CppBackendApi("FLOW", wasmService.newBackendApi("FlowApi"));
 
-    execManager = new ExecutionManager(wasmAttachments, indexedDb);
-    ioManager = new WorkerIoManager(execManager!, indexedDb, (globalThis as any).pipelineEvents as EventTarget);
+    const previewManager = new PreviewManager();
+  
+    awaitProc = new AwaitProcessorSet(wasmAttachments.awaitPool);
+    awaitProc.assignProcessors([
+      new AssetDbAwaitProcessor(indexedDb, previewManager),
+    ]);
+  
+    execManager = new ExecutionManager(awaitProc, wasmAttachments, indexedDb);
+    ioManager = new WorkerIoManager(awaitProc, previewManager, execManager!, indexedDb, (globalThis as any).pipelineEvents as EventTarget);
+
     isThisWorkerReady = true;
     postman.postImReady();
   }

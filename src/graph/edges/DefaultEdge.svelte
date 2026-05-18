@@ -4,6 +4,7 @@ import {
   EdgeToolbar,
   getBezierPath,
   getSmoothStepPath,
+  Position,
 } from "@xyflow/svelte";
 
 import type { xy } from "@/types/xy";
@@ -26,14 +27,24 @@ const {
 //     targetY,
 // }));
 /* svelte-ignore state_referenced_locally */
-const [edgePath, labelX, labelY] = $derived(
-  getBezierPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-  }),
-);
+// const [edgePath, labelX, labelY] = $derived(
+//   getBezierPath({
+//     sourceX,
+//     sourceY,
+//     targetX,
+//     targetY,
+//   }),
+// );
+
+const [edgePath, labelX, labelY, offsetX, offsetY] = $derived(getSmoothStepPath({
+  sourceX: sourceX,
+  sourceY: sourceY,
+  sourcePosition: Position.Right,
+  targetX: targetX,
+  targetY: targetY,
+  targetPosition: Position.Left,
+}));
+
 </script>
 
 <!-- <BaseEdge

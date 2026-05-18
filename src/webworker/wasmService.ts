@@ -17,8 +17,8 @@ class WasmService {
   }
 
   public getAttachments(): wa.WasmAttachments {
-    const { assetStaging, wgpuTaskPool } = this.wasmModule!;
-    const attachments: wa.WasmAttachments = { assetStaging, wgpuTaskPool };
+    const { assetStaging, wgpuTaskPool, awaitPool } = this.wasmModule!;
+    const attachments: wa.WasmAttachments = { assetStaging, wgpuTaskPool, awaitPool };
     return attachments;
   }
 

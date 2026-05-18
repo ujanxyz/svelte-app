@@ -27,16 +27,17 @@ const slotInfo = graphIONodeData.slotInfo;
 const nodeOps = setNodeContextOps(graphIONodeData.info);
 
 const nodeState = $derived(nodeOps.reactiveNodeState()) as grph.NodeState;
+const slotState = $derived(nodeOps.reactiveSlotState(slotInfo.name)) as grph.SlotState;
 
-let canvasRef: HTMLCanvasElement | undefined = $state();
+let anchorContainerRef: HTMLDivElement | undefined = $state();
 
 async function onZoomClick(): Promise<void> {
   await nodeOps.expandPreview(slotInfo, nodeState.encodedData);
 }
 
 async function onEditClick(): Promise<void> {
-  const rect = canvasRef!.getBoundingClientRect();
-  await nodeOps.onGraphInput(slotInfo.dtype, nodeState.encodedData, rect);
+  const rect = anchorContainerRef!.getBoundingClientRect();
+  await nodeOps.onSlotInput(slotInfo, $state.snapshot(slotState), rect);
 }
 
 const actionHandler: ActionHandler = {
@@ -50,9 +51,16 @@ const actionHandler: ActionHandler = {
 
 <div class="node-shell">
   <NodeHeader label={`${rawNodeId} / ${nodeState.label}`} {nodeId} />
-  <div class="content">
-    <PreviewCanvas {slotInfo} {nodeOps} {onZoomClick} {onEditClick} bind:canvasRef={canvasRef} />
-  </div>
+    {#if slotInfo.dtype === "bitmap"}
+      <div class="content" bind:this={anchorContainerRef}>
+        <PreviewCanvas {slotInfo} {nodeOps} {onZoomClick} {onEditClick} />
+      </div>
+    {:else}
+      {@const slotState = nodeOps.reactiveSlotState(slotInfo.name)}
+      <div class="flex-fitted-rows" bind:this={anchorContainerRef}>
+        <button onclick={onEditClick}>Edit {slotInfo.name}</button>
+      </div>
+    {/if}
   {#if graphIONodeData.info.ntype === "OUT"} 
     {@const handleId = slotInfo.name + "/in"}
     <MyHandle kind="in" id={handleId} />
@@ -65,6 +73,18 @@ const actionHandler: ActionHandler = {
 <XYNodeTopBar ntype={graphIONodeData.info.ntype} {actionHandler} />
 
 <style>
+/* TODO: Re-factor this with SlotsArray  */
+.flex-fitted-rows {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  row-gap: var(--space-1);
+
+  padding: 0 12px;
+}
+
 .node-shell {
   display: flex;
   flex-direction: column;

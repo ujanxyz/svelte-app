@@ -130,7 +130,6 @@ function extractMediaIdFromUri(uri: string): string {
 	if (!uri.startsWith("idb:/media/")) return "";
 	return uri.slice("idb:/media/".length);
 }
-
 </script>
 
 <div class="picker-shell">
@@ -181,7 +180,6 @@ function extractMediaIdFromUri(uri: string): string {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
-	color: rgba(255 255 255 / 0.92);
 }
 
 .toolbar {
@@ -216,11 +214,11 @@ function extractMediaIdFromUri(uri: string): string {
 }
 
 .selected-uri {
-	font-size: 0.63rem;
-	background: rgba(255 255 255 / 0.06);
-	border: 1px solid rgba(255 255 255 / 0.12);
-	border-radius: 6px;
-	padding: 0.3rem 0.4rem;
+	font-size: var(--font-size-xxs);
+	border: 1px solid var(--color-border-subtle);
+	border-radius: var(--radius-sm);
+	padding: var(--space-2) var(--space-3);
+	font-family: var(--font-family-mono);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

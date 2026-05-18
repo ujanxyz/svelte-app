@@ -25,6 +25,9 @@ interface Props {
 
 const { slotInfo, slotState }: Props = $props();
 
+// TODO: Move this to parent.
+const nodeOps = getNodeContextOps();
+
 const dTypeIco = $derived(kDtypeToIcon[slotInfo.dtype] ?? "list-numbers");
 const inIco = $derived.by(() => {
   if (slotInfo.access === "O") return "dot-outline";
@@ -40,6 +43,11 @@ const InStatusIcon: Component = $derived(getAppIcon(inIco));
 const OutStatusIcon: Component = $derived(getAppIcon(outIco));
 
 const canEdit = $derived(slotInfo.access !== "O");
+const statusDisabled = $derived.by(() => {
+  if (slotInfo.access === "I") return { in: true, out: false };
+  if (slotInfo.access === "O") return { in: false, out: true };
+  return { in: false, out: false };
+});
 
 async function onClickEdit(ev: MouseEvent): Promise<void> {
   if (!canEdit) return;
@@ -48,10 +56,10 @@ async function onClickEdit(ev: MouseEvent): Promise<void> {
   const rect = anchor.getBoundingClientRect();
 
   try {
-    const nodeOps = getNodeContextOps();
     await nodeOps.onSlotInput(slotInfo, slotState, rect);
-  } catch {
+  } catch (err) {
     alert("TODO: slot manual editor context is not available in this view yet.");
+    console.error(err);
   }
 }
 
@@ -63,7 +71,7 @@ function onClickStatus(ev: MouseEvent): void {
 
 <div class="slot-grid">
   <button
-    class="panebtn edit-btn"
+    class="panebtn editbtn"
     onclick={onClickEdit}
     disabled={!canEdit}
     data-debug-name="slot-pane-btn"
@@ -80,11 +88,11 @@ function onClickStatus(ev: MouseEvent): void {
     onclick={onClickStatus}
     data-debug-name="slot-status-btn"
   >
-    <span class="status-icon in-bg" class:empty={inIco === "dot-outline"}>
-      <InStatusIcon size={8} />
+    <span class="status-icon in-bg" class:empty={statusDisabled.in}>
+        <InStatusIcon size={8} />
     </span>
 
-    <span class="status-icon out-bg" class:empty={outIco === "dot-outline"}>
+    <span class="status-icon out-bg" class:empty={statusDisabled.out}>
       <OutStatusIcon size={8} />
     </span>
   </button>
@@ -104,18 +112,12 @@ function onClickStatus(ev: MouseEvent): void {
 
 .panebtn {
   border: none;
-  margin: 0;
-  /* padding: var(--space-1) var(--space-1); */
-  padding: 0 var(--space-1);
+  /* padding: 0 var(--space-1); */
   text-align: start;
   background-color: transparent;
 }
 
-.panebtn:hover {
-  background-color: var(--color-bg-1);
-}
-
-.edit-btn {
+.editbtn {
   padding-left: var(--space-2);
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr);
@@ -124,8 +126,13 @@ function onClickStatus(ev: MouseEvent): void {
   cursor: pointer;
 }
 
-.edit-btn:disabled {
+.editbtn:disabled {
   cursor: default;
+  color: var(--color-text-hi-con);
+}
+
+.editbtn:hover:not(:disabled) {
+  background-color: var(--color-bg-1);
 }
 
 .status-btn {
@@ -155,7 +162,21 @@ function onClickStatus(ev: MouseEvent): void {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--color-text-hi-con);
+  /* color: var(--color-text-hi-con); */
+}
+
+.in-bg {
+  background-color: var(--tint-blue-lo);
+}
+.out-bg {
+  background-color: var(--tint-green-lo);
+}
+
+.status-btn:hover .status-icon:not(.empty).in-bg {
+  background-color: var(--tint-blue-md);
+}
+.status-btn:hover .status-icon:not(.empty).out-bg {
+  background-color: var(--tint-green-md);
 }
 
 .status-icon {
@@ -167,14 +188,6 @@ function onClickStatus(ev: MouseEvent): void {
   align-items: center;
   justify-content: center;
   color: var(--color-text-hi-con);
-}
-
-.in-bg {
-  background: var(--tint-blue);
-}
-
-.out-bg {
-  background: var(--tint-green);
 }
 
 .status-icon.empty {

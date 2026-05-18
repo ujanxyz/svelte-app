@@ -14,10 +14,11 @@ interface Props {
   nodeOps: Pick<NodeContextOps, "registerPreview" | "unregisterPreview">;
   onZoomClick: () => void;
   onEditClick: () => void;
-  canvasRef: HTMLCanvasElement | undefined;
 }
 
-let { slotInfo, nodeOps, onZoomClick, onEditClick, canvasRef = $bindable() }: Props = $props();
+const { slotInfo, nodeOps, onZoomClick, onEditClick}: Props = $props();
+
+let canvasRef: HTMLCanvasElement | undefined;
 
 function handleZoomClick(ev: MouseEvent): void {
   ev.stopPropagation();

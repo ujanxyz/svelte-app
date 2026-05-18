@@ -22,14 +22,6 @@ class GraphWorkerApi {
     return await this.invokeAsync<"getGraph">("getGraph", request);
   }
 
-  public async encodeGraph(request: graphApis.Request<"encodeGraph">): Promise<graphApis.Response<"encodeGraph">> {
-    return await this.invokeAsync<"encodeGraph">("encodeGraph", request);
-  }
-
-  public async decodeGraph(request: graphApis.Request<"decodeGraph">): Promise<graphApis.Response<"decodeGraph">> {
-    return await this.invokeAsync<"decodeGraph">("decodeGraph", request);
-  }
-
   public async createNode(request: graphApis.Request<"createNode">): Promise<graphApis.Response<"createNode">> {
     return await this.invokeAsync<"createNode">("createNode", request);
   }

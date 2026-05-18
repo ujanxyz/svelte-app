@@ -30,6 +30,7 @@ interface PersistedGraphDoc {
   meta: xy.StoredGraphMeta;
   nodes: xy.StoredNode[];
   edges: xy.StoredEdge[];
+  encoded: { slotId: grph.SlotId; encodedData: grph.EncodedData }[];
 }
 
 registerGraphService("pipelineService", _createPipelineService());
@@ -37,9 +38,7 @@ registerGraphService("pipelineService", _createPipelineService());
 function _createPipelineService() {
 
   async function buildPipeline(): Promise<void> {
-    console.log("Building pipeline...");
     const { assetInfos } = await flow.buildPipeline({});
-    console.log("[DONE] buildPipeline done, asset infos:", assetInfos);
     await io.stageAssets({ isPostRun: false, assetInfos });
   }
 
@@ -104,6 +103,7 @@ function _createPipelineService() {
         meta: parsed.meta || { lastNodeId: 0, lastEdgeId: 0 },
         nodes: parsed.nodes,
         edges: parsed.edges || [],
+        encoded: parsed.encoded || [],
       };
     } catch (error) {
       console.warn("Failed reading graph from localStorage", error);
@@ -150,6 +150,14 @@ function _createPipelineService() {
     const lastNodeId = doc.meta?.lastNodeId ?? 0;
     const lastEdgeId = doc.meta?.lastEdgeId ?? 0;
     await graph.setGraphMeta({ lastNodeId, lastEdgeId });  
+
+    for (const { slotId, encodedData } of doc.encoded) {
+      // TODO: Batch these calls.
+      await flowGraphService.setSlotInput(slotId.parent, slotId.name, encodedData.payload);
+      const slotState = $state.snapshot(reactiveService.useSlotState(slotId));
+      slotState.encodedData = encodedData;
+      reactiveService.setSlotState(slotId, slotState);
+    }
   }
 
   return {
@@ -167,7 +175,25 @@ async function _makePersistedGraphDoc(): Promise<PersistedGraphDoc> {
 
   const xyNodes = flowGraphService.allNodes();
   const nodes: xy.StoredNode[] = [];
+
+  const encodedEntries: { slotId: grph.SlotId; encodedData: grph.EncodedData }[] = [];
   for (const node of xyNodes) {
+    const slotInfos: grph.SlotInfo[] = [];
+    if (node.type === "function") {
+      const nodeData = node.data as xy.xyFuncNodeData;
+      slotInfos.push(...nodeData.inInfos, ...nodeData.outInfos, ...nodeData.inoutInfos);
+    } else {
+      const nodeData = node.data as xy.xyGraphIoNodeData;
+      slotInfos.push(nodeData.slotInfo);
+    }
+
+    slotInfos.forEach((slotInfo: grph.SlotInfo) => {
+      const slotId: grph.SlotId = { parent: slotInfo.parent, name: slotInfo.name };
+      const slotState = $state.snapshot(reactiveService.useSlotState(slotId));
+      if (slotState.encodedData === null) return;
+      encodedEntries.push({ slotId, encodedData: slotState.encodedData });
+    });
+
     const position: base.XYPosition = {
       x: Number.parseFloat(node.position.x.toPrecision(2)),
       y: Number.parseFloat(node.position.y.toPrecision(2)),
@@ -203,6 +229,7 @@ async function _makePersistedGraphDoc(): Promise<PersistedGraphDoc> {
     meta: { lastNodeId, lastEdgeId },
     nodes,
     edges,
+    encoded: encodedEntries,
   };
 }
 

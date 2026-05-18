@@ -5,7 +5,6 @@
  */
 
 import type { InputAndOutputTask } from '../types';
-
 import {
   calculateBufferAlignment,
   createFullscreenTriangleVertexModule,
@@ -14,7 +13,7 @@ import {
   createRenderTargetTexture,
   initializeDevice,
   readbackBuffer,
-} from '../lib/wgpuCommon';
+} from '../wgpuCommon';
 
 export async function processInputAndOutputTemplate(
   task: InputAndOutputTask,
@@ -41,6 +40,7 @@ export async function processInputAndOutputTemplate(
   // Create resources
   const renderTarget = createRenderTargetTexture(device, width, height);
   const outputBuffer = createOutputBuffer(device, alignment.bufferSize);
+
   const inputTexture = createInputTexture(device, srcWidth, srcHeight, srcPixels);
 
   // Create bind group for input texture

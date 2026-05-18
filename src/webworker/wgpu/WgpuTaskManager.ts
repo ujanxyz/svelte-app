@@ -11,9 +11,9 @@ import { WgpuTaskType } from "./types";
  * Routes tasks to appropriate template handlers based on task type.
  */
 class WgpuTaskManager {
-  private readonly wgpuTaskPool: wa.WebGpuTaskPoolInterface;
+  private readonly wgpuTaskPool: wa.WgpuTaskPoolInterface;
 
-  public constructor(wgpuTaskPool: wa.WebGpuTaskPoolInterface) {
+  public constructor(wgpuTaskPool: wa.WgpuTaskPoolInterface) {
     this.wgpuTaskPool = wgpuTaskPool;
   }
 

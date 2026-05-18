@@ -9,9 +9,9 @@ import { getAppIcon } from "@/utils/appIcons";
 import { computeFitScale } from "@/utils/canvasUtils";
 import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
-const ZOOM_STEP = 1.25;
+const ZOOM_STEP = 1.2;
 const ZOOM_MIN = 0.1;
-const ZOOM_MAX = 8;
+const ZOOM_MAX = 5;
 const PAN_STEP = 40;
 const INITIAL_MAX_W = 1200;
 const INITIAL_MAX_H = 800;

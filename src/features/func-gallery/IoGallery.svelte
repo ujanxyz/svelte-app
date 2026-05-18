@@ -31,7 +31,9 @@ const { initialMode = "IN" }: Props = $props();
 const overlay = useOverlayInstance<IoGalleryPayload, string>();
 const payloadMode = overlay.payload?.ntype === "OUT" ? "OUT" : "IN";
 
+
 let mode = $state.raw<{ value: IoMode }>({
+  // svelte-ignore state_referenced_locally
   value: payloadMode ?? initialMode,
 });
 

@@ -31,16 +31,6 @@ export namespace graphApis {
         slotInfos: any[];
       };
     };
-
-    encodeGraph: {
-      request: VoidType;
-      response: string;
-    };
-
-    decodeGraph: {
-      request: string;
-      response: VoidType;
-    };
   
     createNode: {
       request: {

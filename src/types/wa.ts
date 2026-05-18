@@ -1,3 +1,5 @@
+import type { AwaitTaskChannel } from "@/webworker/await-task/AwaitTaskChannel";
+
 export namespace wa {
 
   type ApiInfoEntry = Record<"name", string> & Record<string, any>;
@@ -47,8 +49,8 @@ export namespace wa {
     clearAssets(): void;
   }
 
-  //-----------------------------------------------------------------------------
-  // WebGpuTaskPoolInterface related types.
+  //-----------------------------------------------------------------------------------------------
+  // WgpuTaskPoolInterface related types.
 
   /**
    * Entry representing a pending or fulfilled WebGPU task.
@@ -63,12 +65,17 @@ export namespace wa {
   };
 
   /**
-   * Interface for a temporary in-worker task pool for WebGPU pipelines.
+   * Interface for a awaiter task pool channel shared between C++ execution nodes and JS code.
    * Entries are keyed by work id. Work items are inserted by C++ execution nodes,
    * and fulfilled by the coordinating JS code that performs the GPU work in native JS
    * and resolves the pending status.
    */
-  export interface WebGpuTaskPoolInterface {
+  export interface WgpuTaskPoolInterface {
+      /**
+       * The name of this channel.
+       */
+      channelName: string;
+
       /**
        * Register a pending WebGPU task and return its generated work id.
        * @param taskData Opaque task description passed from C++ or JS bridge code.
@@ -91,11 +98,24 @@ export namespace wa {
       getTaskData(workId: string): object | null;
 
       /**
-       * Get the result data for a fulfilled task.
+       * Peeks the result data for a fulfilled task, not removing it from the pool.
        * @param workId Task id returned from registerTask.
        * @returns Fulfillment payload, or null if missing/unfulfilled.
        */
-      getResultData(workId: string): object | null;
+      peekResultData(workId: string): object | null;
+
+      /**
+       * Releases and removes the result data for a fulfilled task.
+       * This also removes the entire task entry from the pool, since once the result
+       * is consumed, the task is fully complete and can be forgotten.
+       *
+       * @param workId Task id returned from registerTask.
+       * @param forceDelete If true, the task entry is removed even if it is not
+       * fulfilled yet. Use with caution as this may lead to lost work or orphaned
+       * tasks if used incorrectly.
+       * @returns Fulfillment payload, or null if missing / unfulfilled.
+       */
+      releaseResultData(workId: string, forceDelete?: boolean): object | null;
 
       /**
        * Return the ids of tasks that are still pending fulfillment.
@@ -109,7 +129,7 @@ export namespace wa {
        * @param workId Task id returned from registerTask.
        * @returns Removed task entry, or null if not found.
        */
-      takeTask(workId: string): PendingWebGpuTaskEntry | null;
+      takeTask(workId: string): object | null;
 
       /**
        * Clear all registered tasks, e.g. on graph reset or worker shutdown.
@@ -117,7 +137,30 @@ export namespace wa {
       clearTasks(): void;
   };
 
-  //-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Pool of named task channels used as the JS <-> WASM exchange point.
+   */
+  export interface AwaitTaskPoolInterface {
+  
+    /** Adds a task to a named channel and returns the created task id. */
+    addTask(channel: string, taskData: object): string;
+  
+    /** Returns fulfilled result data without removing it from the channel. */
+    peekResult(channel: string, taskId: string): object | null;
+  
+    /**
+     * Returns fulfilled result data and releases channel entry.
+     * forceDelete removes task metadata even if no result is available.
+     */
+    releaseResult(channel: string, taskId: string, forceDelete?: boolean): object | null;
+  
+    /** Registers a named channel implementation. */
+    registerChannel(channelName: string, channel: AwaitTaskChannel<any, any>): void;
+  };
+  
+
+  //-----------------------------------------------------------------------------------------------
   // The following are the types related to the WASM module and its APIs.
 
   type ApiClass = { new (): ApiInstance };
@@ -129,7 +172,8 @@ export namespace wa {
 
   export interface WasmAttachments {
     assetStaging: AssetStagingInterface;
-    wgpuTaskPool: WebGpuTaskPoolInterface;
+    wgpuTaskPool: WgpuTaskPoolInterface;
+    awaitPool: AwaitTaskPoolInterface;
   }
 
   export interface WasmModuleType extends WasmApiSet, WasmAttachments {

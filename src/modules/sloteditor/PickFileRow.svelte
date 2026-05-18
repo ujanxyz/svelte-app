@@ -1,4 +1,6 @@
 <script lang="ts">
+import { computeLetterbox } from "@/utils/canvasUtils";
+
 interface PickFileItem {
   id: string;
   filename: string;
@@ -21,9 +23,15 @@ $effect(() => {
   if (!canvas || !item.thumbnailBitmap) return;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  ctx.fillStyle = "#111";
+  ctx.fillStyle = "#888";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(item.thumbnailBitmap, 0, 0, canvas.width, canvas.height);
+  const { dx, dy, dw, dh } = computeLetterbox(
+    canvas.width,
+    canvas.height,
+    item.thumbnailBitmap.width,
+    item.thumbnailBitmap.height
+  );
+  ctx.drawImage(item.thumbnailBitmap, dx, dy, dw, dh);
 });
 </script>
 
@@ -38,52 +46,65 @@ $effect(() => {
 
 <style>
 .row {
+  --row-height: 4.25rem;
+  box-sizing: border-box;
+  height: var(--row-height);
   width: 100%;
-  border: 1px solid rgba(255 255 255 / 0.14);
-  border-radius: 8px;
-  background: rgba(255 255 255 / 0.04);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-2);
   color: inherit;
-  padding: 6px;
-  display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 8px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   text-align: left;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .row:hover {
-  background: rgba(255 255 255 / 0.09);
+  background: var(--color-bg-3);
 }
 
 .row.selected {
-  border-color: rgba(104 176 255 / 0.9);
-  background: rgba(38 119 190 / 0.22);
+  background: var(--color-flip-bg-3);
+  color: var(--color-flip-text-hi-con);
 }
 
 .thumb {
-  border-radius: 6px;
-  border: 1px solid rgba(255 255 255 / 0.15);
-  width: 96px;
-  height: 56px;
+  box-sizing: border-box;
+  height: var(--row-height);
+  width: calc(1.5 * var(--row-height));
 }
 
 .meta {
+  padding: 0 var(--space-3);
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-1);
 }
 
 .name {
   font-size: 0.76rem;
   font-weight: 600;
+}
+
+.line {
+  font-size: 0.66rem;
+  color: var(--color-text-md-con);
+}
+
+.name, .line {
+  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.line {
-  font-size: 0.66rem;
-  color: rgba(255 255 255 / 0.74);
+.row.selected .line {
+  color: var(--color-flip-text-md-con);
 }
+
 </style>

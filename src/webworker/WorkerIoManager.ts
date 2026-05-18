@@ -1,9 +1,10 @@
 import type { ioApis } from "@/types/ioApis";
 
+import type { AwaitProcessorSet } from "./await-task/AwaitProcessorSet";
 import { type WorkerIndexedDb } from "./db";
 import type { ExecutionManager } from "./ExecutionManager";
 import { IoEventsHandler } from "./IoEventsHandler";
-import { PreviewManager } from "./PreviewManager";
+import { type PreviewManager } from "./PreviewManager";
 
 export interface IoProcessResult extends Record<string, any> {
   transfer?: Transferable[];
@@ -12,15 +13,17 @@ export interface IoProcessResult extends Record<string, any> {
 class WorkerIoManager {
   public static readonly CMD_PREFIX = "IO:" as const;
 
+  private readonly awaitProc: AwaitProcessorSet;
+  private readonly previewManager: PreviewManager;
   private readonly exManager: ExecutionManager;
   private readonly indexedDb: WorkerIndexedDb;
-  private readonly previewManager: PreviewManager;
   private readonly ioEventsHandler: IoEventsHandler;
 
-  public constructor(exManager: ExecutionManager, indexedDb: WorkerIndexedDb, pipelineEvents: EventTarget) {
+  public constructor(awaitProc: AwaitProcessorSet, previewManager: PreviewManager, exManager: ExecutionManager, indexedDb: WorkerIndexedDb, pipelineEvents: EventTarget) {
+    this.awaitProc = awaitProc;
+    this.previewManager = previewManager;
     this.exManager = exManager;
     this.indexedDb = indexedDb;
-    this.previewManager = new PreviewManager();
     this.ioEventsHandler = new IoEventsHandler(indexedDb, this.previewManager);
     this.ioEventsHandler.setUpListeners(pipelineEvents);
   }
@@ -92,7 +95,7 @@ class WorkerIoManager {
         const { isPostRun, assetInfos } = request as ioApis.Request<"stageAssets">;
         console.log("Staging assets: ", { isPostRun, assetInfos });
         if (isPostRun) {
-          await this.exManager.stagePostRunAssets(assetInfos);
+          throw new Error("Post-run staging will not be implemented");
         } else {
           await this.exManager.stagePreRunAssets(assetInfos);
         }
@@ -129,7 +132,20 @@ class WorkerIoManager {
        */
       case "fulfillAwaiters": {
         const { awaitInfos } = request as ioApis.Request<"fulfillAwaiters">;
-        await this.exManager.fulfillTasks(awaitInfos);
+        await this.awaitProc.fulfillAwaitTasks();
+        // for (const awaitInfo of awaitInfos) {
+        //   const { channel, workId } = awaitInfo;
+        //   switch (channel) {
+        //     case "webgpu": {
+        //       console.log("@fulfillTasks ==> ", this.wgpuTaskManager);
+        //       await this.wgpuTaskManager.fulfillTask(workId);
+        //       break;
+        //     }
+        //     default: {
+        //       throw new Error(`Unknown channel: ${channel}, for workId: ${workId}`);
+        //     }
+        //   }
+        // }
         return {} as ioApis.Response<"fulfillAwaiters">;
       }
 

@@ -45,6 +45,9 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
       await flowService!.setGraphInput(rawNodeId, encoded);
     },
 
+    /**
+     * @deprecated Use onSlotInput.
+     */
     onGraphInput: async function(dtypeStr: string, ioData: grph.EncodedData | null, triggerRect: DOMRect): Promise<void> {
       if (nodeInfo.ntype !== "IN") {
         throw new Error("Only IN nodes can have graph input");
@@ -65,7 +68,7 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
     },
 
     onSlotInput: async function(slotInfo: grph.SlotInfo, slotState: grph.SlotState, triggerRect: DOMRect): Promise<void> {
-      if (slotInfo.access === "O") {
+      if (slotInfo.access === "O" && nodeInfo.ntype !== "IN") {
         throw new Error("Only input and inout slots can have slot input");
       }
       if (slotState.inEdges.length > 0) {

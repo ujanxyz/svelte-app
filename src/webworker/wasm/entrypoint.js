@@ -329,7 +329,97 @@ Module.wgpuTaskPool = (function() {
     };
 
     return new WebGpuTaskPool();
-})();// end include: ujcore/wasm/pre_steps.js
+})();
+
+//--------------------------------------------------------------------------------------------------
+Module.awaitPool = (function() {
+    /**
+     * In-memory implementation of AwaitTaskPool for plain JavaScript runtimes.
+     *
+     * This class expects registered channels to expose:
+     * - addTask(taskData): taskId
+     * - peekResult(taskId): resultData | null  
+     * - releaseResult(taskId, forceDelete?): resultData | null
+     */
+    class AwaitTaskPool {
+        constructor() {
+            /** @type {Map<string, any>} */
+            this.channels = new Map();
+        }
+
+        /**
+         * Adds a task to the specified channel and returns a task id.
+         * @param {string} channel
+         * @param {object} taskData
+         * @returns {string}
+         */
+        addTask(channel, taskData) {
+            const channelRef = this.getChannel(channel);
+            return channelRef.addTask(taskData);
+        }
+
+        /**
+         * Returns fulfilled task result without removing it.
+         * @param {string} channel
+         * @param {string} taskId
+         * @returns {object | null}
+         */
+        peekResult(channel, taskId) {
+            const channelRef = this.getChannel(channel);
+            if (typeof channelRef.peekResult !== "function") {
+            throw new Error(
+                `Channel "${channel}" does not support result peeking. ` +
+                "Provide a channel with peekResult(taskId).",
+            );
+            }
+            return channelRef.peekResult(taskId);
+        }
+
+        /**
+         * Returns fulfilled result and releases task state.
+         * @param {string} channel
+         * @param {string} taskId
+         * @param {boolean} [forceDelete=false]
+         * @returns {object | null}
+         */
+        releaseResult(channel, taskId, forceDelete = false) {
+            const channelRef = this.getChannel(channel);
+            if (typeof channelRef.releaseResult !== "function") {
+            throw new Error(
+                `Channel "${channel}" does not support result release. ` +
+                "Provide a channel with releaseResult(taskId, forceDelete).",
+            );
+            }
+            return channelRef.releaseResult(taskId, forceDelete);
+        }
+
+        /**
+         * Registers or replaces a channel by name.
+         * @param {string} channelName
+         * @param {any} channel
+         */
+        registerChannel(channelName, channel) {
+            this.channels.set(channelName, channel);
+        }
+
+        /**
+         * @param {string} channelName
+         * @returns {any}
+         */
+        getChannel(channelName) {
+            const channel = this.channels.get(channelName);
+            if (!channel) {
+            throw new Error(`Unknown AwaitTaskChannel: ${channelName}`);
+            }
+            return channel;
+        }
+    };
+
+    return new AwaitTaskPool();
+})();
+
+
+// end include: ujcore/wasm/pre_steps.js
 
 
 var arguments_ = [];
@@ -6716,6 +6806,14 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
+function JsOnDecodingStart(cAssetUri,cAssetId) { const assetUri = UTF8ToString(cAssetUri); const assetId = UTF8ToString(cAssetId); console.log("[JsOnDecodingStart] Received uri for decoding - assetUri:", assetUri); const taskId = Module.awaitPool.addTask("assetDb", { mode: "load", assetUri, assetId }); return Emval.toHandle({ taskId }); }
+JsOnDecodingStart.sig = 'iii';
+function JsOnDecodingResume(cTaskId) { const taskId = UTF8ToString(cTaskId); const taskResult = Module.awaitPool.releaseResult("assetDb", taskId, true ); if (!taskResult) { console.warn("[JsOnDecodingResume] No result found for taskId:", taskId); return Emval.toHandle({ success: false }); } const { assetId, imageData } = taskResult; const { width, height, data: pixelData, colorSpace } = imageData; const { byteLength, byteOffset } = pixelData; const numBytes = width * height * 4; const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); uint8arr.set(imageData.data); const newImgData = new ImageData(uint8arr, width, height, { colorSpace }); console.log("[JsOnDecodingResume] Decoding completed for taskId:", taskId, "assetId:", assetId, "img:", newImgData); return Emval.toHandle({ success: true, width, height, numBytes, ptrPixels: ptr, imageData: newImgData }); }
+JsOnDecodingResume.sig = 'ii';
+function JsOnEncodingStart(handle) { const target = Emval.toValue(handle); const {assetId, width, height, numBytes, ptrPixels} = target; const pixels = new Uint8Array(Module.HEAPU8.buffer, ptrPixels, numBytes); console.log("[JsOnEncodingStart] Received bitmap for encoding - width:", width, "height:", height, "pixels:", pixels); const taskId = Module.awaitPool.addTask("assetDb", { mode: "store", assetId, width, height, pixels }); return Emval.toHandle({ taskId }); }
+JsOnEncodingStart.sig = 'ii';
+function JsOnEncodingResume(taskIdStr) { const jTaskIdStr = UTF8ToString(taskIdStr); const taskResult = Module.awaitPool.releaseResult("assetDb", jTaskIdStr, true ); if (taskResult) { const { assetId } = taskResult; console.log("[JsOnEncodingResume] Encoding completed for taskId:", jTaskIdStr, "assetId:", assetId); return Emval.toHandle({ success: true, assetId }); } else { console.warn("[JsOnEncodingResume] No result found for taskId:", jTaskIdStr); return Emval.toHandle({ success: false }); } }
+JsOnEncodingResume.sig = 'ii';
 function JsOnCreateBitmap(handle) { const target = Emval.toValue(handle); const {width, height, numBytes} = target; const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); const newImgData = new ImageData(uint8arr, width, height, { colorSpace: "srgb", pixelFormat: "rgba-unorm8" }); const retValue = { dataPtr: ptr, imageData: newImgData, }; return Emval.toHandle(retValue); }
 JsOnCreateBitmap.sig = 'ii';
 function JsReleaseStagedBitmap(slotIdStr,assetUri) { const jSlotIdStr = UTF8ToString(slotIdStr); const jAssetUri = UTF8ToString(assetUri); const imageData = Module.assetStaging.releaseImageData(jSlotIdStr, jAssetUri); if (!imageData) { console.warn("[JsBitmapPool] No staged bitmap found for slot: ", jSlotIdStr, " with asset URI: ", jAssetUri); return null; } const { width, height, data, colorSpace, pixelFormat } = imageData; if (colorSpace !== "srgb" || pixelFormat !== "rgba-unorm8") { console.error("[JsBitmapPool] Unsupported image data format: ", colorSpace, pixelFormat); return null; } const { byteLength, byteOffset } = data; const numBytes = width * height * 4; if (byteLength !== numBytes) { console.error("[JsBitmapPool] Mismatch in expected byte length: ", byteLength, " vs calculated: ", numBytes); return null; } const ptr = Module._malloc(numBytes); const uint8arr = new Uint8ClampedArray(Module.HEAPU8.buffer, ptr, numBytes); uint8arr.set(imageData.data); const newImgData = new ImageData(uint8arr, width, height, { colorSpace, pixelFormat }); const retValue = { width, height, dataPtr: ptr, imageData: newImgData, }; console.log("[JsBitmapPool] returning : ", retValue); return Emval.toHandle(retValue); }
@@ -6802,7 +6900,15 @@ var wasmImports = {
   /** @export */
   JsOnCreateBitmap,
   /** @export */
+  JsOnDecodingResume,
+  /** @export */
+  JsOnDecodingStart,
+  /** @export */
   JsOnDestroyBitmap,
+  /** @export */
+  JsOnEncodingResume,
+  /** @export */
+  JsOnEncodingStart,
   /** @export */
   JsReleaseStagedBitmap,
   /** @export */

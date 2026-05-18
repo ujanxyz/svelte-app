@@ -1,10 +1,10 @@
-import type { flow } from "@/types/flow";
 import type { grph } from "@/types/grph";
 import type { wa } from "@/types/wa";
 import { makeImageDataFromBlob } from "@/utils/canvasUtils";
 import { parseAssetUri } from "@/utils/strUtils";
 import { WgpuTaskManager } from "@/webworker/wgpu/WgpuTaskManager";
 
+import type { AwaitProcessorSet } from "./await-task/AwaitProcessorSet";
 import type { WorkerIndexedDb } from "./db";
 
 /**
@@ -12,12 +12,14 @@ import type { WorkerIndexedDb } from "./db";
  * It can support incremental execution.
  */
 class ExecutionManager {
+  private readonly awaitProc: AwaitProcessorSet;
   private readonly indexedDb: WorkerIndexedDb;
   private readonly assetStaging: wa.AssetStagingInterface;
   private readonly wgpuTaskManager: WgpuTaskManager;
 
 
-  public constructor(wasmAttachments: wa.WasmAttachments, indexedDb: WorkerIndexedDb) {
+  public constructor(awaitProc: AwaitProcessorSet, wasmAttachments: wa.WasmAttachments, indexedDb: WorkerIndexedDb) {
+    this.awaitProc = awaitProc;
     this.indexedDb = indexedDb;
     this.assetStaging = wasmAttachments.assetStaging;
     this.wgpuTaskManager = new WgpuTaskManager(wasmAttachments.wgpuTaskPool);
@@ -59,26 +61,6 @@ class ExecutionManager {
       const slotIdStr = `${assetInfo.slotId.parent}:${assetInfo.slotId.name}`;
       this.assetStaging.stageImageData(slotIdStr, assetUri, imageData);
       console.log(`[ExecutionManager] Staged asset ${assetInfo.assetUri} to slot ${assetInfo.slotId.parent} : ${assetInfo.slotId.name}`);
-    }
-  }
-
-  public async stagePostRunAssets(assetInfos: grph.AssetInfo[]): Promise<void> {
-    throw new Error("Post-run asset staging is not implemented yet");
-  }
-
-  public async fulfillTasks(awaitInfos: flow.AwaitEntry[]): Promise<void> {
-    for (const awaitInfo of awaitInfos) {
-      const { channel, workId } = awaitInfo;
-      switch (channel) {
-        case "webgpu": {
-          console.log("@fulfillTasks ==> ", this.wgpuTaskManager);
-          await this.wgpuTaskManager.fulfillTask(workId);
-          break;
-        }
-        default: {
-          throw new Error(`Unknown channel: ${channel}, for workId: ${workId}`);
-        }
-      }
     }
   }
 }

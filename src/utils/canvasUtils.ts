@@ -6,25 +6,6 @@ import type { base } from "@/types/base";
  */
 
 /**
- * Compute letterbox / fit parameters: fit a graphic of size (gw × gh) into a
- * canvas of size (cw × ch), preserving aspect ratio, centered.
- * The blank bars should be filled by the caller (usually black or a pattern).
- */
-export function computeLetterbox(
-  cw: number,
-  ch: number,
-  gw: number,
-  gh: number,
-): { dx: number; dy: number; dw: number; dh: number } {
-  const scale = Math.min(cw / gw, ch / gh);
-  const dw = Math.round(gw * scale);
-  const dh = Math.round(gh * scale);
-  const dx = Math.round((cw - dw) / 2);
-  const dy = Math.round((ch - dh) / 2);
-  return { dx, dy, dw, dh };
-}
-
-/**
  * Return the scale factor that fits a graphic of size (gw × gh) into a canvas
  * of size (cw × ch) while preserving aspect ratio.
  */
@@ -35,6 +16,25 @@ export function computeFitScale(
   gh: number,
 ): number {
   return Math.min(cw / gw, ch / gh);
+}
+
+/**
+ * Compute letterbox / fit parameters: fit a graphic of size (gw × gh) into a
+ * canvas of size (cw × ch), preserving aspect ratio, centered.
+ * The blank bars should be filled by the caller (usually black or a pattern).
+ */
+export function computeLetterbox(
+  cw: number,
+  ch: number,
+  gw: number,
+  gh: number,
+): { dx: number; dy: number; dw: number; dh: number } {
+  const scale = computeFitScale(cw, ch, gw, gh);
+  const dw = Math.round(gw * scale)|0;
+  const dh = Math.round(gh * scale)|0;
+  const dx = Math.round((cw - dw) / 2)|0;
+  const dy = Math.round((ch - dh) / 2)|0;
+  return { dx, dy, dw, dh };
 }
 
 /**
@@ -52,6 +52,19 @@ export async function makeImageDataFromBlob(blob: Blob): Promise<ImageData> {
   const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
   bitmap.close();
   return imageData;
+}
+
+/**
+ * Converts an ImageBitmap to ImageData by drawing it onto an OffscreenCanvas and extracting the pixel data.
+ *
+ * @param imageBitmap The input ImageBitmap to convert to ImageData.
+ * @returns A Promise that resolves to an ImageData object.
+ */
+export async function bitmapToImageData(imageBitmap: ImageBitmap): Promise<ImageData> {
+  const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+  const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
+  ctx.drawImage(imageBitmap, 0, 0);
+  return ctx.getImageData(0, 0, canvas.width, canvas.height) as ImageData;
 }
 
 /**
