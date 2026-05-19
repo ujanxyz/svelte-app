@@ -8,9 +8,9 @@ import { AssetDbAwaitProcessor } from "./await-task/AssetDbAwaitProcessor";
 import { AwaitProcessorSet } from "./await-task/AwaitProcessorSet";
 import { CppBackendApi } from "./CppBackendApi";
 import { WorkerIndexedDb } from "./db/index";
-import { ExecutionManager } from "./ExecutionManager";
 import { PreviewManager } from "./PreviewManager";
 import wasmService from "./wasmService";
+import { WebGpuAwaitProcessor } from "./wgpu/WebGpuAwaitProcessor";
 import { type IoProcessResult, WorkerIoManager } from "./WorkerIoManager";
 
 const SysCodes = Object.freeze({
@@ -28,7 +28,6 @@ let flowApi: CppBackendApi | null = null;
 
 let awaitProc: AwaitProcessorSet | null = null;
 
-let execManager: ExecutionManager | null = null;
 let ioManager: WorkerIoManager | null = null;
 
 
@@ -52,10 +51,10 @@ const { markHandlerReady, handlePostEvent } = (function createPostHandler() {
     awaitProc = new AwaitProcessorSet(wasmAttachments.awaitPool);
     awaitProc.assignProcessors([
       new AssetDbAwaitProcessor(indexedDb, previewManager),
+      new WebGpuAwaitProcessor(),
     ]);
-  
-    execManager = new ExecutionManager(awaitProc, wasmAttachments, indexedDb);
-    ioManager = new WorkerIoManager(awaitProc, previewManager, execManager!, indexedDb, (globalThis as any).pipelineEvents as EventTarget);
+
+    ioManager = new WorkerIoManager(awaitProc, previewManager, indexedDb, (globalThis as any).pipelineEvents as EventTarget);
 
     isThisWorkerReady = true;
     postman.postImReady();

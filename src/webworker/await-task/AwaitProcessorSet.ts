@@ -43,7 +43,7 @@ class AwaitProcessorSet {
         }
         try {
           console.log(`[AwaitProcessorSet] Processing task id "${taskId}" on channel "${chanName}".`);
-          const result = await proc.processAsync(taskData);
+          const result = await proc.processAsync(taskId, taskData);
           channel.fulfillTask(taskId, result);
           numProcessed++;
         } catch (err) {

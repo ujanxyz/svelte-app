@@ -3,7 +3,6 @@ import * as canvasUtils from "@/utils/canvasUtils";
 import type { WorkerIndexedDb } from "../db";
 import type { PreviewManager } from "../PreviewManager";
 import type { AwaitTaskProcessor } from "./types";
-import type { Image } from "svelte-tweakpane-ui";
 
 interface AssetDbStoreTask {
   mode: "store";
@@ -41,11 +40,11 @@ class AssetDbAwaitProcessor implements AwaitTaskProcessor<AssetDbTask, AssetDbRe
     this.previewManager = previewManager;
   }
 
-  async processAsync(task: AssetDbTask): Promise<AssetDbResult> {
-    if (task.mode === "store") {
-      return await this.#storeAsync(task);
+  async processAsync(taskId: string, taskData: AssetDbTask): Promise<AssetDbResult> {
+    if (taskData.mode === "store") {
+      return await this.#storeAsync(taskData);
     } else {
-      return await this.#loadAsync(task);
+      return await this.#loadAsync(taskData);
     }
   }
 

@@ -2,7 +2,6 @@ import type { ioApis } from "@/types/ioApis";
 
 import type { AwaitProcessorSet } from "./await-task/AwaitProcessorSet";
 import { type WorkerIndexedDb } from "./db";
-import type { ExecutionManager } from "./ExecutionManager";
 import { IoEventsHandler } from "./IoEventsHandler";
 import { type PreviewManager } from "./PreviewManager";
 
@@ -15,14 +14,12 @@ class WorkerIoManager {
 
   private readonly awaitProc: AwaitProcessorSet;
   private readonly previewManager: PreviewManager;
-  private readonly exManager: ExecutionManager;
   private readonly indexedDb: WorkerIndexedDb;
   private readonly ioEventsHandler: IoEventsHandler;
 
-  public constructor(awaitProc: AwaitProcessorSet, previewManager: PreviewManager, exManager: ExecutionManager, indexedDb: WorkerIndexedDb, pipelineEvents: EventTarget) {
+  public constructor(awaitProc: AwaitProcessorSet, previewManager: PreviewManager, indexedDb: WorkerIndexedDb, pipelineEvents: EventTarget) {
     this.awaitProc = awaitProc;
     this.previewManager = previewManager;
-    this.exManager = exManager;
     this.indexedDb = indexedDb;
     this.ioEventsHandler = new IoEventsHandler(indexedDb, this.previewManager);
     this.ioEventsHandler.setUpListeners(pipelineEvents);
@@ -85,21 +82,6 @@ class WorkerIoManager {
         const { assetType } = request as ioApis.Request<"listAssets">;
         const assetEntries = await this.indexedDb.listAssets(assetType);
         return { assetEntries };
-      }
-
-      /**
-       * Stage assets prior to execution: create the full-resolution bitmaps for
-       * input nodes to consume during execution.
-       */
-      case "stageAssets": {
-        const { isPostRun, assetInfos } = request as ioApis.Request<"stageAssets">;
-        console.log("Staging assets: ", { isPostRun, assetInfos });
-        if (isPostRun) {
-          throw new Error("Post-run staging will not be implemented");
-        } else {
-          await this.exManager.stagePreRunAssets(assetInfos);
-        }
-        return {};
       }
 
       /**

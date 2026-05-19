@@ -158,6 +158,7 @@ class WorkerIndexedDb {
     return this.toMediaMeta(record);
   }
 
+  // TODO: Make this private method.
   public async getMediaBlob(id: string): Promise<Blob> {
     const record = await this.getMediaRecordOrThrow(id);
     if (!record.blob) {

@@ -1,90 +1,70 @@
-import type { flow } from "@/types/flow";
-import type { wa } from "@/types/wa";
+import type { AwaitTaskProcessor } from "@/webworker/await-task/types";
 
 import { processInputAndOutputTemplate } from "./templates/templateInputAndOutput";
 import { processOutputOnlyTemplate } from "./templates/templateOutputOnly";
 import type { InputAndOutputTask, OutputOnlyTask, WgpuTask } from "./types";
 import { WgpuTaskType } from "./types";
 
-/**
- * WgpuTaskManager orchestrates WebGPU task execution.
- * Routes tasks to appropriate template handlers based on task type.
- */
-class WgpuTaskManager {
-  private readonly wgpuTaskPool: wa.WgpuTaskPoolInterface;
+interface WgpuResult {
 
-  public constructor(wgpuTaskPool: wa.WgpuTaskPoolInterface) {
-    this.wgpuTaskPool = wgpuTaskPool;
-  }
+};
 
-  public async fulfillTask(workId: string): Promise<void> {
-    console.log("[WgpuTaskManager] Fulfilling work id: ", workId);
+class WebGpuAwaitProcessor implements AwaitTaskProcessor<WgpuTask, WgpuResult> {
+  public readonly name = "wgpu";
 
-    console.time("wgpu-fulfill");
-
-    const rawTask = this.wgpuTaskPool.getTaskData(workId);
-    if (!rawTask) {
-      console.error(`[WgpuTaskManager] No task data found for workId: ${workId}`);
-      return;
-    }
-
+  async processAsync(taskId: string, taskData: WgpuTask): Promise<WgpuResult> {
+      console.time("wgpu-fulfill");
+    let result: WgpuResult = {};
     try {
       // Infer task type from raw data and route to appropriate handler
-      const task = await this._inferAndRouteTask(rawTask);
-      console.log("[WgpuTaskManager] Routed to handler, workId:", workId);
-
-      this.wgpuTaskPool.fulfillTask(workId, task);
+      const inferredTask = await this._inferAndRouteTask(taskData);
     } catch (error) {
-      console.error(`[WgpuTaskManager] Error fulfilling task ${workId}:`, error);
+      console.error(`[WgpuTaskManager] Error fulfilling task ${taskId}:`, error);
     }
-
     console.timeEnd("wgpu-fulfill");
+    return result;
   }
 
   /**
    * Infer task type from raw data and route to appropriate template handler.
    * If explicit type field is missing, detect based on field presence.
    */
-  private async _inferAndRouteTask(rawTask: unknown): Promise<WgpuTask> {
-    const task = rawTask as Record<string, unknown>;
-    const taskType = task.type as WgpuTaskType;
-    if (typeof taskType !== 'string' || !(taskType in WgpuTaskType)) {
-      throw new Error(`[WgpuTaskManager] Invalid or missing task type: ${task.type}`);
-    }
-    const shaderCode = (task.shaderCode as string) || this._getDefaultFragmentShaderForType(taskType);
-    
+  private async _inferAndRouteTask(task: WgpuTask): Promise<WgpuTask> {
+    const shaderCode = (task.shaderCode as string) || this._getDefaultFragmentShaderForType(task.type);
+
     // Explicit type field takes precedence
-    switch (taskType) {
-    case WgpuTaskType.OUTPUT_ONLY: {
+    switch (task.type) {
+      case WgpuTaskType.OUTPUT_ONLY: {
         const outTask: OutputOnlyTask = {
-        type: WgpuTaskType.OUTPUT_ONLY,
-        width: task.width as number,
-        height: task.height as number,
-        pixels: task.pixels as Uint8Array,
-        shaderCode,
+          type: WgpuTaskType.OUTPUT_ONLY,
+          width: task.width as number,
+          height: task.height as number,
+          pixels: task.pixels as Uint8Array,
+          shaderCode,
         };
         await this._processOutputOnly(outTask, shaderCode);
         return outTask;
-    }
+      }
 
-    case WgpuTaskType.INPUT_AND_OUTPUT: {
+      case WgpuTaskType.INPUT_AND_OUTPUT: {
+        // Defensive: allow srcWidth, srcHeight, srcPixels to be optional
         const inOutTask: InputAndOutputTask = {
-        type: WgpuTaskType.INPUT_AND_OUTPUT,
-        width: task.width as number,
-        height: task.height as number,
-        pixels: task.pixels as Uint8Array,
-        srcWidth: task.srcWidth as number,
-        srcHeight: task.srcHeight as number,
-        srcPixels: task.srcPixels as Uint8Array,
-        shaderCode,
+          type: WgpuTaskType.INPUT_AND_OUTPUT,
+          width: task.width as number,
+          height: task.height as number,
+          pixels: task.pixels as Uint8Array,
+          srcWidth: (task as any).srcWidth ?? 0,
+          srcHeight: (task as any).srcHeight ?? 0,
+          srcPixels: (task as any).srcPixels ?? new Uint8Array(),
+          shaderCode,
         };
         const finalShader = shaderCode || this._getDefaultFragmentShaderForType(WgpuTaskType.INPUT_AND_OUTPUT);
         await this._processInputAndOutput(inOutTask, finalShader);
         return inOutTask;
-    }
+      }
 
-    default:
-        throw new Error(`[WgpuTaskManager] Unknown task type: ${taskType}`);
+      default:
+        throw new Error(`[WgpuTaskManager] Unknown type in task: ${task}`);
     }
   }
 
@@ -201,7 +181,4 @@ fn main(@builtin(position) coord: vec4f) -> @location(0) vec4f {
   }
 }
 
-
-
-
-export { WgpuTaskManager };
+export { WebGpuAwaitProcessor };

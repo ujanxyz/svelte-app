@@ -46,10 +46,6 @@ class IoWorkerApi {
     return await this.#invokeAsync<"listAssets">("listAssets", request);
   }
 
-  public async stageAssets(request: ioApis.Request<"stageAssets">): Promise<ioApis.Response<"stageAssets">> {
-    return await this.#invokeAsync<"stageAssets">("stageAssets", request);
-  }
-
   public async registerPreview(request: ioApis.Request<"registerPreview">): Promise<ioApis.Response<"registerPreview">> {
     const { offscreen } = request;
     return await this.#invokeAsync<"registerPreview">("registerPreview", request, [offscreen]);

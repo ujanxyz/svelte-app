@@ -145,20 +145,6 @@ export namespace graphApis {
       response: VoidType;
     };
 
-    buildPipeline: {
-      request: VoidType;
-      response: {
-        assetInfos: grph.AssetInfo[];
-      };
-    };
-
-    getResources: {
-      request: VoidType;
-      response: {
-        resources: grph.ResourceInfo[];
-      };
-    };
-
   };
 
   export type Names = keyof ApiDict;

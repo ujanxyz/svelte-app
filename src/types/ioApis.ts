@@ -53,14 +53,6 @@ export namespace ioApis {
       };
     },
 
-    stageAssets: {
-      request: {
-        isPostRun: boolean;
-        assetInfos: grph.AssetInfo[];
-      };
-      response: {};
-    },
-
     registerPreview: {
       request: {
         slotId: grph.SlotId;

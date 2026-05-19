@@ -3,6 +3,5 @@ import type { AwaitTaskChannel } from "./AwaitTaskChannel";
 export interface AwaitTaskProcessor<TReq, TResult> {
   name: string;
 
-  processAsync(task: TReq): Promise<TResult>;
+  processAsync(taskId: string, taskData: TReq): Promise<TResult>;
 }
-

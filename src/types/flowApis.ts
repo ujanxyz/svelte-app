@@ -1,6 +1,4 @@
 import type { flow } from "./flow";
-import type { fn } from "./function";
-import type { grph } from "./grph";
 
 export namespace flowApis {
 
@@ -16,9 +14,7 @@ export namespace flowApis {
 
     buildPipeline: {
       request: VoidType;
-      response: {
-        assetInfos: grph.AssetInfo[];
-      };
+      response: VoidType;
     };
 
     stepPipeline: {

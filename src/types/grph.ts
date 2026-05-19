@@ -61,13 +61,6 @@ export namespace grph {
     bitmap?: BitmapInfo;
   };
 
-  export interface AssetInfo {
-    slotId: SlotId;
-    assetType: "UNKNOWN" | "GRAPHIN" | "MANUAL" | "ARTIFACT" | "GRAPHOUT";
-    dtype: string;
-    assetUri: string | null;
-  };
-
   // State related types.
 
   export interface EncodedData {

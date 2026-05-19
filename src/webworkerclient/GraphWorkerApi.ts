@@ -58,14 +58,6 @@ class GraphWorkerApi {
     return await this.invokeAsync<"setEncodedData">("setEncodedData", request);
   }
 
-  public async buildPipeline(request: graphApis.Request<"buildPipeline">): Promise<graphApis.Response<"buildPipeline">> {
-    return await this.invokeAsync<"buildPipeline">("buildPipeline", request);
-  }
-
-  public async getResources(request: graphApis.Request<"getResources">): Promise<graphApis.Response<"getResources">> {
-    return await this.invokeAsync<"getResources">("getResources", request);
-  }
-
   private async invokeAsync<K extends graphApis.Names>(name: K, request: graphApis.Request<K>): Promise<graphApis.Response<K>> {
     const { ok, code, payload, error } = await this.client.send(`GRAPH:${name}`, request, []);
     if (!ok) {

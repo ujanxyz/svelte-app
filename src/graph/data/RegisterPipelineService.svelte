@@ -38,8 +38,7 @@ registerGraphService("pipelineService", _createPipelineService());
 function _createPipelineService() {
 
   async function buildPipeline(): Promise<void> {
-    const { assetInfos } = await flow.buildPipeline({});
-    await io.stageAssets({ isPostRun: false, assetInfos });
+    await flow.buildPipeline({});
   }
 
   async function stepPipeline(): Promise<void> {
