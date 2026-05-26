@@ -1,33 +1,36 @@
 /**
- * Template handler for INPUT_AND_OUTPUT tasks.
- * Reads one input texture, writes to output buffer.
- * Shader receives input texture and outputs pixels.
+ * Unified template handler for WebGPU tasks.
+ * Supports 0..N input images and one target output image.
  */
 
-import type { InputAndOutputTask } from '../types';
+import type { WgpuTask } from '../types';
+import { WebGpuResources } from '../WebGpuResources';
 import {
   calculateBufferAlignment,
+  createFullscreenRectVertexBuffer,
   createFullscreenTriangleVertexModule,
   createInputTexture,
   createOutputBuffer,
   createRenderTargetTexture,
-  initializeDevice,
   readbackBuffer,
 } from '../wgpuCommon';
 
 export async function processInputAndOutputTemplate(
-  task: InputAndOutputTask,
+  task: WgpuTask,
   shaderCode: string
 ): Promise<void> {
-  const { width, height, pixels, srcWidth, srcHeight, srcPixels } = task;
+  const { targetImage, inImages } = task;
+  const { width, height, pixels } = targetImage;
+  const inputCount = inImages.length;
 
   console.log(
-    `[templateInputAndOutput] Processing input(${srcWidth}x${srcHeight}) -> output(${width}x${height}) task`,
+    `[templateInputAndOutput] Processing ${inputCount} input image(s) -> output(${width}x${height}) task`,
     task
   );
 
-  // Initialize device
-  const { device } = await initializeDevice();
+  // Initialize shared device and static resources once.
+  const webGpuResources = new WebGpuResources();
+  const { device } = await webGpuResources.getResources();
 
   // Calculate buffer alignment for output
   const alignment = calculateBufferAlignment(width, 4);
@@ -40,58 +43,83 @@ export async function processInputAndOutputTemplate(
   // Create resources
   const renderTarget = createRenderTargetTexture(device, width, height);
   const outputBuffer = createOutputBuffer(device, alignment.bufferSize);
+  const vertexBuffer = createFullscreenRectVertexBuffer(device);
 
-  const inputTexture = createInputTexture(device, srcWidth, srcHeight, srcPixels);
+  let bindGroupLayout: GPUBindGroupLayout | undefined;
+  let bindGroup: GPUBindGroup | undefined;
 
-  // Create bind group for input texture
-  const sampler = device.createSampler({
-    magFilter: 'linear',
-    minFilter: 'linear',
-  });
+  if (inputCount > 0) {
+    const inputTextures = inImages.map((img, index) => {
+      const requiredBytes = img.width * img.height * 4;
+      if (img.pixels.byteLength < requiredBytes) {
+        throw new Error(
+          `[templateInputAndOutput] inImages[${index}] pixels too small: required=${requiredBytes}, actual=${img.pixels.byteLength}`,
+        );
+      }
+      return createInputTexture(device, img.width, img.height, img.pixels);
+    });
 
-  const bindGroupLayout = device.createBindGroupLayout({
-    entries: [
-      {
-        binding: 0,
-        visibility: GPUShaderStage.FRAGMENT,
-        texture: { sampleType: 'float' },
-      },
-      {
-        binding: 1,
-        visibility: GPUShaderStage.FRAGMENT,
-        sampler: { type: 'filtering' },
-      },
-    ],
-  });
+    const sampler = device.createSampler({
+      magFilter: 'linear',
+      minFilter: 'linear',
+    });
 
-  const bindGroup = device.createBindGroup({
-    layout: bindGroupLayout,
-    entries: [
-      { binding: 0, resource: inputTexture.createView() },
-      { binding: 1, resource: sampler },
-    ],
-  });
+    // Dedicated bind group for input textures/sampler.
+    // binding(0) is sampler, binding(1..N) are texture_2d resources.
+    bindGroupLayout = device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.FRAGMENT,
+          sampler: { type: 'filtering' },
+        },
+        ...inputTextures.map((_, index) => ({
+          binding: index + 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          texture: {
+            sampleType: 'float' as GPUTextureSampleType,
+            viewDimension: '2d' as GPUTextureViewDimension,
+          },
+        })),
+      ],
+    });
+
+    bindGroup = device.createBindGroup({
+      layout: bindGroupLayout,
+      entries: [
+        { binding: 0, resource: sampler },
+        ...inputTextures.map((texture, index) => ({
+          binding: index + 1,
+          resource: texture.createView({ dimension: '2d' }),
+        })),
+      ],
+    });
+  }
 
   // Create pipeline with bind group layout
   const vertexModule = createFullscreenTriangleVertexModule(device);
   const fragmentModule = device.createShaderModule({ code: shaderCode });
 
-  const pipelineLayout = device.createPipelineLayout({
-    bindGroupLayouts: [bindGroupLayout],
-  });
-
   const pipeline = device.createRenderPipeline({
-    layout: pipelineLayout,
+    layout: bindGroupLayout
+      ? device.createPipelineLayout({ bindGroupLayouts: [bindGroupLayout] })
+      : 'auto',
     vertex: {
       module: vertexModule,
-      entryPoint: 'main',
+      entryPoint: 'vs_main',
+      buffers: [
+        {
+          arrayStride: 8,
+          attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
+        },
+      ],
     },
     fragment: {
       module: fragmentModule,
-      entryPoint: 'main',
+      entryPoint: 'fs_main',
       targets: [{ format: 'rgba8unorm' }],
     },
-    primitive: { topology: 'triangle-list' },
+    primitive: { topology: 'triangle-strip' },
   });
 
   // Render and copy
@@ -107,8 +135,11 @@ export async function processInputAndOutputTemplate(
     ],
   });
   pass.setPipeline(pipeline);
-  pass.setBindGroup(0, bindGroup);
-  pass.draw(3);
+  pass.setVertexBuffer(0, vertexBuffer);
+  if (bindGroup) {
+    pass.setBindGroup(0, bindGroup);
+  }
+  pass.draw(4);
   pass.end();
 
   encoder.copyTextureToBuffer(

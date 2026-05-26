@@ -23,10 +23,10 @@ import { useAppSettings } from "@/features/app-settings/useAppSettings.svelte";
 import type { xy } from "@/types/xy";
 import { getAppIcon } from "@/utils/appIcons";
 
-import DefaultEdge from "../edges/DefaultEdge.svelte";
 import { useGraphService } from "../graph-services";
-import FunctionNode from "../nodes/FunctionNode.svelte";
-import GraphIONode from "../nodes/GraphIONode.svelte";
+import DefaultEdge from "./DefaultEdge.svelte";
+import FunctionNode from "./FunctionNode.svelte";
+import GraphIONode from "./GraphIONode.svelte";
 import useEditorInteractions from "./useEditorInteractions";
 import useMenusAndPopups from "./useMenusAndPopups";
 //import PlayIcon from "phosphor-svelte/lib/PlayIcon";

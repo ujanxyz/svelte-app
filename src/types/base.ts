@@ -14,4 +14,10 @@ export namespace base {
     width: number;
     height: number;
   } 
+
+  export interface ZoomLevel {
+    x: number;
+    y: number;
+    zoom: number;
+  }
 }

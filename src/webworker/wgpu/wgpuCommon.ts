@@ -36,34 +36,11 @@ declare global {
   };
 }
 
-export interface DeviceContext {
-  device: GPUDevice;
-  adapter: GPUAdapter;
-}
-
 export interface BufferAlignment {
   bytesPerPixel: number;
   unalignedBytesPerRow: number;
   alignedBytesPerRow: number;
   bufferSize: number;
-}
-
-/**
- * Initialize WebGPU device and adapter.
- * Throws if WebGPU is not supported.
- */
-export async function initializeDevice(): Promise<DeviceContext> {
-  const adapter = await navigator.gpu?.requestAdapter();
-  if (!adapter) {
-    throw new Error('[wgpuCommon] WebGPU not supported or adapter unavailable');
-  }
-
-  const device = await adapter.requestDevice();
-  if (!device) {
-    throw new Error('[wgpuCommon] Failed to request WebGPU device');
-  }
-
-  return { device, adapter };
 }
 
 /**
@@ -135,15 +112,44 @@ export function createOutputBuffer(device: GPUDevice, bufferSize: number): GPUBu
 }
 
 /**
- * Create a simple full-screen triangle render pass setup.
- * Returns the vertex shader module for a fullscreen triangle.
+ * Create a fullscreen quad vertex buffer for two triangles in triangle-strip order.
+ * Vertex layout: vec2<f32> position at location(0).
+ */
+export function createFullscreenRectVertexBuffer(device: GPUDevice): GPUBuffer {
+  const vertices = new Float32Array([
+    -1, -1,
+    1, -1,
+    -1, 1,
+    1, 1,
+  ]);
+
+  const vertexBuffer = device.createBuffer({
+    size: vertices.byteLength,
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+  });
+
+  device.queue.writeBuffer(vertexBuffer, 0, vertices);
+  return vertexBuffer;
+}
+
+/**
+ * Create vertex shader module for fullscreen-quad rendering.
+ * Produces normalized UV in location(0) for fragment stage.
  */
 export function createFullscreenTriangleVertexModule(device: GPUDevice): GPUShaderModule {
   return device.createShaderModule({
-    code: `@vertex fn main(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
-      var pos = array<vec2f, 3>(vec2(-1, -1), vec2(3, -1), vec2(-1, 3));
-      return vec4f(pos[i], 0.0, 1.0);
-    }`,
+    code: 
+`struct VSOut {
+  @builtin(position) pos: vec4<f32>,
+  @location(0) uv: vec2<f32>,
+};
+@vertex fn vs_main(@location(0) position: vec2<f32>) -> VSOut {
+  var out: VSOut;
+  out.pos = vec4<f32>(position, 0.0, 1.0);
+  out.uv = (position * 0.5) + vec2<f32>(0.5);
+  out.uv.y = 1.0 - out.uv.y;
+  return out;
+}`,
   });
 }
 
@@ -165,14 +171,20 @@ export function createRenderPipeline(
     layout: bindGroupLayout ? device.createPipelineLayout({ bindGroupLayouts: [bindGroupLayout] }) : 'auto',
     vertex: {
       module: vertexModule,
-      entryPoint: 'main',
+      entryPoint: 'vs_main',
+      buffers: [
+        {
+          arrayStride: 8,
+          attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
+        },
+      ],
     },
     fragment: {
       module: fragmentModule,
-      entryPoint: 'main',
+      entryPoint: 'fs_main',
       targets: [{ format: 'rgba8unorm' }],
     },
-    primitive: { topology: 'triangle-list' },
+    primitive: { topology: 'triangle-strip' },
   });
 }
 

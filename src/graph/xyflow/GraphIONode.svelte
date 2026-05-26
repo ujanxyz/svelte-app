@@ -3,8 +3,8 @@ import PreviewCanvas from "@/graph/components/PreviewCanvas.svelte";
 import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
 
+import MyHandle from "../components/MyHandle.svelte";
 import NodeHeader from "../components/NodeHeader.svelte";
-import MyHandle from "./MyHandle.svelte";
 import { setNodeContextOps } from "./nodeContextOps";
 import XYNodeTopBar, { type ActionHandler } from "./XYNodeTopBar.svelte";
 
@@ -32,7 +32,7 @@ const slotState = $derived(nodeOps.reactiveSlotState(slotInfo.name)) as grph.Slo
 let anchorContainerRef: HTMLDivElement | undefined = $state();
 
 async function onZoomClick(): Promise<void> {
-  await nodeOps.expandPreview(slotInfo, nodeState.encodedData);
+  await nodeOps.expandPreview();
 }
 
 async function onEditClick(): Promise<void> {
@@ -82,7 +82,7 @@ const actionHandler: ActionHandler = {
   align-items: stretch;
   row-gap: var(--space-1);
 
-  padding: 0 12px;
+  padding: 0 var(--space-1);
 }
 
 .node-shell {

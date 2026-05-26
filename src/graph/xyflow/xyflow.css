@@ -21,9 +21,9 @@
   background: var(--color-bg-3);
   border: 0.5px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  width: 7.5rem;
-  padding-top: var(--space-2);
-  padding-bottom: var(--space-3);
+  width: 6.5rem;
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
 }
 
 .svelte-flow__node.selected {
@@ -37,7 +37,7 @@
 }
 
 .svelte-flow__node-graphio {
-
+  width: 5.25rem;
 }
 
 

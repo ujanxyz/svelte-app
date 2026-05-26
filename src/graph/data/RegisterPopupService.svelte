@@ -47,7 +47,7 @@ type Ntype = grph.NodeInfo["ntype"];
 
 const overlayMgr = useOverlayManager();
 const mediaManager = createOverlayController<{}, void>(overlayMgr, renderMediaManager);
-const imageViewer = createOverlayController<{id: string}, void>(overlayMgr, renderImgViewer);
+const imageViewer = createOverlayController<{assetUri: string}, void>(overlayMgr, renderImgViewer);
 const fnGallery = createOverlayController<{}, fn.FunctionInfo | fn.GraphIoInfo>(overlayMgr, renderFnGallery);
 const ioGallery = createOverlayController<IoGalleryPayload, string>(overlayMgr, renderIoGallery);
 const manualInput = createOverlayController<ManualInputOverlayPayload, grph.EncodedData>(overlayMgr, renderGraphInputEditor);
@@ -64,8 +64,8 @@ async function mediaManagerModal(): Promise<void> {
   await mediaManager.open({});
 }
 
-async function imgViewerModal(id: string): Promise<void> {
-  await imageViewer.open({id});
+async function imgViewerModal(assetUri: string): Promise<void> {
+  await imageViewer.open({assetUri});
 }
 
 async function nodeTemplateGallery(ntype: Ntype): Promise<base.StatusOr<fn.FunctionInfo | fn.GraphIoInfo>> {

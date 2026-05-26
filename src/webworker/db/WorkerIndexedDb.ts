@@ -254,6 +254,7 @@ class WorkerIndexedDb {
     if (!record) {
       throw new Error(`Artifact not found for id: ${id}`);
     }
+    console.log(`Fetched artifact record for id ${id}:`, record);
     return record;
   }
 
@@ -267,15 +268,8 @@ class WorkerIndexedDb {
     return true;
   }
 
-  public async getAssetBitmapById(id: string): Promise<{ meta: StoredMediaMeta | StoredArtifactMeta; bitmap: ImageBitmap }> {
-    const parsed = parseAssetUri(id);
-    if (!parsed) {
-      const blob = await this.getMediaBlob(id);
-      const bitmap = await createImageBitmap(blob);
-      const meta = await this.getMediaMeta(id);
-      return { meta, bitmap };
-    }
-
+  public async getAssetBitmap(assetUri: string): Promise<{ meta: StoredMediaMeta | StoredArtifactMeta; bitmap: ImageBitmap }> {
+    const parsed = parseAssetUri(assetUri)!;
     if (parsed.scheme !== MEDIA_STORE_SCHEME) {
       throw new Error(`Unsupported asset URI scheme: ${parsed.scheme}`);
     }

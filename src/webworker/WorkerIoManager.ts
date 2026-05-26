@@ -70,7 +70,8 @@ class WorkerIoManager {
        */
       case "getMediaData": {
         const { id } = request as { id: string };
-        const { meta, bitmap } = await this.indexedDb.getAssetBitmapById(id);
+        const { meta, bitmap } = await this.indexedDb.getAssetBitmap(id);
+        console.log(`[WorkerIoManager] Fetched media asset with id ${id}, meta:`, meta, bitmap);
         return { meta, bitmap, transfer: [bitmap] };
       }
 
@@ -92,8 +93,7 @@ class WorkerIoManager {
        * when the UI is unmounted.
        */
       case "registerPreview": {
-        const { slotId, offscreen } = request as ioApis.Request<"registerPreview">;
-        const assetKey = `${String(slotId.parent)}:${slotId.name}`;
+        const { assetKey, offscreen } = request as ioApis.Request<"registerPreview">;
         const regKey = this.previewManager.registerPreview(assetKey, offscreen);
         return { regKey } as ioApis.Response<"registerPreview">;
       }

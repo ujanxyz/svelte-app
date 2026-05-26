@@ -1,6 +1,7 @@
 import { getContext, setContext } from "svelte";
 
 import type { grph } from "@/types/grph";
+import { makeArtifactUri } from "@/utils/strUtils";
 import { IoWorkerApi } from "@/webworkerclient/IoWorkerApi";
 
 import { useGraphService } from "../graph-services";
@@ -30,11 +31,11 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
 
   return {
     reactiveNodeState: function(): grph.NodeState {
-      return reactiveService.useNodeState(rawNodeId);
+      return reactiveService.useNodeState(nodeId);
     },
 
     reactiveSlotState: function(slotName: string): grph.SlotState {
-      return reactiveService.useSlotState({ parent: rawNodeId, name: slotName });
+      return reactiveService.useSlotState({ parent: nodeId, name: slotName });
     },
 
     onDeleteSelf: async function(): Promise<void> {
@@ -42,7 +43,7 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
     },
 
     onSelfInput: async function(encoded: string): Promise<void> {
-      await flowService!.setGraphInput(rawNodeId, encoded);
+      await flowService!.setGraphInput(nodeId, encoded);
     },
 
     /**
@@ -64,7 +65,7 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
       }
       console.log("Graph input editor closed with result:", dtypeStr, editedData);
       // TODO: Set whole payload.
-      await flowService!.setGraphInput(rawNodeId, editedData.payload);      
+      await flowService!.setGraphInput(nodeId, editedData.payload);      
     },
 
     onSlotInput: async function(slotInfo: grph.SlotInfo, slotState: grph.SlotState, triggerRect: DOMRect): Promise<void> {
@@ -80,16 +81,15 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
       }
       const data = result.value as grph.EncodedData;
       console.log("Slot input editor closed with result:", slotInfo.dtype, data);
-      await flowService!.setSlotInput(rawNodeId, slotInfo.name, data.payload);
+      await flowService!.setSlotInput(nodeId, slotInfo.name, data.payload);
     },
 
     registerPreview: async function (slotInfo: grph.SlotInfo, onscreen: HTMLCanvasElement): Promise<string> {
       if (slotInfo.dtype !== "bitmap") {
         throw new Error("Previews are only supported for bitmap data");
       }
-      const slotId: grph.SlotId = { parent: rawNodeId, name: slotInfo.name };
       const offscreen = onscreen.transferControlToOffscreen() as OffscreenCanvas;
-      const { regKey } = await graphIo.registerPreview({ slotId, offscreen });
+      const { regKey } = await graphIo.registerPreview({ assetKey: nodeId, offscreen });
       return regKey;
     },
 
@@ -97,10 +97,8 @@ function makeNodeContextOps(nodeInfo: grph.NodeInfo) {
       await graphIo.unRegisterPreview({ regKey });
     },
 
-    expandPreview: async function(slotId: grph.SlotId, encodedData: grph.EncodedData | null = null): Promise<void> {
-      const assetUri: string = nodeInfo.ntype === "IN"
-        ? (parseAssetUriFromEncodedData(encodedData) ?? `idb:/artifacts/${slotId.parent}:${slotId.name}`)
-        : `idb:/artifacts/${slotId.parent}:${slotId.name}`;
+    expandPreview: async function(): Promise<void> {
+      const assetUri = makeArtifactUri(nodeId);
       await popupService.imgViewerModal(assetUri);
     },
   };

@@ -1,8 +1,8 @@
 <script lang="ts">
 import ContextMenuMain from "@/demos/ContextMenuMain.svelte";
+import DesignEditorViewDemo from "@/demos/design-editor-v0/DesignEditorViewDemo.svelte";
 import MasonryGridMain from "@/demos/masonry-grid/MasonryGridMain.svelte";
 import StyleDemosMain from "@/demos/style-tokens/StyleDemosMain.svelte";
-import PickFile from "@/modules/sloteditor/PickFile.svelte";
 import WebWorkerTestMain from "@/webworkerclient/WebWorkerTestMain.svelte";
 
 import ButtonGroup from "../components/ButtonGroup.svelte";
@@ -16,6 +16,7 @@ import ScreenLayout from "./ScreenLayout.svelte";
 const modes = [
   { code: "recursive", label: "Cards" },
   { code: "ctxmenu", label: "Ctx Menu" },
+  { code: "designv0", label: "Design V0" },
   { code: "masonry", label: "Masonry" },
   { code: "graph", label: "Graph" },
   { code: "stage", label: "Stage" },
@@ -23,7 +24,6 @@ const modes = [
   { code: "toast", label: "Toast" },
   { code: "memlog", label: "Mem-logging" },
   { code: "worker", label: "WebWorker" },
-  { code: "upload", label: "File Upload" },
   { code: "styles", label: "Styles" },
 ];
 
@@ -44,12 +44,13 @@ function handleSelect(code: string) {
     <RecursiveCardsMain />
   {:else if selected === "ctxmenu"}
     <ContextMenuMain />
+  {:else if selected === "designv0"}
+    <DesignEditorViewDemo />
   {:else if selected === "masonry"}
     <MasonryGridMain />
   {:else if selected === "graph"}
     <GraphEditorWithRealOps />
   {:else if selected === "stage"}
-    <GraphEditorWithRealOps />
     <StageViewMain />
   {:else if selected === "screen"}
     <ScreenLayout />
@@ -59,8 +60,6 @@ function handleSelect(code: string) {
     <MemLogTesterMain />
   {:else if selected === "worker"}
     <WebWorkerTestMain />
-  {:else if selected === "upload"}
-    <PickFile />
   {:else if selected === "styles"}
     <StyleDemosMain />
   {:else}

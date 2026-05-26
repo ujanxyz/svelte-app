@@ -30,7 +30,7 @@ interface PersistedGraphDoc {
   meta: xy.StoredGraphMeta;
   nodes: xy.StoredNode[];
   edges: xy.StoredEdge[];
-  encoded: { slotId: grph.SlotId; encodedData: grph.EncodedData }[];
+  encoded: { slotId: grph.EncodedSlotId; encodedData: grph.EncodedData }[];
 }
 
 registerGraphService("pipelineService", _createPipelineService());
@@ -174,8 +174,7 @@ async function _makePersistedGraphDoc(): Promise<PersistedGraphDoc> {
 
   const xyNodes = flowGraphService.allNodes();
   const nodes: xy.StoredNode[] = [];
-
-  const encodedEntries: { slotId: grph.SlotId; encodedData: grph.EncodedData }[] = [];
+  const encodedEntries: { slotId: grph.EncodedSlotId; encodedData: grph.EncodedData }[] = [];
   for (const node of xyNodes) {
     const slotInfos: grph.SlotInfo[] = [];
     if (node.type === "function") {
@@ -187,7 +186,7 @@ async function _makePersistedGraphDoc(): Promise<PersistedGraphDoc> {
     }
 
     slotInfos.forEach((slotInfo: grph.SlotInfo) => {
-      const slotId: grph.SlotId = { parent: slotInfo.parent, name: slotInfo.name };
+      const slotId: grph.EncodedSlotId = { parent: slotInfo.encodedParent, name: slotInfo.name };
       const slotState = $state.snapshot(reactiveService.useSlotState(slotId));
       if (slotState.encodedData === null) return;
       encodedEntries.push({ slotId, encodedData: slotState.encodedData });

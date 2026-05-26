@@ -1,9 +1,8 @@
 import type { AwaitTaskProcessor } from "@/webworker/await-task/types";
 
-import { processInputAndOutputTemplate } from "./templates/templateInputAndOutput";
-import { processOutputOnlyTemplate } from "./templates/templateOutputOnly";
-import type { InputAndOutputTask, OutputOnlyTask, WgpuTask } from "./types";
-import { WgpuTaskType } from "./types";
+import { RunWgpuPipeline } from "./RunWgpuPipeline";
+import type { WgpuTask } from "./types";
+import { WebGpuResources } from "./WebGpuResources";
 
 interface WgpuResult {
 
@@ -11,173 +10,66 @@ interface WgpuResult {
 
 class WebGpuAwaitProcessor implements AwaitTaskProcessor<WgpuTask, WgpuResult> {
   public readonly name = "wgpu";
+  private readonly webGpuResources = new WebGpuResources();
 
   async processAsync(taskId: string, taskData: WgpuTask): Promise<WgpuResult> {
-      console.time("wgpu-fulfill");
+    console.time("wgpu-fulfill");
+    console.log(`[WebGpuAwaitProcessor] Processing task ${taskId} with data:`, taskData);
     let result: WgpuResult = {};
     try {
-      // Infer task type from raw data and route to appropriate handler
-      const inferredTask = await this._inferAndRouteTask(taskData);
+      await this._validateTask(taskData);
+      const fragShader = taskData.fragShader || this._getDefaultFragmentShader();
+      await RunWgpuPipeline(taskData, fragShader, this.webGpuResources);
     } catch (error) {
-      console.error(`[WgpuTaskManager] Error fulfilling task ${taskId}:`, error);
+      console.error(`[WebGpuAwaitProcessor] Error fulfilling task ${taskId}:`, error);
     }
     console.timeEnd("wgpu-fulfill");
     return result;
   }
 
-  /**
-   * Infer task type from raw data and route to appropriate template handler.
-   * If explicit type field is missing, detect based on field presence.
-   */
-  private async _inferAndRouteTask(task: WgpuTask): Promise<WgpuTask> {
-    const shaderCode = (task.shaderCode as string) || this._getDefaultFragmentShaderForType(task.type);
-
-    // Explicit type field takes precedence
-    switch (task.type) {
-      case WgpuTaskType.OUTPUT_ONLY: {
-        const outTask: OutputOnlyTask = {
-          type: WgpuTaskType.OUTPUT_ONLY,
-          width: task.width as number,
-          height: task.height as number,
-          pixels: task.pixels as Uint8Array,
-          shaderCode,
-        };
-        await this._processOutputOnly(outTask, shaderCode);
-        return outTask;
+  private async _validateTask(task: WgpuTask): Promise<void> {
+    if (!task.targetImage) {
+      throw new Error("[WebGpuAwaitProcessor] Missing required field: targetImage");
+    }
+    if (!Array.isArray(task.inImages)) {
+      throw new Error("[WebGpuAwaitProcessor] Missing required field: inImages[]");
+    }
+    if (!(task.targetImage.pixels instanceof Uint8Array)) {
+      throw new Error("[WebGpuAwaitProcessor] targetImage.pixels must be Uint8Array");
+    }
+    if (task.targetImage.width <= 0 || task.targetImage.height <= 0) {
+      throw new Error("[WebGpuAwaitProcessor] targetImage width/height must be > 0");
+    }
+    for (let i = 0; i < task.inImages.length; i++) {
+      const img = task.inImages[i];
+      if (!(img.pixels instanceof Uint8Array)) {
+        throw new Error(`[WebGpuAwaitProcessor] inImages[${i}].pixels must be Uint8Array`);
       }
-
-      case WgpuTaskType.INPUT_AND_OUTPUT: {
-        // Defensive: allow srcWidth, srcHeight, srcPixels to be optional
-        const inOutTask: InputAndOutputTask = {
-          type: WgpuTaskType.INPUT_AND_OUTPUT,
-          width: task.width as number,
-          height: task.height as number,
-          pixels: task.pixels as Uint8Array,
-          srcWidth: (task as any).srcWidth ?? 0,
-          srcHeight: (task as any).srcHeight ?? 0,
-          srcPixels: (task as any).srcPixels ?? new Uint8Array(),
-          shaderCode,
-        };
-        const finalShader = shaderCode || this._getDefaultFragmentShaderForType(WgpuTaskType.INPUT_AND_OUTPUT);
-        await this._processInputAndOutput(inOutTask, finalShader);
-        return inOutTask;
+      if (img.width <= 0 || img.height <= 0) {
+        throw new Error(`[WebGpuAwaitProcessor] inImages[${i}] width/height must be > 0`);
       }
-
-      default:
-        throw new Error(`[WgpuTaskManager] Unknown type in task: ${task}`);
     }
   }
 
   /**
-   * Get a sensible default vertex shader for a given task type.
+   * Default fragment shader: left 50% black, right 50% white.
+   * Used when fragShader is not provided in the task.
    */
-  private _getDefaultVertexShaderForType(type: WgpuTaskType): string {
-    switch (type) {
-      case WgpuTaskType.OUTPUT_ONLY:
-        return this._getDefaultOutputOnlyVertexShader();
-      case WgpuTaskType.INPUT_AND_OUTPUT:
-        return this._getDefaultInputAndOutputVertexShader();
-      default:
-        throw new Error(`No default vertex shader for task type: ${type}`);
-    }
-  }
-
-  /**
-   * Get a sensible default fragment shader for a given task type.
-   */
-  private _getDefaultFragmentShaderForType(type: WgpuTaskType): string {
-    switch (type) {
-      case WgpuTaskType.OUTPUT_ONLY:
-        return this._getDefaultOutputOnlyFragmentShader();
-      case WgpuTaskType.INPUT_AND_OUTPUT:
-        return this._getDefaultInputAndOutputFragmentShader();
-      default:
-        throw new Error(`No default fragment shader for task type: ${type}`);
-    }
-  }
-
-  /**
-   * Default vertex shader for OUTPUT_ONLY: fullscreen triangle.
-   */
-  private _getDefaultOutputOnlyVertexShader(): string {
-    return `@vertex fn main(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
-  var pos = array<vec2f, 3>(vec2(-1, -1), vec2(3, -1), vec2(-1, 3));
-  return vec4f(pos[i], 0.0, 1.0);
-}`;
-  }
-
-  /**
-   * Default fragment shader for OUTPUT_ONLY: grid pattern with tile colors.
-   */
-  private _getDefaultOutputOnlyFragmentShader(): string {
-    return `@fragment
-fn main(@builtin(position) coord: vec4f) -> @location(0) vec4f {
-  let x = coord.x;
-  let y = coord.y;
-  let grid_size: f32 = 32.0;
-  let is_grid_line: bool = (f32(u32(x) % u32(grid_size)) < 1.0) || 
-                           (f32(u32(y) % u32(grid_size)) < 1.0);
-  
-  if (is_grid_line) {
-    return vec4f(1.0, 1.0, 1.0, 1.0);
-  }
-  
-  let tile_x = floor(x / grid_size);
-  let tile_y = floor(y / grid_size);
-  let r = (tile_x * 13.0 % 255.0) / 255.0;
-  let g = (tile_y * 7.0 % 255.0) / 255.0;
-  let b = ((tile_x + tile_y) * 3.0 % 255.0) / 255.0;
-  
-  return vec4f(r, g, b, 1.0);
-}`;
-  }
-
-  /**
-   * Default vertex shader for INPUT_AND_OUTPUT: fullscreen triangle.
-   */
-  private _getDefaultInputAndOutputVertexShader(): string {
-    return `@vertex fn main(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
-  var pos = array<vec2f, 3>(vec2(-1, -1), vec2(3, -1), vec2(-1, 3));
-  return vec4f(pos[i], 0.0, 1.0);
-}`;
-  }
-
-  /**
-   * Default fragment shader for INPUT_AND_OUTPUT: left half passthrough, right half inverted.
-   */
-  private _getDefaultInputAndOutputFragmentShader(): string {
-    return `@group(0) @binding(0) var input_texture: texture_2d<f32>;
-@group(0) @binding(1) var input_sampler: sampler;
+  private _getDefaultFragmentShader(): string {
+    return `struct VSOut {
+  @builtin(position) pos: vec4<f32>,
+  @location(0) uv: vec2<f32>,
+};
 
 @fragment
-fn main(@builtin(position) coord: vec4f) -> @location(0) vec4f {
-  let uv = coord.xy / vec2f(textureDimensions(input_texture));
-  let color = textureSample(input_texture, input_sampler, uv);
-
+fn fs_main(in: VSOut) -> @location(0) vec4f {
+  let uv = in.uv;
   if (uv.x < 0.5) {
-    return color;
+    return vec4f(0.0, 0.0, 0.0, 1.0);
+  } else {
+    return vec4f(1.0, 1.0, 1.0, 1.0);
   }
-
-  return vec4f(1.0 - color.r, 1.0 - color.g, 1.0 - color.b, color.a);
 }`;
-  }
-
-  /**
-   * Dispatch OUTPUT_ONLY task to template handler.
-   */
-  private async _processOutputOnly(task: OutputOnlyTask, shaderCode: string): Promise<void> {
-    console.log('[WgpuTaskManager] Using OUTPUT_ONLY template');
-    console.log('[WgpuTaskManager] Fragment shader:', shaderCode);
-    await processOutputOnlyTemplate(task, shaderCode);
-  }
-
-  /**
-   * Dispatch INPUT_AND_OUTPUT task to template handler.
-   */
-  private async _processInputAndOutput(task: InputAndOutputTask, shaderCode: string): Promise<void> {
-    console.log('[WgpuTaskManager] Using INPUT_AND_OUTPUT template');
-    console.log('[WgpuTaskManager] Fragment shader:', shaderCode);
-    await processInputAndOutputTemplate(task, shaderCode);
   }
 }
 

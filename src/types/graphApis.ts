@@ -73,30 +73,26 @@ export namespace graphApis {
       };
       response: {
         edgeInfos: grph.EdgeInfo[];
-        slotStates: [grph.SlotId, grph.SlotState][];
       };
     };
   
     deleteElements: {
       request: {
-        nodeIds: number[];
-        edgeIds: number[];
+        nodeIds: string[];
+        edgeIds: string[];
       };
       response: {
-        nodeIds: number[];
-        edgeIds: number[];
-        deletedSlotIds: grph.SlotId[];
-        affectedSlotIds: grph.SlotId[];
+        edgeIds: string[];
+        deletedSlotIds: grph.EncodedSlotId[];
+        affectedSlotIds: grph.EncodedSlotId[];
         topoOrder?: string[];
       };
     };
 
     validateEdge: {
       request: {
-        sourceNode: number;
-        sourceSlot: string;
-        targetNode: number;
-        targetSlot: string;
+        source: grph.EncodedSlotId;
+        target: grph.EncodedSlotId;
       };
       response: {
         validity: grph.SlotValidity;
@@ -105,20 +101,19 @@ export namespace graphApis {
 
     getNodeStates: {
       request: {
-        nodeIds: number[];
+        nodeIds: string[];
       };
       response: {
-        nodeStates: [number /* nodeId */, grph.NodeState][];
+        nodeStates: [string /* nodeId */, grph.NodeState][];
       };
     };
 
     getSlotStates: {
       request: {
-        slotIds: grph.SlotId[];
-        slotIdsEncoded: grph.EncodedSlotId[];
+        slotIds: grph.EncodedSlotId[];
       };
       response: {
-        slotStates: [grph.SlotId, grph.SlotState][];
+        slotStates: [grph.EncodedSlotId, grph.SlotState][];
       };
     };
 
@@ -137,9 +132,7 @@ export namespace graphApis {
 
     setEncodedData: {
       request: {
-        isNode: boolean;
-        nodeId: number | null;
-        slotId: grph.SlotId | null;
+        slotId: grph.EncodedSlotId;
         encodedData: grph.EncodedData | null;
       };
       response: VoidType;

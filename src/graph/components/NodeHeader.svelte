@@ -30,10 +30,9 @@ const { label, nodeId }: Props = $props();
 }
 
 .nodeid {
-  font-size: 0.3rem;
+  font-size: 0.35rem;
   font-family: var(--font-family-mono);
   color: var(--color-text-lo-con);
-  margin-bottom: 4px;
 }
 
 </style>

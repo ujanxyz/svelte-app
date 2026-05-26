@@ -18,8 +18,9 @@ const INITIAL_MAX_H = 800;
 const ARTIFICIAL_DELAY_MS = 0;
 
 const io = getContext(IoWorkerApi.CONTEXT_KEY) as IoWorkerApi;
-const overlay = useOverlayInstance<{ id: string }, void>();
+const overlay = useOverlayInstance<{ assetUri: string }, void>();
 const IcoSeparator = getAppIcon("dot-outline");
+const assetUri = overlay.payload?.assetUri;
 
 // Reactive state: media data
 let bitmap = $state<ImageBitmap | null>(null);
@@ -99,9 +100,8 @@ function getDisplayFormat(meta: StoredAssetMeta): string {
 }
 
 async function loadMediaByPayloadId(): Promise<void> {
-  const id = overlay.payload?.id;
-  if (!id) {
-    loadError = "Missing asset id in overlay payload.";
+  if (!assetUri) {
+    loadError = "Missing asset URI in overlay payload.";
     loading = false;
     return;
   }
@@ -112,7 +112,7 @@ async function loadMediaByPayloadId(): Promise<void> {
 
   try {
     const [response] = await Promise.all([
-      io.getMediaData({ id }),
+      io.getMediaData({ id: assetUri }),
       wait(ARTIFICIAL_DELAY_MS),
     ]);
     bitmap = response.bitmap;
@@ -330,7 +330,7 @@ onMount(() => {
     updateCheckerPattern();
     renderFrame();
   };
-  img.src = "/images/CheckerBoardSeemlessPattern.jpg";
+  img.src = "/images/ff.jpg";
 
   windowEl.focus();
   void loadMediaByPayloadId();
@@ -383,6 +383,8 @@ onMount(() => {
 
   <!-- ── Info banner (top, always visible) ─────────────────────────────────── -->
   <div class="iv-info-banner" aria-label="Image info">
+    {assetUri}
+    {@render separator()}
     <span class="iv-field iv-name">{displayName}</span>
     {@render separator()}
     <span class="iv-field">{mediaWidth}&thinsp;×&thinsp;{mediaHeight}</span>

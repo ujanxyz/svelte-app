@@ -5,7 +5,7 @@ import FadingPanel from "@/components/FadingPanel.svelte";
 import type { grph } from "@/types/grph";
 import { getAppIcon } from "@/utils/appIcons";
 
-import type { NodeContextOps } from "../nodes/nodeContextOps";
+import type { NodeContextOps } from "../xyflow/nodeContextOps";
 
 const IconEdit = getAppIcon("note-pencil");
 
@@ -55,7 +55,7 @@ onMount(() => {
     <FadingPanel className="preview-canvas-fading-panel">
       <div role="toolbar" aria-label="Preview actions">
         <button class="preview-open-btn" type="button" onclick={onEditClick} aria-label={`Edit ${slotInfo.name}`}>
-          <IconEdit size={14} weight="bold" aria-hidden="true" />
+          <IconEdit size={12} aria-hidden="true" />
         </button>
       </div>
     </FadingPanel>
@@ -64,18 +64,21 @@ onMount(() => {
 
 <style>
 .preview-shell {
-  width: 6rem;
-  height: 6rem;
+  width: 4.5rem;
+  height: 4.5rem;
   position: relative;
 }
 
 .preview-button {
-  width: 6rem;
-  height: 6rem;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+
+  width: 100%;
+  height: 100%;
   padding: 0;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-0);
+  border-radius: var(--radius-md);
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -93,7 +96,7 @@ onMount(() => {
 }
 
 .preview-canvas {
-  width: 6rem;
+  width: 100%;
   aspect-ratio: 1 / 1;
   display: block;
   background: var(--color-bg-1);
@@ -109,9 +112,9 @@ onMount(() => {
 }
 
 .preview-open-btn {
-  width: calc(var(--space-6) * 2);
-  height: calc(var(--space-6) * 2);
-  border: 1px solid var(--color-border-default);
+  width: calc(var(--space-4) * 2);
+  height: calc(var(--space-4) * 2);
+  border: 0.5px solid var(--color-border-strong);
   border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;

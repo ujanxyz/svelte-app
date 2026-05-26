@@ -60,13 +60,14 @@ class AssetDbAwaitProcessor implements AwaitTaskProcessor<AssetDbTask, AssetDbRe
 
   async #loadAsync(task: AssetDbLoadTask): Promise<AssetDbLoadResult> {
     const { assetUri, assetId } = task;
-    console.log(`[AssetDbAwaitProcessor] Received load task for URI: ${assetUri}`);
-    const { meta, bitmap } = await this.indexedDb.getAssetBitmapById(assetUri);
+    console.log(`[AssetDbAwaitProcessor.#loadAsync] Received load task for URI: ${assetUri}`);
+    const { meta, bitmap } = await this.indexedDb.getAssetBitmap(assetUri);
     console.log(`[AssetDbAwaitProcessor] Loaded asset with id=${meta.id}, bitmap=`, bitmap);
     const imageData = await canvasUtils.bitmapToImageData(bitmap) as ImageData;
     if (imageData.colorSpace !== "srgb") {
       console.error("[JsBitmapPool] Unsupported image data color space: ", imageData.colorSpace);
     }
+    const { id, meta: artifactMeta } = await this.indexedDb.uploadArtifactImage(assetId, imageData, { stage: "input" });
     this.previewManager.setGraphicForKey(assetId, imageData);
     return { assetId: meta.id, imageData };
   }

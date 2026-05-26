@@ -4,6 +4,7 @@ import ArrowSquareOut from "phosphor-svelte/lib/ArrowSquareOutIcon";
 import BracketsSquareIcon from "phosphor-svelte/lib/BracketsSquareIcon";
 import BugIcon from "phosphor-svelte/lib/BugIcon";
 import CaretRightIcon from "phosphor-svelte/lib/CaretRightIcon";
+import CircleIcon from "phosphor-svelte/lib/CircleIcon";
 import CircleNotchIcon from "phosphor-svelte/lib/CircleNotchIcon";
 import ClipboardIcon from "phosphor-svelte/lib/ClipboardIcon";
 import CodeIcon from "phosphor-svelte/lib/CodeIcon";
@@ -14,6 +15,7 @@ import EmptyIcon from "phosphor-svelte/lib/EmptyIcon";
 import FunctionIcon from "phosphor-svelte/lib/FunctionIcon";
 import ImageSquare from "phosphor-svelte/lib/ImageSquareIcon";
 import InfoIcon from "phosphor-svelte/lib/InfoIcon";
+import LineSegmentIcon from "phosphor-svelte/lib/LineSegmentIcon";
 import LineVerticalIcon from "phosphor-svelte/lib/LineVerticalIcon";
 import LinkSimpleBreakIcon from "phosphor-svelte/lib/LinkSimpleBreakIcon";
 import LinkSimpleIcon from "phosphor-svelte/lib/LinkSimpleIcon";
@@ -25,11 +27,13 @@ import Notches from "phosphor-svelte/lib/NotchesIcon";
 import NotePencil from "phosphor-svelte/lib/NotePencilIcon";
 import PencilSimpleIcon from "phosphor-svelte/lib/PencilSimpleIcon";
 import PlusIcon from "phosphor-svelte/lib/PlusIcon";
+import RectangleIcon from "phosphor-svelte/lib/RectangleIcon";
 import Shapes from "phosphor-svelte/lib/ShapesIcon";
 import SignIn from "phosphor-svelte/lib/SignInIcon";
 import SignOut from "phosphor-svelte/lib/SignOutIcon";
 import StackMinus from "phosphor-svelte/lib/StackMinusIcon";
 import StackPlus from "phosphor-svelte/lib/StackPlusIcon";
+import StarIcon from "phosphor-svelte/lib/StarIcon";
 import Sun from "phosphor-svelte/lib/SunIcon";
 import TrashIcon from "phosphor-svelte/lib/TrashIcon";
 import Warning from "phosphor-svelte/lib/WarningIcon";
@@ -44,6 +48,7 @@ const appIcons = {
   "brackets-square": BracketsSquareIcon,
   bug: BugIcon,
   "caret-right": CaretRightIcon,
+  circle: CircleIcon,
   "circle-notch": CircleNotchIcon,
   clipboard: ClipboardIcon,
   code: CodeIcon,
@@ -57,6 +62,7 @@ const appIcons = {
   "link-simple": LinkSimpleIcon,
   "link-simple-break": LinkSimpleBreakIcon,
   "line-vertical": LineVerticalIcon,
+  "line-segment": LineSegmentIcon,
   list: List,
   "list-numbers": ListNumbers,
   "magnifying-glass": MagnifyingGlass,
@@ -65,12 +71,14 @@ const appIcons = {
   "note-pencil": NotePencil,
   pencil: PencilSimpleIcon,
   plus: PlusIcon,
+  rectangle: RectangleIcon,
   shapes: Shapes,
   "sign-in": SignIn,
   "sign-out": SignOut,
   "stack-minus": StackMinus,
   "stack-plus": StackPlus,
   "sun": Sun,
+  star: StarIcon,
   trash: TrashIcon,
   warning: Warning,
   wrench: Wrench,

@@ -1,6 +1,5 @@
 <script lang="ts">
 import logo from "../assets/svelte.svg";
-import PropsPanelMain from "../graph/propspanel/PropsPanelMain.svelte";
 import WasmTester from "../webworkerclient/WasmTester.svelte";
 import ContentSelector from "./ContentSelector.svelte";
 </script>
@@ -15,7 +14,7 @@ import ContentSelector from "./ContentSelector.svelte";
     <WasmTester />
   </nav>
   <div id="siteAds">
-    <PropsPanelMain />
+    Props ..
   </div>
   <footer id="pageFooter">Footer</footer>
 </div>

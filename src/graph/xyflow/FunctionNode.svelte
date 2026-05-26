@@ -4,8 +4,8 @@ import NodeHeader from "@/graph/components/NodeHeader.svelte";
 import type { grph } from "@/types/grph";
 import type { xy } from "@/types/xy";
 
+import SlotsArray from "../components/SlotsArray.svelte";
 import { setNodeContextOps } from "./nodeContextOps";
-import SlotsArray from "./SlotsArray.svelte";
 import XYNodeTopBar, { type ActionHandler } from "./XYNodeTopBar.svelte";
 
 const {
@@ -33,11 +33,16 @@ const actionHandler: ActionHandler = {
   }
 };
 
+function reactiveSlotState(slotName: string): grph.SlotState {
+  return nodeOps.reactiveSlotState(slotName);
+}
+
 </script>
 
 <div class="node-shell">
   <NodeHeader label={`${rawNodeId} / ${nodeState.label}`} {nodeId} />
-  <SlotsArray ins={funcNodeData.inInfos} outs={funcNodeData.outInfos} inouts={funcNodeData.inoutInfos} />
+  <SlotsArray ins={funcNodeData.inInfos} outs={funcNodeData.outInfos}
+      inouts={funcNodeData.inoutInfos} reactiveSlot={reactiveSlotState} />
 </div>
 <XYNodeTopBar ntype={funcNodeData.info.ntype} {actionHandler} />
 

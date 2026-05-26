@@ -18,6 +18,7 @@ export namespace grph {
   // See C++ repo -> //ujcore/graph
   export interface SlotInfo {
     parent: number;
+    encodedParent: string;
     name: string;
     dtype: string;
     access: "I" | "O" | "M";

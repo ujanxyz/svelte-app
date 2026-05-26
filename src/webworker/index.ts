@@ -1,4 +1,3 @@
-import type { wa } from "@/types/wa";
 import {
   type RawWorkerResponse,
   type SecureMessage,

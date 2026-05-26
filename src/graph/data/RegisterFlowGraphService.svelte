@@ -79,7 +79,7 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition, override
     position,
   };
 
-  reactiveService.setNodeState(nodeInfo.rawId, nodeState!);
+  reactiveService.setNodeState(nodeInfo.alnumid, nodeState!);
 
   const allSlotInfos = [...inInfos, ...outInfos, ...inoutInfos];
   const allSlotStates = [...inStates, ...outStates, ...inoutStates];
@@ -88,7 +88,7 @@ async function newNodeAt(fnSpec: fn.FunctionInfo, position: XYPosition, override
   }
   for (let i = 0; i < allSlotInfos.length; i++) {
     const slotInfo = allSlotInfos[i];
-    const slotId: grph.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
+    const slotId: grph.EncodedSlotId = { parent: slotInfo.encodedParent, name: slotInfo.name };
     reactiveService.setSlotState(slotId, allSlotStates[i]);
   }
 
@@ -114,8 +114,8 @@ async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPositi
     position,
   };
 
-  reactiveService.setNodeState(nodeInfo.rawId, nodeState!);
-  const slotId: grph.SlotId = {parent: slotInfo.parent, name: slotInfo.name};
+  reactiveService.setNodeState(nodeInfo.alnumid, nodeState!);
+  const slotId: grph.EncodedSlotId = { parent: slotInfo.encodedParent, name: slotInfo.name };
   reactiveService.setSlotState(slotId, slotState!);
 
   _updateNodes((nodes: Node[]) => {
@@ -124,23 +124,9 @@ async function newGraphIOAt(dtype: string, isOutput: boolean, position: XYPositi
 }
 
 async function validateEdge(connection: Connection): Promise<grph.SlotValidity> {
-  const sourceHandle = connection.sourceHandle!;
-  const targetHandle = connection.targetHandle!;
-  const sourceSlot = _removeSuffix(sourceHandle, "/out");
-  const targetSlot = _removeSuffix(targetHandle, "/in");
-
-  const nodeData0 = _getNode(connection.source)?.data as xy.xyBaseNodeData;
-  const nodeData1 = _getNode(connection.target)?.data as xy.xyBaseNodeData;
-  if (!nodeData0 || !nodeData1) {
-    throw new Error("Source or target node data not found");
-  }
-
-  const { validity } = await graph.validateEdge({
-    sourceNode: nodeData0.info.rawId,
-    targetNode: nodeData1.info.rawId,
-    sourceSlot,
-    targetSlot,
-  });
+  const source: grph.EncodedSlotId = {parent: connection.source, name: connection.sourceHandle!};
+  const target: grph.EncodedSlotId = {parent: connection.target, name: connection.targetHandle!};  
+  const { validity } = await graph.validateEdge({ source, target });
   return validity as grph.SlotValidity;
 }
 
@@ -167,8 +153,7 @@ async function addEdges(entries: { source: grph.EncodedSlotId; target: grph.Enco
     allSlotIds.push(entry.source, entry.target);
   }
   const { slotStates } = await graph.getSlotStates({
-    slotIds: [],
-    slotIdsEncoded: allSlotIds,
+    slotIds: allSlotIds,
   });
   console.log("Updated slot states after adding edges:", slotStates);
   for (const [slotId, slotState] of slotStates) {
@@ -177,16 +162,16 @@ async function addEdges(entries: { source: grph.EncodedSlotId; target: grph.Enco
 }
 
 async function deletionHandle(nodes: xy.xyNode[], edges: xy.xyEdge[]): Promise<void> {
-  const nodeIds: number[] = nodes.map((n: xy.xyNode) => (n.data as xy.xyBaseNodeData).info.rawId);
-  const edgeIds: number[] = edges.map((e: xy.xyEdge) => (e.data as xy.xyEdgeData).info.id);
+  const nodeIds: string[] = nodes.map((n: xy.xyNode) => n.id);
+  const edgeIds: string[] = edges.map((e: xy.xyEdge) => e.id);
   const { deletedSlotIds, affectedSlotIds } = await graph.deleteElements({
     nodeIds,
     edgeIds,
   });
+
   reactiveService.deleteSlots(deletedSlotIds);
   const { slotStates } = await graph.getSlotStates({
     slotIds: affectedSlotIds,
-    slotIdsEncoded: [],
   });
   for (const [slotId, slotState] of slotStates) {
     reactiveService.setSlotState(slotId, slotState);
@@ -237,21 +222,18 @@ function assignGraph(newNodes: Node[], newEdges: Edge[]): void {
   _setEdges(newEdges);
 }
 
-async function setGraphInput(rawNodeId: number, encoded: string): Promise<void> {
+async function setGraphInput(nodeId: string, encoded: string): Promise<void> {
+  const slotId: grph.EncodedSlotId = { parent: nodeId, name: "$out" };
   await graph.setEncodedData({
-    isNode: true,
-    nodeId: rawNodeId,
-    slotId: null,
+    slotId,
     encodedData: { payload: encoded } as grph.EncodedData,
   });
-  await _internalUpdateNodeState(rawNodeId);
+  await _internalUpdateNodeState(nodeId);
 }
 
-async function setSlotInput(rawNodeId: number, slotName: string, encoded: string): Promise<void> {
-  const slotId: grph.SlotId = { parent: rawNodeId, name: slotName };
+async function setSlotInput(nodeId: string, slotName: string, encoded: string): Promise<void> {
+  const slotId: grph.EncodedSlotId = { parent: nodeId, name: slotName };
   await graph.setEncodedData({
-    isNode: false,
-    nodeId: null,
     slotId,
     encodedData: { payload: encoded } as grph.EncodedData,
   });
@@ -266,36 +248,18 @@ function setViewport(viewport: xy.Viewport): void {
   _setViewport(viewport);
 }
 
-function _getClientXY(event: MouseEvent | TouchEvent): base.XYPosition {
-  if (event instanceof MouseEvent) {
-    return { x: event.clientX, y: event.clientY };
-  } else {
-    const touch = event.touches[0] ?? event.changedTouches[0];
-    return { x: touch.clientX, y: touch.clientY };
-  }
-}
-
-function _removeSuffix(text: string, suffix: string): string {
-  if (text.endsWith(suffix)) {
-    return text.slice(0, -suffix.length);
-  }
-  return text;
-}
-
-async function _internalUpdateNodeState(rawNodeId: number): Promise<void> {
-  const { nodeStates } = await graph.getNodeStates({ nodeIds: [rawNodeId] });
+async function _internalUpdateNodeState(nodeId: string): Promise<void> {
+  const { nodeStates } = await graph.getNodeStates({ nodeIds: [nodeId] });
   for (const [nodeId, nodeState] of nodeStates) {
     reactiveService.setNodeState(nodeId, nodeState);
   }
 }
 
-async function _internalUpdateSlotState(slotId: grph.SlotId): Promise<void> {
-  const { slotStates } = await graph.getSlotStates({
-    slotIds: [slotId],
-    slotIdsEncoded: [],
-  });
+async function _internalUpdateSlotState(slotId: grph.EncodedSlotId): Promise<void> {
+  const { slotStates } = await graph.getSlotStates({ slotIds: [slotId] });
   for (const [slotId, slotState] of slotStates) {
     reactiveService.setSlotState(slotId, slotState);
   }
 }
+
 </script>

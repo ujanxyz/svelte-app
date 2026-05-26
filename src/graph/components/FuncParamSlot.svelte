@@ -16,7 +16,7 @@ import type { Component } from "svelte";
 import type { grph } from "@/types/grph";
 import { getAppIcon } from "@/utils/appIcons";
 
-import { getNodeContextOps } from "../nodes/nodeContextOps";
+import { getNodeContextOps } from "../xyflow/nodeContextOps";
 
 interface Props {
   slotInfo: grph.SlotInfo;

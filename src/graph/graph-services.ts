@@ -31,11 +31,11 @@ interface RawStoreService {
 }
 
 interface ReactiveService {
-  setNodeState(rawNodeId: number, state: grph.NodeState): void;
-  useNodeState(rawNodeId: number): grph.NodeState;
-  setSlotState(slotId: grph.SlotId, state: grph.SlotState): void;
-  useSlotState(slotId: grph.SlotId): grph.SlotState;
-  deleteSlots(slotIds: grph.SlotId[]): void;
+  setNodeState(nodeId: string, state: grph.NodeState): void;
+  useNodeState(nodeId: string): grph.NodeState;
+  setSlotState(slotId: grph.EncodedSlotId, state: grph.SlotState): void;
+  useSlotState(slotId: grph.EncodedSlotId): grph.SlotState;
+  deleteSlots(slotIds: grph.EncodedSlotId[]): void;
 }
 
 interface FlowGraphService {
@@ -58,8 +58,8 @@ interface FlowGraphService {
   deleteAllEdges: () => Promise<void>;
   deleteGraph: () => Promise<void>;
   assignGraph: (newNodes: Node[], newEdges: Edge[]) => void;
-  setGraphInput: (rawNodeId: number, encoded: string) => Promise<void>;
-  setSlotInput: (rawNodeId: number, slotName: string, encoded: string) => Promise<void>;
+  setGraphInput: (nodeId: string, encoded: string) => Promise<void>;
+  setSlotInput: (nodeId: string, slotName: string, encoded: string) => Promise<void>;
 
   getViewport(): xy.Viewport;
   setViewport(viewport: xy.Viewport): void;
@@ -76,7 +76,7 @@ type MenuFunction = (clientXY: base.XYPosition) => Promise<base.StatusOr<string>
 
 interface PopupService {
   mediaManagerModal: () => Promise<void>;
-  imgViewerModal: (id: string) => Promise<void>;
+  imgViewerModal: (assetUri: string) => Promise<void>;
   nodeTemplateGallery: (ntype: grph.NodeInfo["ntype"]) => Promise<base.StatusOr<fn.FunctionInfo | fn.GraphIoInfo>>;
   encodedDataEditor: (rawNodeId: number, dtypeStr: string, priorIoData: grph.EncodedData | null, triggerRect: DOMRect)
       => Promise<base.StatusOr<grph.EncodedData>>;

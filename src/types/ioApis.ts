@@ -1,7 +1,7 @@
 import type { grph } from "@/types/grph";
 
-import type { AssetSummary, AssetType, StoredAssetMeta, StoredMediaMeta } from "./worker-message-types";
 import type { flow } from "./flow";
+import type { AssetSummary, AssetType, StoredAssetMeta, StoredMediaMeta } from "./worker-message-types";
 
 export namespace ioApis {
   interface VoidType {};
@@ -55,7 +55,7 @@ export namespace ioApis {
 
     registerPreview: {
       request: {
-        slotId: grph.SlotId;
+        assetKey: string;
         offscreen: OffscreenCanvas;
       };
       response: {
