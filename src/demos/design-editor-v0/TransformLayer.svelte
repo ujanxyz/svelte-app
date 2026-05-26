@@ -1,9 +1,9 @@
 <script lang="ts">
-import { onMount } from "svelte";
-
 import type { base } from "@/types/base";
 
-import ShapeHighlighter, { type ShapeHighlighterRect } from "./ShapeHighlighter.svelte";
+import ShapeHighlighter from "./ShapeHighlighter.svelte";
+import TransformFrame, { type TransformFrameState } from "./TransformFrame.svelte";
+import type { IDimension, RotatedRect } from "./types";
 
 // Possible states:
 // - hover: when hovering over a shape (not dragging), shows the highlighter.
@@ -25,6 +25,11 @@ export type StartTransform = {
   width: number;
   height: number;
   rotationDeg: number;
+  activePointer?: {
+    pointerId: number;
+    clientX: number;
+    clientY: number;
+  };
 } | {
   mode: "line";
   x1: number;
@@ -36,31 +41,61 @@ export type StartTransform = {
 interface Props {
   // Add zoom pan related props here if needed for the transform layer.
   zoomLevel: base.ZoomLevel;
+  viewport: IDimension;
+  onchange?: (next: RotatedRect) => void;
   onMove?: (dx: number, dy: number) => void;
   onRotate?: (dRotationDeg: number) => void;
 }
 
 const {
   zoomLevel,
+  viewport,
+  onchange,
 }: Props = $props();
 
 let mode = $state<TransformMode>(null);
-let txRect = $state<ShapeHighlighterRect | null>(null);
-let viewportWidth = $state(1);
-let viewportHeight = $state(1);
-let rootEl = $state<HTMLDivElement | null>(null);
+let txRect = $state<RotatedRect | null>(null);
+let activePointer = $state<{ pointerId: number; clientX: number; clientY: number } | null>(null);
+let txSession = $state(0);
 
-const projectedTxRect = $derived.by<ShapeHighlighterRect | null>(() => {
+function worldToViewportRect(rect: RotatedRect): RotatedRect {
+  return {
+    x: (rect.x - zoomLevel.x) * zoomLevel.zoom + viewport.width / 2,
+    y: (rect.y - zoomLevel.y) * zoomLevel.zoom + viewport.height / 2,
+    width: rect.width * zoomLevel.zoom,
+    height: rect.height * zoomLevel.zoom,
+    rotationDeg: rect.rotationDeg,
+  };
+}
+
+function viewportToWorldRect(rect: RotatedRect): RotatedRect {
+  return {
+    x: (rect.x - viewport.width / 2) / zoomLevel.zoom + zoomLevel.x,
+    y: (rect.y - viewport.height / 2) / zoomLevel.zoom + zoomLevel.y,
+    width: rect.width / zoomLevel.zoom,
+    height: rect.height / zoomLevel.zoom,
+    rotationDeg: rect.rotationDeg,
+  };
+}
+
+const projectedTxRect = $derived.by<RotatedRect | null>(() => {
   if (!txRect) return null;
 
-  return {
-    x: (txRect.x - zoomLevel.x) * zoomLevel.zoom + viewportWidth / 2,
-    y: (txRect.y - zoomLevel.y) * zoomLevel.zoom + viewportHeight / 2,
-    width: txRect.width * zoomLevel.zoom,
-    height: txRect.height * zoomLevel.zoom,
-    rotationDeg: txRect.rotationDeg,
-  };
+  return worldToViewportRect(txRect);
 });
+
+function onFrameChange(state: TransformFrameState): void {
+  const nextProjected: RotatedRect = {
+    x: state.centerX - state.width / 2,
+    y: state.centerY - state.height / 2,
+    width: state.width,
+    height: state.height,
+    rotationDeg: state.rotationDeg,
+  };
+  const nextWorld = viewportToWorldRect(nextProjected);
+  txRect = nextWorld;
+  onchange?.(nextWorld);
+}
 
 /**
  * Resets the transform on state change.
@@ -76,6 +111,7 @@ export function reset(tx: StartTransform | null): void {
       height: tx.height,
       rotationDeg: tx.rotationDeg,
     };
+    activePointer = null;
     return;
   } else if (tx?.mode === "tx") {
     txRect = {
@@ -85,50 +121,27 @@ export function reset(tx: StartTransform | null): void {
       height: tx.height,
       rotationDeg: tx.rotationDeg,
     };
+    activePointer = tx.activePointer ?? null;
+    txSession += 1;
+    return;
   }
 
-  txRect = null;
+  if (tx?.mode !== "line") {
+    txRect = null;
+    activePointer = null;
+  }
 }
-
-onMount(() => {
-  if (!rootEl) return;
-
-  const syncViewport = (): void => {
-    if (!rootEl) return;
-    const rect = rootEl.getBoundingClientRect();
-    viewportWidth = Math.max(1, rect.width);
-    viewportHeight = Math.max(1, rect.height);
-  };
-
-  const ro = new ResizeObserver(() => {
-    syncViewport();
-  });
-
-  syncViewport();
-  ro.observe(rootEl);
-
-  return () => {
-    ro.disconnect();
-  };
-});
 
 </script>
 
-<div class="transform-layer" data-debug-name="transform-layer" bind:this={rootEl}>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="100%"
-    height="100%"
-    viewBox={`0 0 ${viewportWidth} ${viewportHeight}`}
-    preserveAspectRatio="none"
-    class="transform-layer__svg"
-  >
-    {#if mode === "hover" && projectedTxRect}
-      <ShapeHighlighter rect={projectedTxRect} stroke="#7c3aed" strokeWidth={1.5} dashed />
-    {:else if (mode === "tx" && projectedTxRect)}
-      TransformFrame rect={projectedTxRect}
-    {/if}
-  </svg>
+<div class="transform-layer" data-debug-name="transform-layer">
+  {#if mode === "hover" && projectedTxRect}
+    <ShapeHighlighter rect={projectedTxRect} viewport={viewport} stroke="#7c3aed" strokeWidth={1.5} dashed />
+  {:else if (mode === "tx" && projectedTxRect)}
+    {#key txSession}
+      <TransformFrame initial={projectedTxRect} viewport={viewport} activePointer={activePointer} onchange={onFrameChange} />
+    {/key}
+  {/if}
 </div>
 
 <style>
@@ -140,7 +153,4 @@ onMount(() => {
   display: block;
 }
 
-.transform-layer__svg {
-  display: block;
-}
 </style>

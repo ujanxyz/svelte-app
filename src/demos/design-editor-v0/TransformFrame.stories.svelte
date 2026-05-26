@@ -10,8 +10,15 @@ const { Story } = defineMeta({
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
+    docs: {
+      description: {
+        component: "Use TransformFrame inside a full-sized div layer so the SVG root can size itself to the available drawing area. Pass initial as a rect object with x, y, width, height, and rotationDeg.",
+      },
+    },
   },
   args: {
+    initial: { x: 220, y: 145, width: 240, height: 150, rotationDeg: -10 },
+    viewport: { width: 920, height: 620 },
     onchange: fn(),
   },
 });
@@ -28,11 +35,7 @@ const { Story } = defineMeta({
 <Story
   name="Large Rotated"
   args={{
-    initialCenterX: 460,
-    initialCenterY: 320,
-    initialWidth: 360,
-    initialHeight: 180,
-    initialRotationDeg: 22,
+    initial: { x: 280, y: 230, width: 360, height: 180, rotationDeg: 22 },
   }}
 >
   {#snippet template(args)}
@@ -45,11 +48,7 @@ const { Story } = defineMeta({
 <Story
   name="Flip and Shear Handles"
   args={{
-    initialCenterX: 460,
-    initialCenterY: 300,
-    initialWidth: 300,
-    initialHeight: 160,
-    initialRotationDeg: 0,
+    initial: { x: 310, y: 220, width: 300, height: 160, rotationDeg: 0 },
     strokeColor: "#7c3aed",
   }}
 >
@@ -63,11 +62,7 @@ const { Story } = defineMeta({
 <Story
   name="Locked Aspect Ratio"
   args={{
-    initialCenterX: 460,
-    initialCenterY: 300,
-    initialWidth: 300,
-    initialHeight: 160,
-    initialRotationDeg: 0,
+    initial: { x: 310, y: 220, width: 300, height: 160, rotationDeg: 0 },
     lockAspectRatio: true,
   }}
 >
@@ -81,11 +76,7 @@ const { Story } = defineMeta({
 <Story
   name="Flip and Skew Disabled"
   args={{
-    initialCenterX: 460,
-    initialCenterY: 300,
-    initialWidth: 300,
-    initialHeight: 160,
-    initialRotationDeg: 0,
+    initial: { x: 310, y: 220, width: 300, height: 160, rotationDeg: 0 },
     disableFlip: true,
     disableSkew: true,
   }}
@@ -100,11 +91,7 @@ const { Story } = defineMeta({
 <Story
   name="All Disabled"
   args={{
-    initialCenterX: 460,
-    initialCenterY: 300,
-    initialWidth: 300,
-    initialHeight: 160,
-    initialRotationDeg: 0,
+    initial: { x: 310, y: 220, width: 300, height: 160, rotationDeg: 0 },
     lockAspectRatio: true,
     disableFlip: true,
     disableSkew: true,

@@ -3,11 +3,11 @@ import { onMount } from "svelte";
 
 import type { base } from "@/types/base";
 
-import { DesignEditorEngine } from "./DesignEditorEngine";
+import { DesignEditorEngine, type PointerInfo } from "./DesignEditorEngine";
 import { createDemoElements } from "./ElementStore";
 import { HitCanvas } from "./HitCanvas";
-import TransformLayer from "./TransformLayer.svelte";
-import type { CanvasElement } from "./types";
+import TransformLayer, { type TransformMode } from "./TransformLayer.svelte";
+import type { CanvasElement, IDimension, RotatedRect } from "./types";
 
 const HITCANVAS_ONSCREEN = true;
 const PAGE_WIDTH = 800;
@@ -18,7 +18,43 @@ let hitCanvasEl: HTMLCanvasElement | null = null;
 let showHitCanvas = false;
 let shapes: CanvasElement[] = [];
 const shapeByHitId = new Map<number, CanvasElement>();
-let zoomLevel: base.ZoomLevel = { x: 0, y: 0, zoom: 1 };
+const shapeById = new Map<string, CanvasElement>();
+let zoomLevel = $state<base.ZoomLevel>({ x: 0, y: 0, zoom: 1 });
+let tfMode: TransformMode = null;
+let viewport = $state<IDimension>({ width: PAGE_WIDTH, height: PAGE_HEIGHT });
+let activeTransformId: string | null = null;
+
+function applyFrameTransformToElement(element: CanvasElement, next: RotatedRect): void {
+  element.x = next.x;
+  element.y = next.y;
+  element.width = next.width;
+  element.height = next.height;
+  element.rotation = next.rotationDeg;
+
+  if (element.type === "circle") {
+    element.radius = Math.min(next.width, next.height) / 2;
+  }
+
+  if (element.type === "star") {
+    const prevOuter = element.outerRadius ?? Math.max(element.width, element.height) / 2;
+    const prevInner = element.innerRadius ?? prevOuter * 0.5;
+    const ratio = prevOuter > 0 ? prevInner / prevOuter : 0.5;
+    const outer = Math.max(next.width, next.height) / 2;
+    element.outerRadius = outer;
+    element.innerRadius = outer * ratio;
+  }
+}
+
+function onTransformFrameChange(next: RotatedRect): void {
+  if (tfMode !== "tx" || !activeTransformId) return;
+  const target = shapeById.get(activeTransformId) ?? null;
+  if (!target) return;
+  if (target.type === "line") return;
+
+  applyFrameTransformToElement(target, next);
+  engine.setShapes(shapes);
+  refreshHitCanvas();
+}
 
 function setupHitCanvas(): void {
   if (HITCANVAS_ONSCREEN) {
@@ -88,48 +124,69 @@ const engine = new DesignEditorEngine({
   },
   handlePtrMove: (point) => {
     const hit = findHit(point);
+    if (tfMode === "tx") {
+      return true;
+    }
+
+    if (tfMode === "line") {
+      return true;
+    }
     if (hit) {
       const bounds = hit.getBounds();
+      activeTransformId = hit.id;
+      tfMode = "hover";
       transform?.reset({
-        mode: "hover",
+        mode: tfMode,
         x: bounds.x,
         y: bounds.y,
         width: bounds.width,
         height: bounds.height,
-        rotationDeg: hit.rotation ?? 0,
+        rotationDeg: bounds.rotationDeg,
       });
       // console.log("Pointer move hit", { id: hit.id, hitId: hit.hitId, point });
       return true;
     }
+    tfMode = null;
     transform?.reset(null);
     return false;
   },
-  handlePtrDown: (point) => {
+  handlePtrDown: (point, pointer: PointerInfo) => {
     const hit = findHit(point);
     if (hit) {
+      console.log("Pointer down hit", { id: hit.id, hitId: hit.hitId, point });
       const bounds = hit.getBounds();
+      activeTransformId = hit.id;
+      tfMode = "tx";
       transform?.reset({
-        mode: "hover",
+        mode: tfMode,
         x: bounds.x,
         y: bounds.y,
         width: bounds.width,
         height: bounds.height,
-        rotationDeg: hit.rotation ?? 0,
+        rotationDeg: bounds.rotationDeg,
+        activePointer: pointer,
       });
-      console.log("Pointer down hit", { id: hit.id, hitId: hit.hitId, point });
       return true;
     }
+
     transform?.reset(null);
+    tfMode = null;
+    activeTransformId = null;
     return false;
   },
   handlePtrUp: (point) => {
+    if (tfMode === null) {
+      transform?.reset(null);
+      activeTransformId = null;
+      return false;
+    }
     console.log("Pointer up", point);
-    // transform?.reset(null);
-    return false;
+    return true;
   },
 });
 
 let container: HTMLDivElement;
+let shellEl: HTMLDivElement;
 let transform: TransformLayer | null = null;
 
 onMount(() => {
@@ -138,10 +195,12 @@ onMount(() => {
   shapes = createDemoElements(PAGE_WIDTH, PAGE_HEIGHT);
 
   shapeByHitId.clear();
+  shapeById.clear();
   for (const shape of shapes) {
     hitCanvas.initCandidate(shape);
     shape.hitcolor = shape.hitColor;
     shapeByHitId.set(shape.hitId, shape);
+    shapeById.set(shape.id, shape);
   }
 
   setupHitCanvas();
@@ -151,10 +210,31 @@ onMount(() => {
   }
   engine.setShapes(shapes);
 
+  const syncViewport = (): void => {
+    const rect = shellEl.getBoundingClientRect();
+    viewport = {
+      width: Math.max(1, Math.round(rect.width)),
+      height: Math.max(1, Math.round(rect.height)),
+    };
+
+    // Resize invalidates pointer coordinate mapping, so clear active overlays.
+    tfMode = null;
+    activeTransformId = null;
+    transform?.reset(null);
+  };
+
+  const ro = new ResizeObserver(() => {
+    syncViewport();
+  });
+
+  syncViewport();
+  ro.observe(shellEl);
+
   window.addEventListener("keydown", handleKeyDown);
 
   return () => {
     window.removeEventListener("keydown", handleKeyDown);
+    ro.disconnect();
     hitCanvas.destroy();
     hitCanvasEl?.remove();
     hitCanvasEl = null;
@@ -163,12 +243,14 @@ onMount(() => {
 
 </script>
 
-<div class="shell">
+<div class="shell" bind:this={shellEl}>
   <div class="content" bind:this={container}>
   </div>
   <TransformLayer
     bind:this={transform}
     {zoomLevel}
+    {viewport}
+    onchange={onTransformFrameChange}
   />
 </div>
 

@@ -7,7 +7,7 @@ import type {
   CanvasElement,
   DistributionDirection,
   ElementType,
-  Rect,
+  RotatedRect,
   RotatedrectDelta,
 } from "./types";
 
@@ -37,28 +37,61 @@ function lineEndpoints(el: CanvasElement): { x1: number; y1: number; x2: number;
   return { x1, y1, x2, y2 };
 }
 
-function boundsFromElement(this: CanvasElement): Rect {
+function withElementRotation(ctx: CanvasRenderingContext2D, element: CanvasElement, draw: () => void): void {
+  const rotation = element.rotation ?? 0;
+  if (!rotation) {
+    draw();
+    return;
+  }
+
+  const cx = element.x + element.width / 2;
+  const cy = element.y + element.height / 2;
+  ctx.translate(cx, cy);
+  ctx.rotate((rotation * Math.PI) / 180);
+  ctx.translate(-cx, -cy);
+  draw();
+}
+
+function boundsFromElement(this: CanvasElement): RotatedRect {
   if (this.type === "line") {
     const { x1, y1, x2, y2 } = lineEndpoints(this);
     const minX = Math.min(x1, x2);
     const minY = Math.min(y1, y2);
     const maxX = Math.max(x1, x2);
     const maxY = Math.max(y1, y2);
-    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+      rotationDeg: (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI,
+    };
   }
 
   if (this.type === "circle") {
     const radius = this.radius ?? Math.min(this.width, this.height) / 2;
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
-    return { x: cx - radius, y: cy - radius, width: radius * 2, height: radius * 2 };
+    return {
+      x: cx - radius,
+      y: cy - radius,
+      width: radius * 2,
+      height: radius * 2,
+      rotationDeg: 0,
+    };
   }
 
   if (this.type === "star") {
     const outer = this.outerRadius ?? Math.max(this.width, this.height) / 2;
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
-    return { x: cx - outer, y: cy - outer, width: outer * 2, height: outer * 2 };
+    return {
+      x: cx - outer,
+      y: cy - outer,
+      width: outer * 2,
+      height: outer * 2,
+      rotationDeg: this.rotation ?? 0,
+    };
   }
 
   return {
@@ -66,6 +99,7 @@ function boundsFromElement(this: CanvasElement): Rect {
     y: this.y,
     width: this.width,
     height: this.height,
+    rotationDeg: this.rotation ?? 0,
   };
 }
 
@@ -79,14 +113,16 @@ function drawElement(this: CanvasElement, ctx: CanvasRenderingContext2D): void {
   ctx.lineWidth = Math.max(1, this.strokeWidth || 1);
 
   if (this.type === "rect" || this.type === "group") {
-    if (this.type === "group") {
-      ctx.setLineDash([5, 4]);
-      ctx.strokeStyle = this.stroke || "#94a3b8";
-      ctx.strokeRect(this.x, this.y, this.width, this.height);
-    } else {
-      ctx.fillRect(this.x, this.y, this.width, this.height);
-      ctx.strokeRect(this.x, this.y, this.width, this.height);
-    }
+    withElementRotation(ctx, this, () => {
+      if (this.type === "group") {
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = this.stroke || "#94a3b8";
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+      } else {
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+      }
+    });
     ctx.restore();
     return;
   }
@@ -123,33 +159,37 @@ function drawElement(this: CanvasElement, ctx: CanvasRenderingContext2D): void {
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
 
-    ctx.beginPath();
-    for (let i = 0; i < points * 2; i += 1) {
-      const radius = i % 2 === 0 ? outer : inner;
-      const angle = -Math.PI / 2 + (i * Math.PI) / points;
-      const px = cx + Math.cos(angle) * radius;
-      const py = cy + Math.sin(angle) * radius;
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    withElementRotation(ctx, this, () => {
+      ctx.beginPath();
+      for (let i = 0; i < points * 2; i += 1) {
+        const radius = i % 2 === 0 ? outer : inner;
+        const angle = -Math.PI / 2 + (i * Math.PI) / points;
+        const px = cx + Math.cos(angle) * radius;
+        const py = cy + Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    });
     ctx.restore();
     return;
   }
 
   // Dummy image drawing until source binding is wired.
-  ctx.fillStyle = "#dbeafe";
-  ctx.fillRect(this.x, this.y, this.width, this.height);
-  ctx.strokeStyle = this.stroke || "#1d4ed8";
-  ctx.strokeRect(this.x, this.y, this.width, this.height);
-  ctx.beginPath();
-  ctx.moveTo(this.x, this.y);
-  ctx.lineTo(this.x + this.width, this.y + this.height);
-  ctx.moveTo(this.x + this.width, this.y);
-  ctx.lineTo(this.x, this.y + this.height);
-  ctx.stroke();
+  withElementRotation(ctx, this, () => {
+    ctx.fillStyle = "#dbeafe";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.strokeStyle = this.stroke || "#1d4ed8";
+    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x + this.width, this.y + this.height);
+    ctx.moveTo(this.x + this.width, this.y);
+    ctx.lineTo(this.x, this.y + this.height);
+    ctx.stroke();
+  });
   ctx.restore();
 }
 
@@ -193,22 +233,26 @@ function drawElementHit(this: CanvasElement, ctx: CanvasRenderingContext2D): voi
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
 
-    ctx.beginPath();
-    for (let i = 0; i < points * 2; i += 1) {
-      const radius = i % 2 === 0 ? outer : inner;
-      const angle = -Math.PI / 2 + (i * Math.PI) / points;
-      const px = cx + Math.cos(angle) * radius;
-      const py = cy + Math.sin(angle) * radius;
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-    ctx.closePath();
-    ctx.fill();
+    withElementRotation(ctx, this, () => {
+      ctx.beginPath();
+      for (let i = 0; i < points * 2; i += 1) {
+        const radius = i % 2 === 0 ? outer : inner;
+        const angle = -Math.PI / 2 + (i * Math.PI) / points;
+        const px = cx + Math.cos(angle) * radius;
+        const py = cy + Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+    });
     ctx.restore();
     return;
   }
 
-  ctx.fillRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2);
+  withElementRotation(ctx, this, () => {
+    ctx.fillRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2);
+  });
   ctx.restore();
 }
 
@@ -615,8 +659,8 @@ export class ElementStore {
         next.height = clampPositive(next.height + delta.height);
         if (next.type === "line" && next.y2 !== undefined) next.y2 += delta.height;
       }
-      if (delta.rotation) {
-        next.rotation += delta.rotation;
+      if (delta.rotationDeg) {
+        next.rotation += delta.rotationDeg;
       }
 
       this.elements.set(id, normalizeElement(next));
@@ -676,145 +720,43 @@ export class ElementStore {
   }
 
   group(ids: string[]): string {
-    const members = this.order.filter((id) => ids.includes(id));
-    if (members.length < 2) return "";
-
-    const bounds = this.#combinedBounds(members);
-    const groupId = this.#nextId("group-");
-
-    const groupElement: CanvasElement = normalizeElement({
-      id: groupId,
-      type: "group",
-      name: `Group ${groupId.slice(-4)}`,
-      x: bounds.x,
-      y: bounds.y,
-      width: bounds.width,
-      height: bounds.height,
-      rotation: 0,
-      opacity: 1,
-      visible: true,
-      locked: false,
-      fill: "transparent",
-      stroke: "#64748b",
-      strokeWidth: 1,
-      zIndex: this.order.length,
-      hitId: -1,
-      hitColor: DEFAULT_HIT_COLOR,
-      hitcolor: DEFAULT_HIT_COLOR,
-      childIds: [...members],
-      draw: drawElement,
-      drawHit: drawElementHit,
-      getBounds: boundsFromElement,
-    });
-
-    this.add(groupElement);
-
-    for (const memberId of members) {
-      const current = this.elements.get(memberId);
-      if (!current) continue;
-      this.elements.set(memberId, normalizeElement({ ...current, parentId: groupId }));
-    }
-
-    this.select([groupId], false);
-    return groupId;
+    // Temporarily disabled until oriented-bounds semantics are fully defined.
+    // const members = this.order.filter((id) => ids.includes(id));
+    // if (members.length < 2) return "";
+    // const bounds = this.#combinedBounds(members);
+    // const groupId = this.#nextId("group-");
+    // ...
+    return "";
   }
 
   ungroup(groupId: string): void {
-    const group = this.elements.get(groupId);
-    if (!group || group.type !== "group") return;
-
-    const children = group.childIds?.length
-      ? group.childIds
-      : this.order.filter((id) => this.elements.get(id)?.parentId === groupId);
-
-    for (const childId of children) {
-      const child = this.elements.get(childId);
-      if (!child) continue;
-      this.elements.set(childId, normalizeElement({ ...child, parentId: undefined }));
-    }
-
-    this.delete([groupId]);
-    this.select(children, false);
+    // Temporarily disabled until oriented-bounds semantics are fully defined.
+    // const group = this.elements.get(groupId);
+    // if (!group || group.type !== "group") return;
+    // ...
+    void groupId;
   }
 
   align(ids: string[], mode: AlignMode): void {
-    const aligned = ids
-      .map((id) => this.elements.get(id))
-      .filter((el): el is CanvasElement => !!el)
-      .filter((el) => !el.locked);
-
-    if (aligned.length < 2) return;
-
-    const bounds = aligned.map((el) => el.getBounds());
-    const minX = Math.min(...bounds.map((b) => b.x));
-    const maxX = Math.max(...bounds.map((b) => b.x + b.width));
-    const minY = Math.min(...bounds.map((b) => b.y));
-    const maxY = Math.max(...bounds.map((b) => b.y + b.height));
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
-
-    for (let i = 0; i < aligned.length; i += 1) {
-      const el = aligned[i];
-      const b = bounds[i];
-
-      let targetX = b.x;
-      let targetY = b.y;
-
-      if (mode === "left") targetX = minX;
-      if (mode === "center") targetX = centerX - b.width / 2;
-      if (mode === "right") targetX = maxX - b.width;
-      if (mode === "top") targetY = minY;
-      if (mode === "middle") targetY = centerY - b.height / 2;
-      if (mode === "bottom") targetY = maxY - b.height;
-
-      const dx = targetX - b.x;
-      const dy = targetY - b.y;
-      this.transform([el.id], { x: dx, y: dy });
-    }
+    // Temporarily disabled until oriented-bounds semantics are fully defined.
+    // const aligned = ids
+    //   .map((id) => this.elements.get(id))
+    //   .filter((el): el is CanvasElement => !!el)
+    //   .filter((el) => !el.locked);
+    // ...
+    void ids;
+    void mode;
   }
 
   distribute(ids: string[], direction: DistributionDirection): void {
-    const items = ids
-      .map((id) => this.elements.get(id))
-      .filter((el): el is CanvasElement => !!el)
-      .filter((el) => !el.locked);
-
-    if (items.length < 3) return;
-
-    const withBounds = items
-      .map((el) => ({ el, bounds: el.getBounds() }))
-      .sort((a, b) =>
-        direction === "horizontal"
-          ? a.bounds.x + a.bounds.width / 2 - (b.bounds.x + b.bounds.width / 2)
-          : a.bounds.y + a.bounds.height / 2 - (b.bounds.y + b.bounds.height / 2),
-      );
-
-    const first = withBounds[0];
-    const last = withBounds[withBounds.length - 1];
-    if (!first || !last) return;
-
-    const firstCenter =
-      direction === "horizontal"
-        ? first.bounds.x + first.bounds.width / 2
-        : first.bounds.y + first.bounds.height / 2;
-    const lastCenter =
-      direction === "horizontal"
-        ? last.bounds.x + last.bounds.width / 2
-        : last.bounds.y + last.bounds.height / 2;
-
-    const gap = (lastCenter - firstCenter) / (withBounds.length - 1);
-
-    for (let i = 1; i < withBounds.length - 1; i += 1) {
-      const item = withBounds[i];
-      if (!item) continue;
-      const currentCenter =
-        direction === "horizontal"
-          ? item.bounds.x + item.bounds.width / 2
-          : item.bounds.y + item.bounds.height / 2;
-      const targetCenter = firstCenter + gap * i;
-      const delta = targetCenter - currentCenter;
-      this.transform(item.el.id ? [item.el.id] : [], direction === "horizontal" ? { x: delta } : { y: delta });
-    }
+    // Temporarily disabled until oriented-bounds semantics are fully defined.
+    // const items = ids
+    //   .map((id) => this.elements.get(id))
+    //   .filter((el): el is CanvasElement => !!el)
+    //   .filter((el) => !el.locked);
+    // ...
+    void ids;
+    void direction;
   }
 
   lock(ids: string[]): void {
@@ -904,19 +846,19 @@ export class ElementStore {
     });
   }
 
-  #combinedBounds(ids: string[]): Rect {
-    const rects = ids
-      .map((id) => this.elements.get(id))
-      .filter((el): el is CanvasElement => !!el)
-      .map((el) => el.getBounds());
+  // #combinedBounds(ids: string[]): Rect {
+  //   const rects = ids
+  //     .map((id) => this.elements.get(id))
+  //     .filter((el): el is CanvasElement => !!el)
+  //     .map((el) => el.getBounds());
 
-    if (!rects.length) return { x: 0, y: 0, width: 0, height: 0 };
+  //   if (!rects.length) return { x: 0, y: 0, width: 0, height: 0 };
 
-    const minX = Math.min(...rects.map((r) => r.x));
-    const minY = Math.min(...rects.map((r) => r.y));
-    const maxX = Math.max(...rects.map((r) => r.x + r.width));
-    const maxY = Math.max(...rects.map((r) => r.y + r.height));
+  //   const minX = Math.min(...rects.map((r) => r.x));
+  //   const minY = Math.min(...rects.map((r) => r.y));
+  //   const maxX = Math.max(...rects.map((r) => r.x + r.width));
+  //   const maxY = Math.max(...rects.map((r) => r.y + r.height));
 
-    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-  }
+  //   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  // }
 }

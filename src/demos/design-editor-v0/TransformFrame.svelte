@@ -1,5 +1,7 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
+
+import type { IDimension, RotatedRect } from "./types";
 
 export type TransformFrameState = {
   centerX: number;
@@ -67,11 +69,13 @@ type Interaction =
     };
 
 type Props = {
-  initialCenterX?: number;
-  initialCenterY?: number;
-  initialWidth?: number;
-  initialHeight?: number;
-  initialRotationDeg?: number;
+  initial?: RotatedRect;
+  viewport: IDimension;
+  activePointer?: {
+    pointerId: number;
+    clientX: number;
+    clientY: number;
+  } | null;
   minWidth?: number;
   minHeight?: number;
   strokeColor?: string;
@@ -82,11 +86,9 @@ type Props = {
 };
 
 const {
-  initialCenterX = 340,
-  initialCenterY = 220,
-  initialWidth = 240,
-  initialHeight = 150,
-  initialRotationDeg = -10,
+  initial = { x: 220, y: 145, width: 240, height: 150, rotationDeg: -10 },
+  viewport,
+  activePointer = null,
   minWidth = 36,
   minHeight = 36,
   strokeColor = "#7c3aed",
@@ -96,9 +98,7 @@ const {
   onchange,
 }: Props = $props();
 
-let layerEl: HTMLDivElement;
-let viewportW = $state(1);
-let viewportH = $state(1);
+let layerEl: SVGSVGElement;
 
 let centerX = $state(340);
 let centerY = $state(220);
@@ -161,6 +161,11 @@ function isSideResizeHandle(handle: ResizeHandle): boolean {
 function toPointerInLayer(ev: PointerEvent): { x: number; y: number } {
   const rect = layerEl.getBoundingClientRect();
   return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+}
+
+function toLayerPoint(clientX: number, clientY: number): { x: number; y: number } {
+  const rect = layerEl.getBoundingClientRect();
+  return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
 function rotateVec(x: number, y: number, radians: number): { x: number; y: number } {
@@ -452,30 +457,51 @@ function endInteraction(ev: PointerEvent): void {
   interaction = null;
 }
 
+function beginCapturedMove(pointer: { pointerId: number; clientX: number; clientY: number }): void {
+  if (!layerEl) return;
+  const startPointer = toLayerPoint(pointer.clientX, pointer.clientY);
+  layerEl.setPointerCapture(pointer.pointerId);
+  interaction = {
+    mode: "move",
+    pointerId: pointer.pointerId,
+    startPointer,
+    startCenter: { x: centerX, y: centerY },
+    target: layerEl,
+  };
+}
+
 onMount(() => {
-  centerX = initialCenterX;
-  centerY = initialCenterY;
-  frameW = initialWidth;
-  frameH = initialHeight;
-  rotationDeg = initialRotationDeg;
+  centerX = initial.x + initial.width / 2;
+  centerY = initial.y + initial.height / 2;
+  frameW = initial.width;
+  frameH = initial.height;
+  rotationDeg = initial.rotationDeg;
   flipX = false;
   flipY = false;
   skewXDeg = 0;
   skewYDeg = 0;
 
-  const ro = new ResizeObserver((entries) => {
-    const rect = entries[0]?.contentRect;
-    if (!rect) return;
-    viewportW = Math.max(1, Math.round(rect.width));
-    viewportH = Math.max(1, Math.round(rect.height));
-  });
-  ro.observe(layerEl);
-  return () => ro.disconnect();
+  if (activePointer) {
+    beginCapturedMove(activePointer);
+  }
+
+  layerEl.addEventListener("pointermove", updateInteraction as EventListener);
+  layerEl.addEventListener("pointerup", endInteraction as EventListener);
+  layerEl.addEventListener("pointercancel", endInteraction as EventListener);
+});
+
+onDestroy(() => {
+  layerEl.removeEventListener("pointermove", updateInteraction as EventListener);
+  layerEl.removeEventListener("pointerup", endInteraction as EventListener);
+  layerEl.removeEventListener("pointercancel", endInteraction as EventListener);
+
+  if (interaction?.target.hasPointerCapture(interaction.pointerId)) {
+    interaction.target.releasePointerCapture(interaction.pointerId);
+  }
 });
 </script>
 
-<div class="tf-layer" bind:this={layerEl} style={`--tf-color: ${strokeColor};`}>
-  <svg class="tf-svg" width="100%" height="100%" viewBox={`0 0 ${viewportW} ${viewportH}`}>
+<svg class="tf-layer" bind:this={layerEl} width={viewport.width} height={viewport.height} viewBox={`0 0 ${viewport.width} ${viewport.height}`} preserveAspectRatio="none" style={`--tf-color: ${strokeColor};`}>
     <!-- Content layer: visual quad — affected by flip and shear -->
     <g transform={`translate(${centerX} ${centerY}) rotate(${rotationDeg}) scale(${flipX ? -1 : 1} ${flipY ? -1 : 1}) skewX(${skewXDeg}) skewY(${skewYDeg})`}>
       <rect class="tf-content-quad" x={-frameW / 2} y={-frameH / 2} width={frameW} height={frameH} />
@@ -589,8 +615,7 @@ onMount(() => {
         />
       {/if}
     </g>
-  </svg>
-</div>
+</svg>
 
 <style>
 .tf-layer {
@@ -598,12 +623,6 @@ onMount(() => {
   inset: 0;
   pointer-events: none;
   z-index: 4;
-}
-
-.tf-svg {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .tf-content-quad {

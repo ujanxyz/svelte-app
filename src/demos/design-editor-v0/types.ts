@@ -3,6 +3,11 @@ export interface Point {
   y: number;
 }
 
+export interface IDimension {
+  width: number;
+  height: number;
+}
+
 export interface Rect {
   x: number;
   y: number;
@@ -18,7 +23,7 @@ export interface RotatedRect {
   y: number;
   width: number;
   height: number;
-  rotation: number;
+  rotationDeg: number;
 }
 
 export interface LineTransform {
@@ -70,7 +75,7 @@ export type GroupElementType = "group";
 
 type DrawFn = (ctx: CanvasRenderingContext2D) => void;
 type DrawHitFn = (ctx: CanvasRenderingContext2D) => void;
-type BoundsFn = () => Rect;
+type BoundsFn = () => RotatedRect;
 
 /**
  * CanvasElement is the normalized, renderable data model used by ElementStore.

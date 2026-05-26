@@ -8,23 +8,29 @@ export type ZoomLevel = {
   zoom: number;
 };
 
+export type PointerInfo = {
+  pointerId: number;
+  clientX: number;
+  clientY: number;
+};
+
 export interface DesignEditorEngineOptions {
   pageWidth: number;
   pageHeight: number;
 
   // Handle pointer events in client code instead of the engine.
   // This allows implementing custom behaviors like selection, dragging, etc. in client code.
-  handlePtrMove(point: Point): boolean;
-  handlePtrDown(point: Point): boolean;
-  handlePtrUp(point: Point): boolean;
+  handlePtrMove(point: Point, pointer: PointerInfo): boolean;
+  handlePtrDown(point: Point, pointer: PointerInfo): boolean;
+  handlePtrUp(point: Point, pointer: PointerInfo): boolean;
   onZoomLevelChange(zoomLevel: ZoomLevel): void;
 }
 
 export class DesignEditorEngine {
   private readonly camera: Camera2D;
-  private readonly handlePtrMove: (point: Point) => boolean;
-  private readonly handlePtrDown: (point: Point) => boolean;
-  private readonly handlePtrUp: (point: Point) => boolean;
+  private readonly handlePtrMove: (point: Point, pointer: PointerInfo) => boolean;
+  private readonly handlePtrDown: (point: Point, pointer: PointerInfo) => boolean;
+  private readonly handlePtrUp: (point: Point, pointer: PointerInfo) => boolean;
   private readonly onZoomLevelChange: (zoomLevel: ZoomLevel) => void;
 
   private pageRect: Rect;
@@ -290,7 +296,7 @@ export class DesignEditorEngine {
 
   readonly #onPointerDown = (ev: PointerEvent): void => {
     const worldPoint = this.#eventToWorldPoint(ev);
-    if (worldPoint && this.handlePtrDown(worldPoint)) {
+    if (worldPoint && this.handlePtrDown(worldPoint, { pointerId: ev.pointerId, clientX: ev.clientX, clientY: ev.clientY })) {
       return;
     }
 
@@ -302,7 +308,7 @@ export class DesignEditorEngine {
 
   readonly #onPointerMove = (ev: PointerEvent): void => {
     const worldPoint = this.#eventToWorldPoint(ev);
-    if (worldPoint && this.handlePtrMove(worldPoint)) {
+    if (worldPoint && this.handlePtrMove(worldPoint, { pointerId: ev.pointerId, clientX: ev.clientX, clientY: ev.clientY })) {
       return;
     }
 
@@ -321,7 +327,7 @@ export class DesignEditorEngine {
 
   readonly #onPointerUp = (ev: PointerEvent): void => {
     const worldPoint = this.#eventToWorldPoint(ev);
-    if (worldPoint && this.handlePtrUp(worldPoint)) {
+    if (worldPoint && this.handlePtrUp(worldPoint, { pointerId: ev.pointerId, clientX: ev.clientX, clientY: ev.clientY })) {
       return;
     }
 

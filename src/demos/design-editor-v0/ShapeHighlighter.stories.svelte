@@ -15,13 +15,12 @@ const { Story } = defineMeta({
   name="Default"
   args={{
     rect: { x: 120, y: 70, width: 190, height: 120, rotationDeg: 0 },
+    viewport: { width: 520, height: 320 },
   }}
 >
   {#snippet template(args)}
     <div style="width: 520px; height: 320px; position: relative; border-radius: 12px; border: 1px solid rgba(95,95,120,.35); background: linear-gradient(180deg, #f8faff, #eef2ff); overflow: hidden;">
-      <svg width="100%" height="100%" viewBox="0 0 520 320">
-        <ShapeHighlighter {...args} />
-      </svg>
+      <ShapeHighlighter {...args} />
     </div>
   {/snippet}
 </Story>
@@ -30,14 +29,13 @@ const { Story } = defineMeta({
   name="Rotated"
   args={{
     rect: { x: 180, y: 90, width: 170, height: 90, rotationDeg: 28 },
+    viewport: { width: 520, height: 320 },
     dashed: true,
   }}
 >
   {#snippet template(args)}
     <div style="width: 520px; height: 320px; position: relative; border-radius: 12px; border: 1px solid rgba(95,95,120,.35); background: linear-gradient(180deg, #f8faff, #eef2ff); overflow: hidden;">
-      <svg width="100%" height="100%" viewBox="0 0 520 320">
-        <ShapeHighlighter {...args} />
-      </svg>
+      <ShapeHighlighter {...args} />
     </div>
   {/snippet}
 </Story>

@@ -1,4 +1,4 @@
-import type { Rect, ShapeType } from "./types";
+import type { RotatedRect, ShapeType } from "./types";
 
 export const HIT_BORDER = 5;
 export const LINE_HIT_BORDER = 20;
@@ -34,7 +34,7 @@ abstract class BaseShape {
 
   abstract draw(ctx: CanvasRenderingContext2D): void;
   abstract drawHit(ctx: CanvasRenderingContext2D): void;
-  abstract getBounds(): Rect;
+  abstract getBounds(): RotatedRect;
 }
 
 export class RectShape extends BaseShape {
@@ -78,8 +78,8 @@ export class RectShape extends BaseShape {
     ctx.restore();
   }
 
-  getBounds(): Rect {
-    return { x: this.x, y: this.y, width: this.width, height: this.height };
+  getBounds(): RotatedRect {
+    return { x: this.x, y: this.y, width: this.width, height: this.height, rotationDeg: 0 };
   }
 }
 
@@ -126,12 +126,13 @@ export class CircleShape extends BaseShape {
     ctx.restore();
   }
 
-  getBounds(): Rect {
+  getBounds(): RotatedRect {
     return {
       x: this.cx - this.radius,
       y: this.cy - this.radius,
       width: this.radius * 2,
       height: this.radius * 2,
+      rotationDeg: 0,
     };
   }
 }
@@ -185,7 +186,7 @@ export class LineShape extends BaseShape {
     ctx.restore();
   }
 
-  getBounds(): Rect {
+  getBounds(): RotatedRect {
     const minX = Math.min(this.x1, this.x2);
     const minY = Math.min(this.y1, this.y2);
     const maxX = Math.max(this.x1, this.x2);
@@ -195,6 +196,7 @@ export class LineShape extends BaseShape {
       y: minY,
       width: maxX - minX,
       height: maxY - minY,
+      rotationDeg: (Math.atan2(this.y2 - this.y1, this.x2 - this.x1) * 180) / Math.PI,
     };
   }
 }
@@ -261,12 +263,13 @@ export class StarShape extends BaseShape {
     ctx.restore();
   }
 
-  getBounds(): Rect {
+  getBounds(): RotatedRect {
     return {
       x: this.cx - this.rout,
       y: this.cy - this.rout,
       width: this.rout * 2,
       height: this.rout * 2,
+      rotationDeg: 0,
     };
   }
 }
