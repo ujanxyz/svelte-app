@@ -116,10 +116,9 @@ function addShape(type: "line" | "rect" | "circle" | "star"): void {
       name: id,
       x: x1,
       y: y1,
-      width: x2 - x1,
-      height: y2 - y1,
-      x2,
-      y2,
+      width: Math.hypot(x2 - x1, y2 - y1),
+      height: 0,
+      rotation: (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI,
       fill: stroke,
       stroke,
       strokeWidth: 3,
@@ -147,7 +146,6 @@ function addShape(type: "line" | "rect" | "circle" | "star"): void {
   }
 
   hitCanvas?.initCandidate(shape);
-  shape.hitcolor = shape.hitColor;
 
   shapes = [...shapes, shape];
   drawScene();
@@ -191,7 +189,6 @@ function setupHitCanvas(): void {
   // Reinitialize existing shapes against the new HitCanvas instance.
   for (const shape of shapes) {
     hitCanvas.initCandidate(shape);
-    shape.hitcolor = shape.hitColor;
   }
 
   drawScene();

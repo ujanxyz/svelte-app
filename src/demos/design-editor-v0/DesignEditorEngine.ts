@@ -1,5 +1,5 @@
+import { drawAdaptiveGrid } from "./AdaptiveGrid";
 import { Camera2D } from "./camera2d";
-import { drawAdaptiveGrid } from "./grid";
 import type { CanvasElement, Point, Rect } from "./types";
 
 export type ZoomLevel = {
@@ -13,6 +13,8 @@ export type PointerInfo = {
   clientX: number;
   clientY: number;
 };
+
+export const VIEW_SCALE = 1.6;
 
 export interface DesignEditorEngineOptions {
   pageWidth: number;
@@ -39,6 +41,7 @@ export class DesignEditorEngine {
   private shapes: CanvasElement[] = [];
 
   private container: HTMLDivElement | null = null;
+  private wheelEventTarget: HTMLElement | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
   private offscreenCanvas: HTMLCanvasElement | null = null;
@@ -75,10 +78,10 @@ export class DesignEditorEngine {
     };
 
     this.viewRect = {
-      x: -2 * pageWidth,
-      y: -2 * pageHeight,
-      width: 4 * pageWidth,
-      height: 4 * pageHeight,
+      x: -(VIEW_SCALE * pageWidth) / 2,
+      y: -(VIEW_SCALE * pageHeight) / 2,
+      width: VIEW_SCALE * pageWidth,
+      height: VIEW_SCALE * pageHeight,
     };
 
     console.log(this.pageRect, this.viewRect);
@@ -109,11 +112,13 @@ export class DesignEditorEngine {
 
     container.appendChild(this.canvas);
 
+    this.wheelEventTarget = container.parentElement ?? container;
+
     this.canvas.addEventListener("pointerdown", this.#onPointerDown);
     this.canvas.addEventListener("pointermove", this.#onPointerMove);
     this.canvas.addEventListener("pointerup", this.#onPointerUp);
     this.canvas.addEventListener("pointerleave", this.#onPointerUp);
-    this.canvas.addEventListener("wheel", this.#onWheel, { passive: false });
+    this.wheelEventTarget.addEventListener("wheel", this.#onWheel, { passive: false });
 
     this.resizeObserver = new ResizeObserver(() => {
       this.syncCanvasSize();
@@ -143,9 +148,11 @@ export class DesignEditorEngine {
       this.canvas.removeEventListener("pointermove", this.#onPointerMove);
       this.canvas.removeEventListener("pointerup", this.#onPointerUp);
       this.canvas.removeEventListener("pointerleave", this.#onPointerUp);
-      this.canvas.removeEventListener("wheel", this.#onWheel);
       this.canvas.remove();
     }
+
+    this.wheelEventTarget?.removeEventListener("wheel", this.#onWheel);
+    this.wheelEventTarget = null;
 
     this.ctx = null;
     this.canvas = null;
@@ -166,8 +173,8 @@ export class DesignEditorEngine {
       width,
       height,
     };
-    const surfWidth = width * 4;
-    const surfHeight = height * 4;
+    const surfWidth = width * VIEW_SCALE;
+    const surfHeight = height * VIEW_SCALE;
     this.viewRect = {
       x: -surfWidth / 2,
       y: -surfHeight / 2,
@@ -175,6 +182,7 @@ export class DesignEditorEngine {
       height: surfHeight,
     };
     console.log(this.pageRect, this.viewRect);
+    this.#setZoomConstrainedToView(this.camera.zoom);
     this.camera.clampCenterToView(this.viewRect, this.viewportWidth, this.viewportHeight);
     this.#emitZoomLevel();
     this.#invalidate();
@@ -186,6 +194,22 @@ export class DesignEditorEngine {
       y: this.camera.centerY,
       zoom: this.camera.zoom,
     });
+  }
+
+  #setZoomConstrainedToView(nextZoom: number): void {
+    // Keep the camera view fully inside viewRect when zooming out.
+    // Once the visible world would exceed the buffered view bounds,
+    // zoom-out is locked at that boundary-derived minimum zoom.
+    const minZoom =
+      this.viewportWidth <= 0 || this.viewportHeight <= 0
+        ? this.camera.minZoom
+        : Math.max(
+            this.camera.minZoom,
+            this.viewportWidth / Math.max(1, this.viewRect.width),
+            this.viewportHeight / Math.max(1, this.viewRect.height),
+          );
+    const clampedZoom = Math.min(this.camera.maxZoom, Math.max(minZoom, nextZoom));
+    this.camera.setZoom(clampedZoom);
   }
 
   private syncCanvasSize(): void {
@@ -201,6 +225,7 @@ export class DesignEditorEngine {
     this.offscreenCanvas.width = this.canvas.width;
     this.offscreenCanvas.height = this.canvas.height;
 
+    this.#setZoomConstrainedToView(this.camera.zoom);
     this.camera.clampCenterToView(this.viewRect, this.viewportWidth, this.viewportHeight);
     this.#emitZoomLevel();
   }
@@ -362,8 +387,8 @@ export class DesignEditorEngine {
 
     const before = this.camera.screenToWorld(screenPoint, this.viewportWidth, this.viewportHeight);
 
-    const zoomScale = Math.exp(-ev.deltaY * 0.0012);
-    this.camera.setZoom(this.camera.zoom * zoomScale);
+    const zoomScale = Math.exp(-ev.deltaY * 0.001);
+    this.#setZoomConstrainedToView(this.camera.zoom * zoomScale);
 
     const after = this.camera.screenToWorld(screenPoint, this.viewportWidth, this.viewportHeight);
 

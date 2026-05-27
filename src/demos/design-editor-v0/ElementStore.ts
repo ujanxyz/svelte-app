@@ -32,8 +32,9 @@ function clampPositive(value: number): number {
 function lineEndpoints(el: CanvasElement): { x1: number; y1: number; x2: number; y2: number } {
   const x1 = el.x;
   const y1 = el.y;
-  const x2 = el.x2 ?? el.x + el.width;
-  const y2 = el.y2 ?? el.y + el.height;
+  const rotationRad = ((el.rotation ?? 0) * Math.PI) / 180;
+  const x2 = x1 + Math.cos(rotationRad) * el.width;
+  const y2 = y1 + Math.sin(rotationRad) * el.width;
   return { x1, y1, x2, y2 };
 }
 
@@ -54,17 +55,12 @@ function withElementRotation(ctx: CanvasRenderingContext2D, element: CanvasEleme
 
 function boundsFromElement(this: CanvasElement): RotatedRect {
   if (this.type === "line") {
-    const { x1, y1, x2, y2 } = lineEndpoints(this);
-    const minX = Math.min(x1, x2);
-    const minY = Math.min(y1, y2);
-    const maxX = Math.max(x1, x2);
-    const maxY = Math.max(y1, y2);
     return {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-      rotationDeg: (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI,
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: 0,
+      rotationDeg: this.rotation ?? 0,
     };
   }
 
@@ -197,8 +193,8 @@ function drawElementHit(this: CanvasElement, ctx: CanvasRenderingContext2D): voi
   if (!this.visible) return;
 
   ctx.save();
-  ctx.fillStyle = this.hitcolor || this.hitColor || DEFAULT_HIT_COLOR;
-  ctx.strokeStyle = this.hitcolor || this.hitColor || DEFAULT_HIT_COLOR;
+  ctx.fillStyle = this.hitColor || DEFAULT_HIT_COLOR;
+  ctx.strokeStyle = this.hitColor || DEFAULT_HIT_COLOR;
   ctx.lineWidth = Math.max(1, this.strokeWidth || 1);
 
   if (this.type === "line") {
@@ -268,7 +264,7 @@ function normalizeElement(input: CanvasElement): CanvasElement {
     ...input,
     name: input.name || input.id,
     width: clampPositive(input.width),
-    height: clampPositive(input.height),
+    height: input.type === "line" ? 0 : clampPositive(input.height),
     rotation: input.rotation ?? 0,
     opacity: clampOpacity(input.opacity ?? 1),
     visible: input.visible ?? true,
@@ -279,15 +275,7 @@ function normalizeElement(input: CanvasElement): CanvasElement {
     zIndex: Math.max(0, input.zIndex ?? 0),
     hitId: input.hitId ?? -1,
     hitColor: input.hitColor ?? DEFAULT_HIT_COLOR,
-    hitcolor: input.hitcolor ?? input.hitColor ?? DEFAULT_HIT_COLOR,
   };
-
-  if (element.type === "line") {
-    element.x2 = element.x2 ?? element.x + element.width;
-    element.y2 = element.y2 ?? element.y + element.height;
-    element.width = element.x2 - element.x;
-    element.height = element.y2 - element.y;
-  }
 
   return ensureElementMethods(element);
 }
@@ -311,9 +299,6 @@ type CreateElementInput = {
   parentId?: string;
   hitId?: number;
   hitColor?: string;
-  hitcolor?: string;
-  x2?: number;
-  y2?: number;
   radius?: number;
   points?: number;
   innerRadius?: number;
@@ -343,9 +328,6 @@ export function createElement(input: CreateElementInput): CanvasElement {
     zIndex: input.zIndex ?? 0,
     hitId: input.hitId ?? -1,
     hitColor: input.hitColor ?? DEFAULT_HIT_COLOR,
-    hitcolor: input.hitcolor ?? input.hitColor ?? DEFAULT_HIT_COLOR,
-    x2: input.x2,
-    y2: input.y2,
     radius: input.radius,
     points: input.points,
     innerRadius: input.innerRadius,
@@ -370,10 +352,9 @@ export function createDemoElements(pageWidth = 1200, pageHeight = 800): CanvasEl
       name: "Line 100",
       x: 0,
       y: 0,
-      width: 180,
-      height: 110,
-      x2: -500,
-      y2: 500,
+      width: Math.hypot(-500, 500),
+      height: 0,
+      rotation: (Math.atan2(500, -500) * 180) / Math.PI,
       stroke: "#b45309",
       fill: "#b45309",
       strokeWidth: 8,
@@ -460,10 +441,9 @@ export function createDemoElements(pageWidth = 1200, pageHeight = 800): CanvasEl
       name: "Line 1",
       x: -halfW + 30,
       y: -30,
-      width: 190,
-      height: 100,
-      x2: -halfW + 220,
-      y2: 70,
+      width: Math.hypot(190, 100),
+      height: 0,
+      rotation: (Math.atan2(100, 190) * 180) / Math.PI,
       stroke: "#0f766e",
       fill: "#0f766e",
       strokeWidth: 3,
@@ -475,10 +455,9 @@ export function createDemoElements(pageWidth = 1200, pageHeight = 800): CanvasEl
       name: "Line 2",
       x: halfW - 200,
       y: -halfH + 20,
-      width: 180,
-      height: 110,
-      x2: halfW - 20,
-      y2: -halfH + 130,
+      width: Math.hypot(180, 110),
+      height: 0,
+      rotation: (Math.atan2(110, 180) * 180) / Math.PI,
       stroke: "#b45309",
       fill: "#b45309",
       strokeWidth: 3,
@@ -604,7 +583,6 @@ export class ElementStore {
         parentId: src.parentId,
         hitId: -1,
         hitColor: DEFAULT_HIT_COLOR,
-        hitcolor: DEFAULT_HIT_COLOR,
       });
       clones.push(clone);
     }
@@ -645,19 +623,15 @@ export class ElementStore {
 
       if (delta.x) {
         next.x += delta.x;
-        if (next.type === "line" && next.x2 !== undefined) next.x2 += delta.x;
       }
       if (delta.y) {
         next.y += delta.y;
-        if (next.type === "line" && next.y2 !== undefined) next.y2 += delta.y;
       }
       if (delta.width) {
         next.width = clampPositive(next.width + delta.width);
-        if (next.type === "line" && next.x2 !== undefined) next.x2 += delta.width;
       }
       if (delta.height) {
-        next.height = clampPositive(next.height + delta.height);
-        if (next.type === "line" && next.y2 !== undefined) next.y2 += delta.height;
+        next.height = next.type === "line" ? 0 : clampPositive(next.height + delta.height);
       }
       if (delta.rotationDeg) {
         next.rotation += delta.rotationDeg;

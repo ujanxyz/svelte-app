@@ -8,7 +8,6 @@ abstract class BaseShape {
   public readonly type: ShapeType;
   public fill: string;
   public stroke: string;
-  public hitcolor: string;
   public zIndex: number;
   public hitId: number;
   public hitColor: string;
@@ -26,7 +25,6 @@ abstract class BaseShape {
     this.type = type;
     this.fill = fill;
     this.stroke = stroke;
-    this.hitcolor = hitColor;
     this.zIndex = zIndex;
     this.hitId = hitId;
     this.hitColor = hitColor;
@@ -72,7 +70,7 @@ export class RectShape extends BaseShape {
 
   drawHit(ctx: CanvasRenderingContext2D): void {
     ctx.save();
-    ctx.fillStyle = this.hitcolor;
+    ctx.fillStyle = this.hitColor;
     const pad = HIT_BORDER / 2;
     ctx.fillRect(this.x - pad, this.y - pad, this.width + HIT_BORDER, this.height + HIT_BORDER);
     ctx.restore();
@@ -121,7 +119,7 @@ export class CircleShape extends BaseShape {
     ctx.beginPath();
     ctx.arc(this.cx, this.cy, this.radius + HIT_BORDER / 2, 0, Math.PI * 2);
     ctx.closePath();
-    ctx.fillStyle = this.hitcolor;
+    ctx.fillStyle = this.hitColor;
     ctx.fill();
     ctx.restore();
   }
@@ -178,7 +176,7 @@ export class LineShape extends BaseShape {
     ctx.beginPath();
     ctx.moveTo(this.x1, this.y1);
     ctx.lineTo(this.x2, this.y2);
-    ctx.strokeStyle = this.hitcolor;
+    ctx.strokeStyle = this.hitColor;
     ctx.lineWidth = LINE_HIT_BORDER;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -258,7 +256,7 @@ export class StarShape extends BaseShape {
   drawHit(ctx: CanvasRenderingContext2D): void {
     ctx.save();
     this.tracePath(ctx, HIT_BORDER / 2);
-    ctx.fillStyle = this.hitcolor;
+    ctx.fillStyle = this.hitColor;
     ctx.fill();
     ctx.restore();
   }

@@ -12,7 +12,7 @@ export class Camera2D {
   public readonly minZoom: number;
   public readonly maxZoom: number;
 
-  public constructor(minZoom = 0.25, maxZoom = 4) {
+  public constructor(minZoom = 0.5, maxZoom = 2.5) {
     this.minZoom = minZoom;
     this.maxZoom = maxZoom;
   }

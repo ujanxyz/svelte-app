@@ -1,7 +1,13 @@
+<script module lang="ts">
+const MIN_WIDTH = 36;
+const MIN_HEIGHT = 36;
+const STROKE_COLOR = "#7c3aed";
+</script>
+
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 
-import type { IDimension, RotatedRect } from "./types";
+import type { IDimension, Point, RotatedRect } from "./types";
 
 export type TransformFrameState = {
   centerX: number;
@@ -20,14 +26,14 @@ type Interaction =
   | {
       mode: "move";
       pointerId: number;
-      startPointer: { x: number; y: number };
-      startCenter: { x: number; y: number };
+      startPointer: Point;
+      startCenter: Point;
       target: Element;
     }
   | {
       mode: "rotate";
       pointerId: number;
-      startCenter: { x: number; y: number };
+      startCenter: Point;
       startPointerAngle: number;
       startRotationRad: number;
       target: Element;
@@ -36,8 +42,8 @@ type Interaction =
       mode: "resize";
       handle: ResizeHandle;
       pointerId: number;
-      startPointer: { x: number; y: number };
-      startCenter: { x: number; y: number };
+      startPointer: Point;
+      startCenter: Point;
       startWidth: number;
       startHeight: number;
       startRotationRad: number;
@@ -48,7 +54,7 @@ type Interaction =
   | {
       mode: "shear-x";
       pointerId: number;
-      startPointer: { x: number; y: number };
+      startPointer: Point;
       startSkewXDeg: number;
       startFrameH: number;
       startRotationRad: number;
@@ -59,7 +65,7 @@ type Interaction =
   | {
       mode: "shear-y";
       pointerId: number;
-      startPointer: { x: number; y: number };
+      startPointer: Point;
       startSkewYDeg: number;
       startFrameW: number;
       startRotationRad: number;
@@ -76,9 +82,6 @@ type Props = {
     clientX: number;
     clientY: number;
   } | null;
-  minWidth?: number;
-  minHeight?: number;
-  strokeColor?: string;
   lockAspectRatio?: boolean;
   disableFlip?: boolean;
   disableSkew?: boolean;
@@ -89,9 +92,6 @@ const {
   initial = { x: 220, y: 145, width: 240, height: 150, rotationDeg: -10 },
   viewport,
   activePointer = null,
-  minWidth = 36,
-  minHeight = 36,
-  strokeColor = "#7c3aed",
   lockAspectRatio = false,
   disableFlip = false,
   disableSkew = false,
@@ -158,23 +158,23 @@ function isSideResizeHandle(handle: ResizeHandle): boolean {
   return handle === "n" || handle === "s" || handle === "e" || handle === "w";
 }
 
-function toPointerInLayer(ev: PointerEvent): { x: number; y: number } {
+function toPointerInLayer(ev: PointerEvent): Point {
   const rect = layerEl.getBoundingClientRect();
   return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
 }
 
-function toLayerPoint(clientX: number, clientY: number): { x: number; y: number } {
+function toLayerPoint(clientX: number, clientY: number): Point {
   const rect = layerEl.getBoundingClientRect();
   return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
-function rotateVec(x: number, y: number, radians: number): { x: number; y: number } {
+function rotateVec(x: number, y: number, radians: number): Point {
   const c = Math.cos(radians);
   const s = Math.sin(radians);
   return { x: x * c - y * s, y: x * s + y * c };
 }
 
-function pointerAngle(pointer: { x: number; y: number }, c: { x: number; y: number }): number {
+function pointerAngle(pointer: Point, c: Point): number {
   return Math.atan2(pointer.y - c.y, pointer.x - c.x);
 }
 
@@ -379,12 +379,12 @@ function updateInteraction(ev: PointerEvent): void {
     let nextWidth: number;
     let nextHeight: number;
     if (Math.abs(widthDelta / interaction.startWidth) >= Math.abs(heightDelta / interaction.startHeight)) {
-      nextWidth = Math.max(minWidth, interaction.startWidth + widthDelta);
-      nextHeight = Math.max(minHeight, nextWidth / ratio);
+      nextWidth = Math.max(MIN_WIDTH, interaction.startWidth + widthDelta);
+      nextHeight = Math.max(MIN_HEIGHT, nextWidth / ratio);
       nextWidth = nextHeight * ratio;
     } else {
-      nextHeight = Math.max(minHeight, interaction.startHeight + heightDelta);
-      nextWidth = Math.max(minWidth, nextHeight * ratio);
+      nextHeight = Math.max(MIN_HEIGHT, interaction.startHeight + heightDelta);
+      nextWidth = Math.max(MIN_WIDTH, nextHeight * ratio);
       nextHeight = nextWidth / ratio;
     }
 
@@ -408,8 +408,8 @@ function updateInteraction(ev: PointerEvent): void {
 
     centerX = startC.x + centerShiftScreen.x;
     centerY = startC.y + centerShiftScreen.y;
-    frameW = Math.max(minWidth, maxX - minX);
-    frameH = Math.max(minHeight, maxY - minY);
+    frameW = Math.max(MIN_WIDTH, maxX - minX);
+    frameH = Math.max(MIN_HEIGHT, maxY - minY);
 
     emitChange();
     return;
@@ -426,16 +426,16 @@ function updateInteraction(ev: PointerEvent): void {
   const affectsBottom = interaction.handle === "s" || interaction.handle === "se" || interaction.handle === "sw";
 
   if (affectsRight) {
-    maxX = Math.max(maxX + deltaLocal.x, minX + minWidth);
+    maxX = Math.max(maxX + deltaLocal.x, minX + MIN_WIDTH);
   }
   if (affectsLeft) {
-    minX = Math.min(minX + deltaLocal.x, maxX - minWidth);
+    minX = Math.min(minX + deltaLocal.x, maxX - MIN_WIDTH);
   }
   if (affectsBottom) {
-    maxY = Math.max(maxY + deltaLocal.y, minY + minHeight);
+    maxY = Math.max(maxY + deltaLocal.y, minY + MIN_HEIGHT);
   }
   if (affectsTop) {
-    minY = Math.min(minY + deltaLocal.y, maxY - minHeight);
+    minY = Math.min(minY + deltaLocal.y, maxY - MIN_HEIGHT);
   }
 
   const nextLocalCenter = { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
@@ -443,8 +443,8 @@ function updateInteraction(ev: PointerEvent): void {
 
   centerX = startC.x + centerShiftScreen.x;
   centerY = startC.y + centerShiftScreen.y;
-  frameW = Math.max(minWidth, maxX - minX);
-  frameH = Math.max(minHeight, maxY - minY);
+  frameW = Math.max(MIN_WIDTH, maxX - minX);
+  frameH = Math.max(MIN_HEIGHT, maxY - minY);
 
   emitChange();
 }
@@ -501,7 +501,7 @@ onDestroy(() => {
 });
 </script>
 
-<svg class="tf-layer" bind:this={layerEl} width={viewport.width} height={viewport.height} viewBox={`0 0 ${viewport.width} ${viewport.height}`} preserveAspectRatio="none" style={`--tf-color: ${strokeColor};`}>
+<svg class="tf-layer" bind:this={layerEl} width={viewport.width} height={viewport.height} viewBox={`0 0 ${viewport.width} ${viewport.height}`} preserveAspectRatio="none" style={`--tf-color: ${STROKE_COLOR};`}>
     <!-- Content layer: visual quad — affected by flip and shear -->
     <g transform={`translate(${centerX} ${centerY}) rotate(${rotationDeg}) scale(${flipX ? -1 : 1} ${flipY ? -1 : 1}) skewX(${skewXDeg}) skewY(${skewYDeg})`}>
       <rect class="tf-content-quad" x={-frameW / 2} y={-frameH / 2} width={frameW} height={frameH} />
@@ -578,11 +578,11 @@ onDestroy(() => {
       {#if canFlip}
         <!-- Flip-X handle: south middle, click-only -->
         <circle class="tf-flip-handle" cx="0" cy={frameH / 2 + 34} r="9" role="button" tabindex="-1" aria-label="Flip horizontally" onpointerdown={doFlipX} />
-        <text class="tf-handle-icon" x="0" y={frameH / 2 + 34} text-anchor="middle" dominant-baseline="central" pointer-events="none">↔</text>
+        <text class="tf-handle-icon" x="0" y={frameH / 2 + 34} text-anchor="middle" dominant-baseline="central" pointer-events="none">⛓</text>
 
         <!-- Flip-Y handle: east middle, click-only -->
         <circle class="tf-flip-handle" cx={frameW / 2 + 34} cy="0" r="9" role="button" tabindex="-1" aria-label="Flip vertically" onpointerdown={doFlipY} />
-        <text class="tf-handle-icon" x={frameW / 2 + 34} y="0" text-anchor="middle" dominant-baseline="central" pointer-events="none">↕</text>
+        <text class="tf-handle-icon" x={frameW / 2 + 34} y="0" text-anchor="middle" dominant-baseline="central" pointer-events="none">⛓</text>
       {/if}
 
       {#if canSkew}
@@ -678,6 +678,7 @@ onDestroy(() => {
   stroke-width: 1.7;
   rx: 2;
   pointer-events: all;
+  cursor: grab;
 }
 
 .tf-corner {
@@ -731,13 +732,14 @@ onDestroy(() => {
   stroke: #ffffff;
   stroke-width: 1.5;
   pointer-events: all;
+  cursor: grab;
 }
 
 .tf-shear-x {
-  cursor: ew-resize;
+  cursor: grab;
 }
 
 .tf-shear-y {
-  cursor: ns-resize;
+  cursor: grab;
 }
 </style>

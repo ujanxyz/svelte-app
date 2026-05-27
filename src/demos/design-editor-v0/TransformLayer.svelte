@@ -3,6 +3,7 @@ import type { base } from "@/types/base";
 
 import ShapeHighlighter from "./ShapeHighlighter.svelte";
 import TransformFrame, { type TransformFrameState } from "./TransformFrame.svelte";
+import TransformLineV2 from "./TransformLineV2.svelte";
 import type { IDimension, RotatedRect } from "./types";
 
 // Possible states:
@@ -32,19 +33,23 @@ export type StartTransform = {
   };
 } | {
   mode: "line";
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotationDeg: number;
+  activePointer?: {
+    pointerId: number;
+    clientX: number;
+    clientY: number;
+  };
 };
 
 interface Props {
   // Add zoom pan related props here if needed for the transform layer.
   zoomLevel: base.ZoomLevel;
   viewport: IDimension;
-  onchange?: (next: RotatedRect) => void;
-  onMove?: (dx: number, dy: number) => void;
-  onRotate?: (dRotationDeg: number) => void;
+  onchange: (next: RotatedRect) => void;
 }
 
 const {
@@ -97,6 +102,12 @@ function onFrameChange(state: TransformFrameState): void {
   onchange?.(nextWorld);
 }
 
+function onLineChange(next: RotatedRect): void {
+  const nextWorld = viewportToWorldRect(next);
+  txRect = nextWorld;
+  onchange?.(nextWorld);
+}
+
 /**
  * Resets the transform on state change.
  * The transform contains the initial values for the specified mode.
@@ -124,12 +135,21 @@ export function reset(tx: StartTransform | null): void {
     activePointer = tx.activePointer ?? null;
     txSession += 1;
     return;
+  } else if (tx?.mode === "line") {
+    txRect = {
+      x: tx.x,
+      y: tx.y,
+      width: tx.width,
+      height: tx.height,
+      rotationDeg: tx.rotationDeg,
+    };
+    activePointer = tx.activePointer ?? null;
+    txSession += 1;
+    return;
   }
 
-  if (tx?.mode !== "line") {
-    txRect = null;
-    activePointer = null;
-  }
+  txRect = null;
+  activePointer = null;
 }
 
 </script>
@@ -140,6 +160,10 @@ export function reset(tx: StartTransform | null): void {
   {:else if (mode === "tx" && projectedTxRect)}
     {#key txSession}
       <TransformFrame initial={projectedTxRect} viewport={viewport} activePointer={activePointer} onchange={onFrameChange} />
+    {/key}
+  {:else if (mode === "line" && projectedTxRect)}
+    {#key txSession}
+      <TransformLineV2 initial={projectedTxRect} viewport={viewport} activePointer={activePointer} onchange={onLineChange} />
     {/key}
   {/if}
 </div>

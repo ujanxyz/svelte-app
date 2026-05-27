@@ -1,5 +1,9 @@
 import type { Rect } from "./types";
 
+const GRID_AXIS_COLOR = "#525F7FE6";
+const GRID_MAJOR_COLOR = "#7885A073";
+const GRID_MINOR_COLOR = "#7885A033";
+
 function chooseGridStep(zoom: number): number {
   const targetPixelSpacing = 32;
   const targetWorld = targetPixelSpacing / zoom;
@@ -41,13 +45,13 @@ export function drawAdaptiveGrid(
     ctx.lineTo(x, yEnd);
 
     if (isAxis) {
-      ctx.strokeStyle = "rgba(82, 95, 127, 0.9)";
+      ctx.strokeStyle = GRID_AXIS_COLOR;
       ctx.lineWidth = axisLineWidth;
     } else if (isMajor) {
-      ctx.strokeStyle = "rgba(120, 133, 160, 0.45)";
+      ctx.strokeStyle = GRID_MAJOR_COLOR;
       ctx.lineWidth = majorLineWidth;
     } else {
-      ctx.strokeStyle = "rgba(120, 133, 160, 0.2)";
+      ctx.strokeStyle = GRID_MINOR_COLOR;
       ctx.lineWidth = minorLineWidth;
     }
     ctx.stroke();
@@ -62,13 +66,13 @@ export function drawAdaptiveGrid(
     ctx.lineTo(xEnd, y);
 
     if (isAxis) {
-      ctx.strokeStyle = "rgba(82, 95, 127, 0.9)";
+      ctx.strokeStyle = GRID_AXIS_COLOR;
       ctx.lineWidth = axisLineWidth;
     } else if (isMajor) {
-      ctx.strokeStyle = "rgba(120, 133, 160, 0.45)";
+      ctx.strokeStyle = GRID_MAJOR_COLOR;
       ctx.lineWidth = majorLineWidth;
     } else {
-      ctx.strokeStyle = "rgba(120, 133, 160, 0.2)";
+      ctx.strokeStyle = GRID_MINOR_COLOR;
       ctx.lineWidth = minorLineWidth;
     }
     ctx.stroke();

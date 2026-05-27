@@ -26,12 +26,7 @@ export interface RotatedRect {
   rotationDeg: number;
 }
 
-export interface LineTransform {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}
+export type LineTransform = RotatedRect;
 
 export type RotatedrectDelta = Partial<RotatedRect>;
 export type LineTransformDelta = Partial<LineTransform>;
@@ -82,14 +77,11 @@ type BoundsFn = () => RotatedRect;
  */
 export interface CanvasElement extends BaseElement, HitCandidate {
   zIndex: number;
-  hitcolor: string;
   draw: DrawFn;
   drawHit: DrawHitFn;
   getBounds: BoundsFn;
 
   // Optional geometry extensions used by specific element kinds.
-  x2?: number;
-  y2?: number;
   radius?: number;
   points?: number;
   innerRadius?: number;
