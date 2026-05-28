@@ -4,11 +4,13 @@ import { onMount } from "svelte";
 import type { base } from "@/types/base";
 
 import { DesignEditorEngine, type PointerInfo, VIEW_SCALE } from "./DesignEditorEngine";
-import { createDemoElements } from "./ElementStore";
+import type { GraphicBase } from "./GraphicBase";
+import { createGraphicSet } from "./GraphicFactories";
 import { HitCanvas } from "./HitCanvas";
 import TransformLayer, { type TransformMode } from "./TransformLayer.svelte";
-import type { CanvasElement, IDimension, Point, RotatedRect } from "./types";
+import type { IDimension, Point, RotatedRect } from "./types";
 
+const DEBUG_LINE_V2 = true;
 const HITCANVAS_ONSCREEN = true;
 const PAGE_WIDTH = 800;
 const PAGE_HEIGHT = 600;
@@ -18,9 +20,9 @@ const VIEW_HEIGHT = PAGE_HEIGHT * VIEW_SCALE;
 const hitCanvas = new HitCanvas();
 let hitCanvasEl: HTMLCanvasElement | null = null;
 let showHitCanvas = false;
-let shapes: CanvasElement[] = [];
-const shapeByHitId = new Map<number, CanvasElement>();
-const shapeById = new Map<string, CanvasElement>();
+let graphicsV2: GraphicBase[] = [];
+const graphicByHitId = new Map<number, GraphicBase>();
+const graphicById = new Map<string, GraphicBase>();
 let zoomLevel = $state<base.ZoomLevel>({ x: 0, y: 0, zoom: 1 });
 let tfMode: TransformMode = null;
 let viewport = $state<IDimension>({ width: PAGE_WIDTH, height: PAGE_HEIGHT });
@@ -44,35 +46,40 @@ function clearActiveTransform(): void {
   transform?.reset(null);
 }
 
-function applyFrameTransformToElement(element: CanvasElement, next: RotatedRect): void {
-  element.x = next.x;
-  element.y = next.y;
-  element.width = next.width;
-  element.height = element.type === "line" ? 0 : next.height;
-  element.rotation = next.rotationDeg;
-
-  if (element.type === "circle") {
-    element.radius = Math.min(next.width, next.height) / 2;
-  }
-
-  if (element.type === "star") {
-    const prevOuter = element.outerRadius ?? Math.max(element.width, element.height) / 2;
-    const prevInner = element.innerRadius ?? prevOuter * 0.5;
-    const ratio = prevOuter > 0 ? prevInner / prevOuter : 0.5;
-    const outer = Math.max(next.width, next.height) / 2;
-    element.outerRadius = outer;
-    element.innerRadius = outer * ratio;
-  }
-}
-
 function onTransformFrameChange(next: RotatedRect): void {
   if ((tfMode !== "tx" && tfMode !== "line") || !activeTransformId) return;
-  const target = shapeById.get(activeTransformId) ?? null;
-  if (!target) return;
+  const graphic = graphicById.get(activeTransformId) ?? null;
+  if (!graphic) return;
+  if (graphic.type === "line") {
+    const normalizedLineTx = {
+      x: next.x,
+      y: next.y,
+      width: next.width,
+      height: 0,
+      rotationDeg: next.rotationDeg,
+    };
+    graphic.updateTransform(normalizedLineTx);
+    if (DEBUG_LINE_V2) {
+      const tx = graphic.getTransform();
+      if (tx.height !== 0) {
+        console.warn("[LineV2] height drift detected", {
+          activeTransformId,
+          incoming: next,
+          stored: tx,
+        });
+      } else {
+        console.log("[LineV2] normalized transform", {
+          activeTransformId,
+          incoming: next,
+          stored: tx,
+        });
+      }
+    }
+  } else {
+    graphic.updateTransform(next);
+  }
 
-  applyFrameTransformToElement(target, next);
-
-  engine.setShapes(shapes);
+  engine.setElements(graphicsV2);
   refreshHitCanvas();
 }
 
@@ -109,43 +116,42 @@ function handleKeyDown(ev: KeyboardEvent): void {
 }
 
 function refreshHitCanvas(): void {
-  const drawables = [...shapes]
-    .sort((a, b) => a.zIndex - b.zIndex)
-    .map((shape) => ({
-    hitId: shape.hitId,
-    hitColor: shape.hitColor,
+  const drawables = [...graphicsV2]
+    .sort((a, b) => a.getZIndex() - b.getZIndex())
+    .map((graphic) => {
+    const { hitId, hitColor } = graphic.getHitData();
+    return {
+    hitId,
+    hitColor,
     drawHit: (ctx: CanvasRenderingContext2D) => {
       ctx.save();
       ctx.translate(VIEW_WIDTH / 2, VIEW_HEIGHT / 2);
-      shape.drawHit(ctx);
+      graphic.hitFn(ctx);
       ctx.restore();
     },
-    }));
+    };
+    });
 
   hitCanvas.refresh(drawables);
 }
 
-function findHit(point: { x: number; y: number }): CanvasElement | null {
+function findHit(point: { x: number; y: number }): GraphicBase | null {
   const hitId = hitCanvas.lookup({
     x: point.x + VIEW_WIDTH / 2,
     y: point.y + VIEW_HEIGHT / 2,
   });
 
   if (hitId < 0) return null;
-  return shapeByHitId.get(hitId) ?? null;
+  return graphicByHitId.get(hitId) ?? null;
 }
 
 function engine_handlePtrMove(point: Point): boolean {
   const hit = findHit(point);
-  if (tfMode === "tx") {
-    return true;
-  }
-
-  if (tfMode === "line") {
+  if (tfMode === "tx" || tfMode === "line") {
     return true;
   }
   if (hit) {
-    const bounds = hit.getBounds();
+    const bounds = hit.getTransform();
     activeTransformId = hit.id;
     tfMode = "hover";
 
@@ -166,14 +172,9 @@ function engine_handlePtrMove(point: Point): boolean {
 function engine_handlePtrDown(point: Point, pointer: PointerInfo): boolean {
   const hit = findHit(point);
   if (hit) {
-    const bounds = hit.getBounds();
+    const bounds = hit.getTransform();
     activeTransformId = hit.id;
-
-    if (hit.type === "line") {
-      tfMode = "line";
-    } else {
-      tfMode = "tx";
-    }
+    tfMode = (hit.type === "line") ? "line" : "tx";
 
     transform?.reset({
       mode: tfMode,
@@ -223,14 +224,15 @@ let transform: TransformLayer | null = null;
 onMount(() => {
   engine.mount(container);
   engine.setPageSize(PAGE_WIDTH, PAGE_HEIGHT);
-  shapes = createDemoElements(PAGE_WIDTH, PAGE_HEIGHT);
+  graphicsV2 = createGraphicSet(14, { width: PAGE_WIDTH, height: PAGE_HEIGHT });
+  hitCanvas.initGraphics(graphicsV2);
 
-  shapeByHitId.clear();
-  shapeById.clear();
-  for (const shape of shapes) {
-    hitCanvas.initCandidate(shape);
-    shapeByHitId.set(shape.hitId, shape);
-    shapeById.set(shape.id, shape);
+  graphicByHitId.clear();
+  graphicById.clear();
+  for (const graphic of graphicsV2) {
+    const { hitId } = graphic.getHitData();
+    graphicByHitId.set(hitId, graphic);
+    graphicById.set(graphic.id, graphic);
   }
 
   setupHitCanvas();
@@ -239,7 +241,7 @@ onMount(() => {
   if (hitCanvasEl) {
     hitCanvasEl.style.opacity = showHitCanvas ? "1" : "0";
   }
-  engine.setShapes(shapes);
+  engine.setElements(graphicsV2);
 
   const syncViewport = (): void => {
     const rect = shellEl.getBoundingClientRect();

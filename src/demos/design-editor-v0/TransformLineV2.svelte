@@ -87,8 +87,8 @@ function pointerAngle(pointer: Point, c: Point): number {
 
 function emitChange(): void {
   onchange?.({
-    x: start.x,
-    y: start.y,
+    x: centerX,
+    y: centerY,
     width: lineLength,
     height: 0,
     rotationDeg,
@@ -218,12 +218,10 @@ function beginCapturedMove(pointer: { pointerId: number; clientX: number; client
 
 onMount(() => {
   const initialLength = Math.max(MIN_LINE_LENGTH, initial.width);
-  const initialRad = (initial.rotationDeg * Math.PI) / 180;
-
   lineLength = initialLength;
   rotationDeg = initial.rotationDeg;
-  centerX = initial.x + (Math.cos(initialRad) * initialLength) / 2;
-  centerY = initial.y + (Math.sin(initialRad) * initialLength) / 2;
+  centerX = initial.x;
+  centerY = initial.y;
 
   if (activePointer) {
     beginCapturedMove(activePointer);

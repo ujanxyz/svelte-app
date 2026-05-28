@@ -2,17 +2,16 @@
 import { onMount } from "svelte";
 
 import { getAppIcon } from "@/utils/appIcons";
-import { newRandomId } from "@/jsutils/idUtils";
 
-import { createElement } from "./ElementStore";
+import type { GraphicBase } from "./GraphicBase";
+import { createGraphic } from "./GraphicFactories";
 import { HitCanvas } from "./HitCanvas";
-import type { CanvasElement } from "./types";
 
 let sceneEl: HTMLCanvasElement;
 let hitEl: HTMLCanvasElement;
 let stackEl: HTMLDivElement;
 
-let shapes = $state.raw<CanvasElement[]>([]);
+let shapes = $state.raw<GraphicBase[]>([]);
 let hoverSummary = $state("None");
 let downSummary = $state("None");
 let useOffscreen = $state(false);
@@ -25,23 +24,9 @@ const RectangleIcon = getAppIcon("rectangle");
 const CircleIcon = getAppIcon("circle");
 const StarIcon = getAppIcon("star");
 
-function rand(min: number, max: number): number {
-  return min + Math.random() * (max - min);
-}
-
-function pick<T>(values: T[]): T {
-  return values[Math.floor(Math.random() * values.length)] as T;
-}
-
-function colorPair(): { fill: string; stroke: string } {
-  const pairs = [
-    { fill: "#fca5a5", stroke: "#7f1d1d" },
-    { fill: "#93c5fd", stroke: "#1e3a8a" },
-    { fill: "#86efac", stroke: "#14532d" },
-    { fill: "#fdba74", stroke: "#7c2d12" },
-    { fill: "#c4b5fd", stroke: "#4c1d95" },
-  ];
-  return pick(pairs);
+function assignHit(graphic: GraphicBase): void {
+  if (!hitCanvas) return;
+  hitCanvas.initGraphics([graphic]);
 }
 
 function drawScene(): void {
@@ -53,100 +38,45 @@ function drawScene(): void {
   ctx.fillStyle = "#f8fafc";
   ctx.fillRect(0, 0, sceneEl.width, sceneEl.height);
 
-  const sorted = [...shapes].sort((a, b) => a.zIndex - b.zIndex);
+  const sorted = [...shapes].sort((a, b) => a.getZIndex() - b.getZIndex());
+  ctx.save();
+  ctx.translate(sceneEl.width / 2, sceneEl.height / 2);
   for (const shape of sorted) {
-    shape.draw(ctx);
+    shape.drawFn(ctx);
   }
+  ctx.restore();
 
-  hitCanvas?.refresh(sorted);
+  hitCanvas?.refresh(
+    sorted.map((shape) => {
+      const { hitId, hitColor } = shape.getHitData();
+      return {
+        hitId,
+        hitColor,
+        drawHit: (hitCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) => {
+          hitCtx.save();
+          hitCtx.translate(sceneEl.width / 2, sceneEl.height / 2);
+          shape.hitFn(hitCtx);
+          hitCtx.restore();
+        },
+      };
+    }),
+  );
 }
 
-function shapeSummary(shape: CanvasElement): string {
-  return `${shape.type} | id=${shape.id} | hitId=${shape.hitId} | hit=${shape.hitColor}`;
+function shapeSummary(shape: GraphicBase): string {
+  const hit = shape.getHitData();
+  return `${shape.type} | id=${shape.id} | hitId=${hit.hitId} | hit=${hit.hitColor}`;
 }
 
-function findByHitId(hitId: number): CanvasElement | undefined {
-  return shapes.find((s) => s.hitId === hitId);
+function findByHitId(hitId: number): GraphicBase | undefined {
+  return shapes.find((s) => s.getHitData().hitId === hitId);
 }
 
 function addShape(type: "line" | "rect" | "circle" | "star"): void {
-  const { fill, stroke } = colorPair();
-  const id = `${type}-${newRandomId().slice(0, 6)}`;
-  const zIndex = shapes.length;
+  const shape = createGraphic(type, { width: sceneEl.width, height: sceneEl.height });
 
-  let shape: CanvasElement;
-  if (type === "rect") {
-    const width = rand(60, 140);
-    const height = rand(40, 110);
-    shape = createElement({
-      id,
-      type,
-      name: id,
-      x: rand(40, 540),
-      y: rand(40, 300),
-      width,
-      height,
-      fill,
-      stroke,
-      zIndex,
-    });
-  } else if (type === "circle") {
-    const radius = rand(20, 58);
-    shape = createElement({
-      id,
-      type,
-      name: id,
-      x: rand(60, 560) - radius,
-      y: rand(60, 320) - radius,
-      width: radius * 2,
-      height: radius * 2,
-      radius,
-      fill,
-      stroke,
-      zIndex,
-    });
-  } else if (type === "line") {
-    const x1 = rand(40, 560);
-    const y1 = rand(40, 320);
-    const x2 = rand(40, 560);
-    const y2 = rand(40, 320);
-    shape = createElement({
-      id,
-      type,
-      name: id,
-      x: x1,
-      y: y1,
-      width: Math.hypot(x2 - x1, y2 - y1),
-      height: 0,
-      rotation: (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI,
-      fill: stroke,
-      stroke,
-      strokeWidth: 3,
-      zIndex,
-    });
-  } else {
-    const outer = rand(28, 52);
-    const width = outer * 2;
-    const height = outer * 2;
-    shape = createElement({
-      id,
-      type,
-      name: id,
-      x: rand(80, 540) - outer,
-      y: rand(80, 300) - outer,
-      width,
-      height,
-      points: Math.floor(rand(3, 8)),
-      innerRadius: rand(12, 24),
-      outerRadius: outer,
-      fill,
-      stroke,
-      zIndex,
-    });
-  }
-
-  hitCanvas?.initCandidate(shape);
-
+  shape.updateConfig({ zIndex: shapes.length });
+  assignHit(shape);
   shapes = [...shapes, shape];
   drawScene();
 }
@@ -188,7 +118,7 @@ function setupHitCanvas(): void {
 
   // Reinitialize existing shapes against the new HitCanvas instance.
   for (const shape of shapes) {
-    hitCanvas.initCandidate(shape);
+    assignHit(shape);
   }
 
   drawScene();
@@ -213,8 +143,11 @@ onMount(() => {
 
   setupHitCanvas();
 
-  for (let i = 0; i < 10; i += 1) {
-    addShape(pick(["line", "rect", "circle", "star"]));
+  for (let i = 0; i < 3; i += 1) {
+    addShape("line");
+    addShape("rect");
+    addShape("circle");
+    addShape("star");
   }
 
   drawScene();

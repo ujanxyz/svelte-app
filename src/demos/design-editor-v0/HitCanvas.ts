@@ -1,6 +1,6 @@
 import { createHitColorGen } from "@/utils/HitColorGen";
 
-import type { AbstractGraphic } from "./AbstractGraphic";
+import type { GraphicBase } from "./GraphicBase";
 import type { HitCandidate } from "./types";
 
 type HitCtx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -47,25 +47,15 @@ export class HitCanvas {
     this.#clearToBlack();
   }
 
-  /** @deprecated - use initGraphic instead. */
-  public initCandidate(elem: HitCandidate): void {
-    const nextHit =
-      this.#freeColorPool.length > 0
-        ? (this.#freeColorPool.pop() as { id: number; col: string })
-        : this.#colorGen.next();
-    elem.hitColor = nextHit.col;
-    elem.hitId = nextHit.id;
-  }
-
-
   /** Allocate or reuse a hit color and set hit fields on candidate. */
-  // TODO: This should replace initCandidate above.
-  public initGraphic(elem: AbstractGraphic): void {
-    const nextHit =
-      this.#freeColorPool.length > 0
-        ? (this.#freeColorPool.pop() as { id: number; col: string })
-        : this.#colorGen.next();
-    elem.setHitData(nextHit.id, nextHit.col);
+  public initGraphics(elems: GraphicBase[]): void {
+    elems.forEach((elem) => {
+      const nextHit =
+        this.#freeColorPool.length > 0
+          ? (this.#freeColorPool.pop() as { id: number; col: string })
+          : this.#colorGen.next();
+      elem.setHitData(nextHit.id, nextHit.col);
+    });
   }
 
   /** Return hit colors of deleted elements back to the reuse pool. */

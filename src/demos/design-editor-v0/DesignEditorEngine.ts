@@ -1,6 +1,7 @@
 import { drawAdaptiveGrid } from "./AdaptiveGrid";
-import { Camera2D } from "./camera2d";
-import type { CanvasElement, Point, Rect } from "./types";
+import { Camera2D } from "./Camera2D";
+import type { GraphicBase } from "./GraphicBase";
+import type { Point, Rect } from "./types";
 
 export type ZoomLevel = {
   x: number;
@@ -38,7 +39,7 @@ export class DesignEditorEngine {
   private pageRect: Rect;
   private viewRect: Rect;
 
-  private shapes: CanvasElement[] = [];
+  private graphicElems: GraphicBase[] = [];
 
   private container: HTMLDivElement | null = null;
   private wheelEventTarget: HTMLElement | null = null;
@@ -161,8 +162,8 @@ export class DesignEditorEngine {
     this.container = null;
   }
 
-  public setShapes(shapes: CanvasElement[]): void {
-    this.shapes = [...shapes].sort((a, b) => a.zIndex - b.zIndex);
+  public setElements(elements: GraphicBase[]): void {
+    this.graphicElems = [...elements].sort((a, b) => a.getZIndex() - b.getZIndex());
     this.#invalidate();
   }
 
@@ -310,13 +311,9 @@ export class DesignEditorEngine {
   }
 
   #drawShapes(ctx: CanvasRenderingContext2D): void {
-    for (const shape of this.shapes) {
-      shape.draw(ctx);
+    for (const elem of this.graphicElems) {
+      elem.drawFn(ctx);
     }
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 1, 1, 0, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(0, 255, 255, 0.95)";
-    ctx.fill();
   }
 
   readonly #onPointerDown = (ev: PointerEvent): void => {
