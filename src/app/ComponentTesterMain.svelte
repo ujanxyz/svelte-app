@@ -1,6 +1,5 @@
 <script lang="ts">
 import ContextMenuMain from "@/demos/ContextMenuMain.svelte";
-import DesignEditorViewDemo from "@/demos/design-editor-v0/DesignEditorViewDemo.svelte";
 import MasonryGridMain from "@/demos/masonry-grid/MasonryGridMain.svelte";
 import StyleDemosMain from "@/demos/style-tokens/StyleDemosMain.svelte";
 import WebWorkerTestMain from "@/webworkerclient/WebWorkerTestMain.svelte";
@@ -45,7 +44,7 @@ function handleSelect(code: string) {
   {:else if selected === "ctxmenu"}
     <ContextMenuMain />
   {:else if selected === "designv0"}
-    <DesignEditorViewDemo />
+    Add DesignEditorViewDemo here.
   {:else if selected === "masonry"}
     <MasonryGridMain />
   {:else if selected === "graph"}

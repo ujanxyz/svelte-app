@@ -118,7 +118,7 @@ export class DesignEditorEngine {
     this.canvas.addEventListener("pointerdown", this.#onPointerDown);
     this.canvas.addEventListener("pointermove", this.#onPointerMove);
     this.canvas.addEventListener("pointerup", this.#onPointerUp);
-    this.canvas.addEventListener("pointerleave", this.#onPointerUp);
+    this.canvas.addEventListener("pointerleave", this.#onPointerLeave);
     this.wheelEventTarget.addEventListener("wheel", this.#onWheel, { passive: false });
 
     this.resizeObserver = new ResizeObserver(() => {
@@ -148,7 +148,7 @@ export class DesignEditorEngine {
       this.canvas.removeEventListener("pointerdown", this.#onPointerDown);
       this.canvas.removeEventListener("pointermove", this.#onPointerMove);
       this.canvas.removeEventListener("pointerup", this.#onPointerUp);
-      this.canvas.removeEventListener("pointerleave", this.#onPointerUp);
+      this.canvas.removeEventListener("pointerleave", this.#onPointerLeave);
       this.canvas.remove();
     }
 
@@ -325,10 +325,10 @@ export class DesignEditorEngine {
     if (ev.button !== 0) return;
     this.isDragging = true;
     this.dragLast = { x: ev.clientX, y: ev.clientY };
-    this.canvas?.setPointerCapture(ev.pointerId);
   };
 
   readonly #onPointerMove = (ev: PointerEvent): void => {
+    console.log("pointer move", ev.pointerId, ev.clientX, ev.clientY);
     const worldPoint = this.#eventToWorldPoint(ev);
     if (worldPoint && this.handlePtrMove(worldPoint, { pointerId: ev.pointerId, clientX: ev.clientX, clientY: ev.clientY })) {
       return;
@@ -355,7 +355,12 @@ export class DesignEditorEngine {
 
     if (!this.isDragging) return;
     this.isDragging = false;
-    this.canvas?.releasePointerCapture(ev.pointerId);
+  };
+
+  readonly #onPointerLeave = (_ev: PointerEvent): void => {
+    console.log("pointer leave");
+    if (!this.isDragging) return;
+    this.isDragging = false;
   };
 
   #eventToWorldPoint(ev: PointerEvent): Point | null {
@@ -396,4 +401,5 @@ export class DesignEditorEngine {
     this.#emitZoomLevel();
     this.#invalidate();
   };
+
 }

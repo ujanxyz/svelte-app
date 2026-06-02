@@ -1,3 +1,4 @@
+import type { bgtask } from "@/bgtask/worker/types";
 import type { ioApis } from "@/types/ioApis";
 
 import type { AwaitProcessorSet } from "./await-task/AwaitProcessorSet";
@@ -5,11 +6,7 @@ import { type WorkerIndexedDb } from "./db";
 import { IoEventsHandler } from "./IoEventsHandler";
 import { type PreviewManager } from "./PreviewManager";
 
-export interface IoProcessResult extends Record<string, any> {
-  transfer?: Transferable[];
-};
-
-class WorkerIoManager {
+class WorkerIoManager implements bgtask.host.BgTaskPlugin {
   public static readonly CMD_PREFIX = "IO:" as const;
 
   private readonly awaitProc: AwaitProcessorSet;
@@ -25,7 +22,11 @@ class WorkerIoManager {
     this.ioEventsHandler.setUpListeners(pipelineEvents);
   }
 
-  public async process(code: string, request: any): Promise<Error | IoProcessResult> {
+  public get prefix(): string {
+    return "IO";
+  }
+
+  public async onProcess(code: string, request: any): Promise<bgtask.host.PluginProcessResult> {
     if (!code.startsWith(WorkerIoManager.CMD_PREFIX)) {
       throw new Error("Invalid code: " + code);
     }

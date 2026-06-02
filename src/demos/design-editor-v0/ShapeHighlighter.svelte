@@ -25,8 +25,6 @@ const {
   dashed = true,
 }: Props = $props();
 
-const cx = $derived(rect.x + rect.width / 2);
-const cy = $derived(rect.y + rect.height / 2);
 const rotationDeg = $derived(rect.rotationDeg ?? 0);
 </script>
 
@@ -38,10 +36,10 @@ const rotationDeg = $derived(rect.rotationDeg ?? 0);
   preserveAspectRatio="none"
   class="shape-highlighter"
 >
-  <g transform={`rotate(${rotationDeg} ${cx} ${cy})`}>
+  <g transform={`translate(${rect.x} ${rect.y}) rotate(${rotationDeg})`}>
     <rect
-      x={rect.x}
-      y={rect.y}
+      x={-rect.width / 2}
+      y={-rect.height / 2}
       width={rect.width}
       height={rect.height}
       fill="none"

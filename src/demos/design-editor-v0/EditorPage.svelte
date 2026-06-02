@@ -3,19 +3,18 @@ import { onMount } from "svelte";
 
 import type { base } from "@/types/base";
 
-import { DesignEditorEngine, type PointerInfo, VIEW_SCALE } from "./DesignEditorEngine";
+import { DesignEditorEngine, type PointerInfo } from "./DesignEditorEngine";
 import type { GraphicBase } from "./GraphicBase";
 import { createGraphicSet } from "./GraphicFactories";
+import { CubicBezierShape, PolygonGraphic } from "./GraphicTypes";
 import { HitCanvas } from "./HitCanvas";
+import { pageStore } from "./pageStore.svelte";
 import TransformLayer, { type TransformMode } from "./TransformLayer.svelte";
+import type { EditableCubicBezierPath } from "./types";
 import type { IDimension, Point, RotatedRect } from "./types";
 
 const DEBUG_LINE_V2 = true;
 const HITCANVAS_ONSCREEN = true;
-const PAGE_WIDTH = 800;
-const PAGE_HEIGHT = 600;
-const VIEW_WIDTH = PAGE_WIDTH * VIEW_SCALE;
-const VIEW_HEIGHT = PAGE_HEIGHT * VIEW_SCALE;
 
 const hitCanvas = new HitCanvas();
 let hitCanvasEl: HTMLCanvasElement | null = null;
@@ -23,19 +22,18 @@ let showHitCanvas = false;
 let graphicsV2: GraphicBase[] = [];
 const graphicByHitId = new Map<number, GraphicBase>();
 const graphicById = new Map<string, GraphicBase>();
-let zoomLevel = $state<base.ZoomLevel>({ x: 0, y: 0, zoom: 1 });
 let tfMode: TransformMode = null;
-let viewport = $state<IDimension>({ width: PAGE_WIDTH, height: PAGE_HEIGHT });
-let activeTransformId: string | null = null;
+let viewport = $state<IDimension>({ ...pageStore.pageDimension });
+let activeTransformId = $state<string | null>(null);
 
 function syncHitCanvasOverlayScale(): void {
   if (!hitCanvasEl) return;
 
   const rect = shellEl.getBoundingClientRect();
-  const scale = Math.min(1, rect.width / VIEW_WIDTH, rect.height / VIEW_HEIGHT);
+  const scale = Math.min(1, rect.width / pageStore.viewDimension.width, rect.height / pageStore.viewDimension.height);
 
-  hitCanvasEl.style.width = `${VIEW_WIDTH}px`;
-  hitCanvasEl.style.height = `${VIEW_HEIGHT}px`;
+  hitCanvasEl.style.width = `${pageStore.viewDimension.width}px`;
+  hitCanvasEl.style.height = `${pageStore.viewDimension.height}px`;
   hitCanvasEl.style.transformOrigin = "top left";
   hitCanvasEl.style.transform = `scale(${scale})`;
 }
@@ -46,7 +44,7 @@ function clearActiveTransform(): void {
   transform?.reset(null);
 }
 
-function onTransformFrameChange(next: RotatedRect): void {
+function onTransformChange(next: RotatedRect): void {
   if ((tfMode !== "tx" && tfMode !== "line") || !activeTransformId) return;
   const graphic = graphicById.get(activeTransformId) ?? null;
   if (!graphic) return;
@@ -83,6 +81,26 @@ function onTransformFrameChange(next: RotatedRect): void {
   refreshHitCanvas();
 }
 
+function onDeepEditPolygonCoordsChange(coords: base.XYPosition[]): void {
+  if (!activeTransformId) return;
+  const graphic = graphicById.get(activeTransformId);
+  if (!(graphic instanceof PolygonGraphic)) return;
+
+  graphic.updateCoords(coords);
+  engine.setElements(graphicsV2);
+  refreshHitCanvas();
+}
+
+function onDeepEditBezierPathChange(path: EditableCubicBezierPath): void {
+  if (!activeTransformId) return;
+  const graphic = graphicById.get(activeTransformId);
+  if (!(graphic instanceof CubicBezierShape)) return;
+
+  graphic.updatePath(path);
+  engine.setElements(graphicsV2);
+  refreshHitCanvas();
+}
+
 function setupHitCanvas(): void {
   if (HITCANVAS_ONSCREEN) {
     if (!hitCanvasEl) {
@@ -95,11 +113,11 @@ function setupHitCanvas(): void {
       hitCanvasEl.style.zIndex = "2";
       container.appendChild(hitCanvasEl);
     }
-    hitCanvasEl.width = VIEW_WIDTH;
-    hitCanvasEl.height = VIEW_HEIGHT;
+    hitCanvasEl.width = pageStore.viewDimension.width;
+    hitCanvasEl.height = pageStore.viewDimension.height;
     hitCanvas.configureOnscreen(hitCanvasEl);
   } else {
-    hitCanvas.configureOffscreen(VIEW_WIDTH, VIEW_HEIGHT);
+    hitCanvas.configureOffscreen(pageStore.viewDimension.width, pageStore.viewDimension.height);
   }
 }
 
@@ -125,7 +143,7 @@ function refreshHitCanvas(): void {
     hitColor,
     drawHit: (ctx: CanvasRenderingContext2D) => {
       ctx.save();
-      ctx.translate(VIEW_WIDTH / 2, VIEW_HEIGHT / 2);
+      ctx.translate(pageStore.viewDimension.width / 2, pageStore.viewDimension.height / 2);
       graphic.hitFn(ctx);
       ctx.restore();
     },
@@ -137,8 +155,8 @@ function refreshHitCanvas(): void {
 
 function findHit(point: { x: number; y: number }): GraphicBase | null {
   const hitId = hitCanvas.lookup({
-    x: point.x + VIEW_WIDTH / 2,
-    y: point.y + VIEW_HEIGHT / 2,
+    x: point.x + pageStore.viewDimension.width / 2,
+    y: point.y + pageStore.viewDimension.height / 2,
   });
 
   if (hitId < 0) return null;
@@ -203,28 +221,30 @@ function engine_handlePtrUp(point: Point): boolean {
   return true;
 }
 
-const engine = new DesignEditorEngine({
-  pageWidth: PAGE_WIDTH,
-  pageHeight: PAGE_HEIGHT,
-  onZoomLevelChange: (nextZoomLevel) => {
-    if (nextZoomLevel.zoom !== zoomLevel.zoom) {
-      clearActiveTransform();
-    }
-    zoomLevel = nextZoomLevel;
-  },
-  handlePtrMove: engine_handlePtrMove,
-  handlePtrDown: engine_handlePtrDown,
-  handlePtrUp: engine_handlePtrUp,
-});
+let engine!: DesignEditorEngine;
 
 let container: HTMLDivElement;
 let shellEl: HTMLDivElement;
 let transform: TransformLayer | null = null;
 
 onMount(() => {
+  engine = new DesignEditorEngine({
+    pageWidth: pageStore.pageDimension.width,
+    pageHeight: pageStore.pageDimension.height,
+    onZoomLevelChange: (nextZoomLevel) => {
+      if (nextZoomLevel.zoom !== pageStore.zoomLevel.zoom) {
+        clearActiveTransform();
+      }
+      pageStore.setZoomLevel(nextZoomLevel);
+    },
+    handlePtrMove: engine_handlePtrMove,
+    handlePtrDown: engine_handlePtrDown,
+    handlePtrUp: engine_handlePtrUp,
+  });
+
   engine.mount(container);
-  engine.setPageSize(PAGE_WIDTH, PAGE_HEIGHT);
-  graphicsV2 = createGraphicSet(14, { width: PAGE_WIDTH, height: PAGE_HEIGHT });
+  engine.setPageSize(pageStore.pageDimension.width, pageStore.pageDimension.height);
+  graphicsV2 = createGraphicSet(14, pageStore.pageDimension);
   hitCanvas.initGraphics(graphicsV2);
 
   graphicByHitId.clear();
@@ -281,9 +301,15 @@ onMount(() => {
   </div>
   <TransformLayer
     bind:this={transform}
-    {zoomLevel}
+    zoomLevel={pageStore.zoomLevel}
     {viewport}
-    onchange={onTransformFrameChange}
+    viewDimension={pageStore.viewDimension}
+    activeGraphicType={activeTransformId ? (graphicById.get(activeTransformId)?.type ?? null) : null}
+    deepEditCoords={activeTransformId && graphicById.get(activeTransformId) instanceof PolygonGraphic ? (graphicById.get(activeTransformId) as PolygonGraphic).getCoords() : null}
+    deepEditBezierPath={activeTransformId && graphicById.get(activeTransformId) instanceof CubicBezierShape ? (graphicById.get(activeTransformId) as CubicBezierShape).getPath() : null}
+    ondeepeditcoordschange={onDeepEditPolygonCoordsChange}
+    ondeepeditbezierchange={onDeepEditBezierPathChange}
+    onchange={onTransformChange}
   />
 </div>
 

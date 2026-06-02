@@ -4,7 +4,7 @@ const GRID_AXIS_COLOR = "#525F7FE6";
 const GRID_MAJOR_COLOR = "#7885A073";
 const GRID_MINOR_COLOR = "#7885A033";
 
-function chooseGridStep(zoom: number): number {
+function _chooseGridStep(zoom: number): number {
   const targetPixelSpacing = 32;
   const targetWorld = targetPixelSpacing / zoom;
   const power = 10 ** Math.floor(Math.log10(Math.max(targetWorld, 1e-6)));
@@ -24,7 +24,7 @@ export function drawAdaptiveGrid(
   visibleWorld: Rect,
   zoom: number,
 ): void {
-  const step = chooseGridStep(zoom);
+  const step = _chooseGridStep(zoom);
   const majorStep = step * 5;
 
   const xStart = Math.floor(visibleWorld.x / step) * step;

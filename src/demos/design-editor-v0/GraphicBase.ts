@@ -8,6 +8,8 @@ const GraphicTypeEnums = Object.freeze({
   Circle: "circle",
   Line: "line",
   Star: "star",
+  Polygon: "polygon",
+  CubicBezier: "cubic-bezier",
   // Non shape graphics.
   Image: "image",
   Group: "group",
@@ -121,8 +123,8 @@ class ShapeGraphicBase extends GraphicBase {
   }
 
   protected getRotationCenter(): { x: number; y: number } {
-    const { x, y, width, height } = this.transform;
-    return { x: x + width / 2, y: y + height / 2 };
+    const { x, y } = this.transform;
+    return { x, y };
   }
 
   // Main draw function for this graphic. This will be called by the editor's rendering loop.

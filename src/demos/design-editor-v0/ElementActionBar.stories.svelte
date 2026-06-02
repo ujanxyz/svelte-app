@@ -1,41 +1,40 @@
 <script module lang="ts">
 import { defineMeta } from "@storybook/addon-svelte-csf";
+import { fn } from "storybook/test";
 
-import ShapeHighlighter from "./ShapeHighlighter.svelte";
+import ElementActionBar from "./ElementActionBar.svelte";
 
 const { Story } = defineMeta({
-  title: "Demos/DesignEditorV0/ShapeHighlighter",
-  component: ShapeHighlighter,
+  title: "Demos/DesignEditorV0/ElementActionBar",
+  component: ElementActionBar,
   tags: ["autodocs"],
-  parameters: { layout: "centered" },
+  parameters: {
+    layout: "centered",
+  },
+  args: {
+    coordinate: { left: 260, top: 120 },
+    onaction: fn(),
+  },
 });
 </script>
 
-<Story
-  name="Default"
-  args={{
-    rect: { x: 215, y: 130, width: 190, height: 120, rotationDeg: 0 },
-    viewport: { width: 520, height: 320 },
-  }}
->
+<Story name="Default">
   {#snippet template(args)}
     <div style="width: 520px; height: 320px; position: relative; border-radius: 12px; border: 1px solid rgba(95,95,120,.35); background: linear-gradient(180deg, #f8faff, #eef2ff); overflow: hidden;">
-      <ShapeHighlighter {...args} />
+      <ElementActionBar {...args} />
     </div>
   {/snippet}
 </Story>
 
 <Story
-  name="Rotated"
+  name="Near Top Edge"
   args={{
-    rect: { x: 265, y: 135, width: 170, height: 90, rotationDeg: 28 },
-    viewport: { width: 520, height: 320 },
-    dashed: true,
+    coordinate: { left: 260, top: 24 },
   }}
 >
   {#snippet template(args)}
     <div style="width: 520px; height: 320px; position: relative; border-radius: 12px; border: 1px solid rgba(95,95,120,.35); background: linear-gradient(180deg, #f8faff, #eef2ff); overflow: hidden;">
-      <ShapeHighlighter {...args} />
+      <ElementActionBar {...args} />
     </div>
   {/snippet}
 </Story>

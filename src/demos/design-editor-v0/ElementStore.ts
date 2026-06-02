@@ -1,9 +1,10 @@
 import { SvelteMap, SvelteSet } from "svelte/reactivity";
 
 import { newRandomId } from "@/jsutils/idUtils";
+import type { base } from "@/types/base";
 
 import { type DrawStyle, type GraphicBase, GraphicTypeEnums, ShapeGraphicBase } from "./GraphicBase";
-import { CircleGraphic, ImageGraphic, LineGraphic, RectGraphic, StarGraphic } from "./GraphicTypes";
+import { CircleGraphic, ImageGraphic, LineGraphic, PolygonGraphic, RectGraphic, StarGraphic } from "./GraphicTypes";
 import type { AlignMode, DistributionDirection, RotatedRect, RotatedRectDelta } from "./types";
 
 const DEFAULT_HIT_COLOR = "#000000FF";
@@ -19,6 +20,7 @@ interface SerializedGraphic {
   hit: { hitId: number; hitColor: string };
   config: { zIndex: number; visible: boolean; locked: boolean };
   style?: DrawStyle;
+  coords?: base.XYPosition[];
 }
 
 interface SerializedStore {
@@ -55,6 +57,7 @@ function createGraphicByType(type: (typeof GraphicTypeEnums)[keyof typeof Graphi
   if (type === GraphicTypeEnums.Circle) return new CircleGraphic(id);
   if (type === GraphicTypeEnums.Line) return new LineGraphic(id);
   if (type === GraphicTypeEnums.Star) return new StarGraphic(id);
+  if (type === GraphicTypeEnums.Polygon) return new PolygonGraphic(id);
   if (type === GraphicTypeEnums.Image) return new ImageGraphic(id);
   // Group is not implemented as GraphicBase yet; fallback to rect keeps store usable.
   return new RectGraphic(id);
@@ -327,6 +330,7 @@ export class ElementStore {
             hit: el.getHitData(),
             config: el.getConfig(),
             style: shapeStyle,
+            coords: el instanceof PolygonGraphic ? el.getCoords() : undefined,
           };
         }),
       order: [...this.order],
@@ -352,6 +356,9 @@ export class ElementStore {
       graphic.setHitData(raw.hit.hitId, raw.hit.hitColor);
       if (raw.style && graphic instanceof ShapeGraphicBase) {
         graphic.updateStyle(raw.style);
+      }
+      if (raw.coords && graphic instanceof PolygonGraphic) {
+        graphic.updateCoords(raw.coords);
       }
 
       this.elements.set(graphic.id, graphic);
@@ -385,6 +392,9 @@ export class ElementStore {
 
     if (source instanceof ShapeGraphicBase && clone instanceof ShapeGraphicBase) {
       clone.updateStyle(source.getStyle());
+    }
+    if (source instanceof PolygonGraphic && clone instanceof PolygonGraphic) {
+      clone.updateCoords(source.getCoords());
     }
 
     return clone;
